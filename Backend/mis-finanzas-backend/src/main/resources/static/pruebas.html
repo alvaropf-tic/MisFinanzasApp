@@ -1,0 +1,1045 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pruebas de la API</title>
+<!--
+    Página para probar todos los endpoints del backend de Mis Finanzas.
+    Solo se sirve en el perfil dev: http://localhost:8090/pruebas.html
+
+    Recomendado: arrancar con una base de datos en memoria para no llenar la de desarrollo
+    ./mvnw spring-boot:run -Dspring-boot.run.arguments="--spring.datasource.url=jdbc:h2:mem:pruebas"
+-->
+<style>
+    :root {
+        --fondo: #f6f7f9;
+        --superficie: #ffffff;
+        --superficie-2: #f0f2f5;
+        --borde: #dfe3e8;
+        --texto: #1c2430;
+        --texto-suave: #5d6876;
+        --acento: #2f6fde;
+        --acento-texto: #ffffff;
+        --ok: #1f8a4c;
+        --ok-fondo: #e5f4ea;
+        --error: #c53a3a;
+        --error-fondo: #fbe9e9;
+        --aviso: #a86a00;
+        --codigo: #f3f4f6;
+        --get: #2f6fde;
+        --post: #1f8a4c;
+        --put: #a86a00;
+        --patch: #7b4fc9;
+        --delete: #c53a3a;
+    }
+    @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+            --fondo: #12161c;
+            --superficie: #1a2028;
+            --superficie-2: #222a34;
+            --borde: #2e3844;
+            --texto: #e4e8ee;
+            --texto-suave: #98a3b1;
+            --acento: #5b8ff0;
+            --ok: #4cc27f;
+            --ok-fondo: #173325;
+            --error: #ef6b6b;
+            --error-fondo: #3a1d1f;
+            --aviso: #e0a540;
+            --codigo: #141920;
+            --get: #6b9cf2;
+            --post: #4cc27f;
+            --put: #e0a540;
+            --patch: #a986ea;
+            --delete: #ef6b6b;
+        }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        background: var(--fondo);
+        color: var(--texto);
+        font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    header {
+        background: var(--superficie);
+        border-bottom: 1px solid var(--borde);
+        padding: 14px 16px;
+    }
+    .contenedor { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
+    header .contenedor { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 0; }
+    h1 { font-size: 18px; margin: 0; }
+    h2 { font-size: 15px; margin: 0 0 10px; }
+    .suave { color: var(--texto-suave); }
+    .pestanas { display: flex; gap: 4px; margin-left: auto; }
+    .pestanas button {
+        background: transparent; border: 1px solid var(--borde); color: var(--texto);
+        padding: 6px 14px; border-radius: 6px; cursor: pointer; font: inherit;
+    }
+    .pestanas button[aria-selected="true"] { background: var(--acento); border-color: var(--acento); color: var(--acento-texto); }
+    main { padding: 16px 0 40px; }
+    .tarjeta {
+        background: var(--superficie); border: 1px solid var(--borde); border-radius: 10px;
+        padding: 16px; margin-bottom: 16px;
+    }
+    button.principal, button.secundario {
+        font: inherit; border-radius: 6px; padding: 7px 14px; cursor: pointer; border: 1px solid var(--acento);
+    }
+    button.principal { background: var(--acento); color: var(--acento-texto); }
+    button.secundario { background: transparent; color: var(--acento); }
+    button:disabled { opacity: .55; cursor: default; }
+    input, select, textarea {
+        font: inherit; color: var(--texto); background: var(--superficie-2);
+        border: 1px solid var(--borde); border-radius: 6px; padding: 6px 8px; min-width: 0;
+    }
+    textarea { width: 100%; font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+    label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--texto-suave); }
+    .fila { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+
+    /* ---------- Suite ---------- */
+    .resumen { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .contador { padding: 6px 12px; border-radius: 6px; background: var(--superficie-2); font-variant-numeric: tabular-nums; }
+    .contador.ok { background: var(--ok-fondo); color: var(--ok); }
+    .contador.error { background: var(--error-fondo); color: var(--error); }
+    .barra { height: 6px; background: var(--superficie-2); border-radius: 3px; overflow: hidden; margin-top: 12px; }
+    .barra div { height: 100%; width: 0; background: var(--acento); transition: width .2s; }
+    .tabla-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+    th { color: var(--texto-suave); font-weight: 600; font-size: 12px; }
+    tr.seccion td { background: var(--superficie-2); font-weight: 600; }
+    tr.prueba { cursor: pointer; }
+    tr.prueba:hover td { background: var(--superficie-2); }
+    tr.fallo td:first-child { box-shadow: inset 3px 0 0 var(--error); }
+    td.estado { white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .ruta { font-family: ui-monospace, Consolas, monospace; font-size: 12px; word-break: break-all; }
+    .metodo { font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 700; }
+    .GET { color: var(--get); } .POST { color: var(--post); } .PUT { color: var(--put); }
+    .PATCH { color: var(--patch); } .DELETE { color: var(--delete); }
+    .correcto { color: var(--ok); } .incorrecto { color: var(--error); }
+    tr.detalle td { background: var(--codigo); }
+    pre {
+        margin: 0; white-space: pre-wrap; word-break: break-word;
+        font: 12px/1.45 ui-monospace, Consolas, monospace; max-height: 340px; overflow: auto;
+    }
+    .detalle-columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .nota { color: var(--error); font-size: 12px; }
+    .aviso { color: var(--aviso); }
+
+    /* ---------- Consola ---------- */
+    .consola { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+    .respuesta-cabecera { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+    .insignia { padding: 2px 8px; border-radius: 4px; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .insignia.ok { background: var(--ok-fondo); color: var(--ok); }
+    .insignia.error { background: var(--error-fondo); color: var(--error); }
+    #consola-imagen { max-width: 100%; border: 1px solid var(--borde); border-radius: 6px; margin-top: 8px; }
+    .oculto { display: none !important; }
+
+    @media (max-width: 760px) {
+        .consola, .detalle-columnas { grid-template-columns: 1fr; }
+        .pestanas { margin-left: 0; }
+        .ocultar-movil { display: none; }
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <div class="contenedor">
+        <h1>Mis Finanzas · Pruebas de la API</h1>
+        <span class="suave" id="servidor"></span>
+        <nav class="pestanas" role="tablist">
+            <button role="tab" aria-selected="true" data-pestana="suite">Suite automática</button>
+            <button role="tab" aria-selected="false" data-pestana="consola">Consola manual</button>
+        </nav>
+    </div>
+</header>
+
+<main class="contenedor">
+
+    <!-- ==================== SUITE AUTOMÁTICA ==================== -->
+    <section id="pestana-suite">
+        <div class="tarjeta">
+            <div class="resumen">
+                <button class="principal" id="ejecutar">Ejecutar todas las pruebas</button>
+                <span class="contador" id="total">0 pruebas</span>
+                <span class="contador ok" id="correctas">0 correctas</span>
+                <span class="contador error" id="fallidas">0 fallidas</span>
+                <span class="suave" id="tiempo"></span>
+                <label style="flex-direction:row;align-items:center;gap:6px;margin-left:auto">
+                    <input type="checkbox" id="solo-fallos"> Solo fallos
+                </label>
+            </div>
+            <div class="barra"><div id="progreso"></div></div>
+            <p class="suave" id="info-suite" style="margin:10px 0 0">
+                Crea dos usuarios de prueba, recorre todos los endpoints (también los casos de error) y al final borra los datos creados.
+                Pulsa una fila para ver la petición y la respuesta.
+            </p>
+        </div>
+
+        <div class="tarjeta tabla-scroll">
+            <table>
+                <thead>
+                    <tr><th>#</th><th>Prueba</th><th>Petición</th><th>Esperado</th><th>Recibido</th><th class="ocultar-movil">ms</th></tr>
+                </thead>
+                <tbody id="resultados">
+                    <tr><td colspan="6" class="suave">Todavía no se ha ejecutado ninguna prueba.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ==================== CONSOLA MANUAL ==================== -->
+    <section id="pestana-consola" class="oculto">
+        <div class="tarjeta">
+            <h2>Sesión</h2>
+            <div class="fila">
+                <label>Usuario <input id="login-usuario" autocomplete="username"></label>
+                <label>Contraseña <input id="login-password" type="password" autocomplete="current-password"></label>
+                <button class="principal" id="login">Iniciar sesión</button>
+                <button class="secundario" id="logout">Cerrar sesión</button>
+                <span class="suave" id="estado-sesion">Sin sesión</span>
+            </div>
+        </div>
+
+        <div class="consola">
+            <div class="tarjeta">
+                <h2>Petición</h2>
+                <div class="fila" style="margin-bottom:10px">
+                    <label style="flex:1 1 100%">Endpoint
+                        <select id="endpoint"></select>
+                    </label>
+                </div>
+                <div class="fila" id="parametros-ruta" style="margin-bottom:10px"></div>
+                <label style="margin-bottom:10px">Parámetros de consulta (query string)
+                    <input id="query" placeholder="desde=2026-11-01&hasta=2026-11-30&page=0&size=20">
+                </label>
+                <label id="bloque-cuerpo" style="margin-bottom:10px">Cuerpo JSON
+                    <textarea id="cuerpo" rows="12" spellcheck="false"></textarea>
+                </label>
+                <label id="bloque-archivo" class="oculto" style="margin-bottom:10px">Imagen (JPG, PNG o WEBP, máx. 5 MB)
+                    <input type="file" id="archivo" accept="image/jpeg,image/png,image/webp">
+                </label>
+                <div class="fila">
+                    <button class="principal" id="enviar">Enviar</button>
+                    <label style="flex-direction:row;align-items:center;gap:6px">
+                        <input type="checkbox" id="sin-token"> Enviar sin token
+                    </label>
+                </div>
+            </div>
+
+            <div class="tarjeta">
+                <h2>Respuesta</h2>
+                <div class="respuesta-cabecera">
+                    <span class="insignia" id="respuesta-estado">—</span>
+                    <span class="suave" id="respuesta-tiempo"></span>
+                    <span class="suave ruta" id="respuesta-url"></span>
+                </div>
+                <pre id="respuesta-cuerpo" class="suave">Elige un endpoint y pulsa Enviar.</pre>
+                <img id="consola-imagen" class="oculto" alt="Imagen devuelta por la API">
+            </div>
+        </div>
+    </section>
+</main>
+
+<script>
+"use strict";
+
+// =====================================================================
+// UTILIDADES COMUNES
+// =====================================================================
+
+document.getElementById("servidor").textContent = location.origin;
+
+const almacen = {
+    leer(clave) { try { return sessionStorage.getItem(clave); } catch { return null; } },
+    guardar(clave, valor) { try { valor == null ? sessionStorage.removeItem(clave) : sessionStorage.setItem(clave, valor); } catch { /* sin almacenamiento */ } }
+};
+
+// Hace una petición y devuelve { status, data, ms, tipo, blob }
+async function api(metodo, ruta, { body, raw, tipoContenido, form, token } = {}) {
+
+    const headers = {};
+    let payload;
+
+    if (token) headers.Authorization = "Bearer " + token;
+
+    if (form) {
+        payload = form;
+    } else if (raw !== undefined) {
+        payload = raw;
+        headers["Content-Type"] = tipoContenido || "application/json";
+    } else if (body !== undefined) {
+        payload = JSON.stringify(body);
+        headers["Content-Type"] = "application/json";
+    }
+
+    const inicio = performance.now();
+    let respuesta;
+
+    try {
+        respuesta = await fetch(ruta, { method: metodo, headers, body: payload });
+    } catch (e) {
+        return { status: 0, data: "No se pudo conectar con el servidor: " + e.message, ms: 0, tipo: "" };
+    }
+
+    const tipo = respuesta.headers.get("content-type") || "";
+    let data = null;
+    let blob = null;
+
+    if (tipo.includes("json")) {
+        data = await respuesta.json().catch(() => null);
+    } else if (tipo.startsWith("image/")) {
+        blob = await respuesta.blob();
+        data = { imagen: tipo, bytes: blob.size };
+    } else {
+        const texto = await respuesta.text();
+        data = texto || null;
+    }
+
+    return { status: respuesta.status, data, ms: Math.round(performance.now() - inicio), tipo, blob };
+}
+
+function formatear(valor) {
+    if (valor === undefined) return "";
+    if (valor === null) return "(sin cuerpo)";
+    if (typeof valor === "string") return valor;
+    return JSON.stringify(valor, null, 2);
+}
+
+function crear(etiqueta, props = {}, ...hijos) {
+    const el = document.createElement(etiqueta);
+    for (const [k, v] of Object.entries(props)) {
+        if (k === "class") el.className = v;
+        else if (k === "text") el.textContent = v;
+        else el.setAttribute(k, v);
+    }
+    hijos.forEach(h => el.append(h));
+    return el;
+}
+
+// Imagen PNG real generada en el navegador (para subirla como ticket)
+function generarPng() {
+    const canvas = document.createElement("canvas");
+    canvas.width = 240; canvas.height = 140;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, 240, 140);
+    ctx.fillStyle = "#1c2430"; ctx.font = "16px sans-serif";
+    ctx.fillText("Ticket de prueba", 20, 40);
+    ctx.fillText("Total: 23,45 €", 20, 80);
+    return new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+}
+
+// Pestañas
+document.querySelectorAll("[data-pestana]").forEach(boton => {
+    boton.addEventListener("click", () => {
+        document.querySelectorAll("[data-pestana]").forEach(b => b.setAttribute("aria-selected", b === boton));
+        document.getElementById("pestana-suite").classList.toggle("oculto", boton.dataset.pestana !== "suite");
+        document.getElementById("pestana-consola").classList.toggle("oculto", boton.dataset.pestana !== "consola");
+    });
+});
+
+// =====================================================================
+// SUITE AUTOMÁTICA
+// =====================================================================
+
+const TOTAL_ESTIMADO = 186;
+let resultados = [];
+let seccionActual = "";
+
+function seccion(nombre) {
+    seccionActual = nombre;
+    const tbody = document.getElementById("resultados");
+    tbody.append(crear("tr", { class: "seccion", "data-seccion": nombre }, crear("td", { colspan: 6, text: nombre })));
+}
+
+// Ejecuta una prueba: comprueba el código HTTP y, opcionalmente, el contenido.
+// "comprobar" devuelve true si todo va bien, o un texto explicando qué falla.
+async function prueba(nombre, metodo, ruta, opciones, esperado, comprobar) {
+
+    const r = await api(metodo, ruta, opciones);
+    let ok = r.status === esperado;
+    let nota = "";
+
+    if (ok && comprobar) {
+        try {
+            const resultado = comprobar(r.data, r);
+            if (resultado !== true) { ok = false; nota = resultado || "La respuesta no tiene el contenido esperado"; }
+        } catch (e) {
+            ok = false; nota = "Error al comprobar la respuesta: " + e.message;
+        }
+    }
+
+    if (!ok && !nota && r.data && r.data.mensaje) nota = r.data.mensaje;
+
+    const enviado = opciones.form ? "(multipart/form-data)" : (opciones.raw !== undefined ? opciones.raw : opciones.body);
+    pintarResultado({ n: resultados.length + 1, seccion: seccionActual, nombre, metodo, ruta, esperado, r, ok, nota, enviado, conToken: !!opciones.token });
+    return r.data;
+}
+
+function pintarResultado(res) {
+
+    resultados.push(res);
+
+    const fila = crear("tr", { class: "prueba" + (res.ok ? "" : " fallo") },
+        crear("td", { class: "suave", text: res.n }),
+        crear("td", {}, res.nombre, res.nota ? crear("div", { class: "nota", text: res.nota }) : ""),
+        crear("td", {}, crear("span", { class: "metodo " + res.metodo, text: res.metodo }), " ", crear("span", { class: "ruta", text: res.ruta })),
+        crear("td", { class: "estado", text: res.esperado }),
+        crear("td", { class: "estado " + (res.ok ? "correcto" : "incorrecto"), text: (res.ok ? "✔ " : "✘ ") + (res.r.status || "error") }),
+        crear("td", { class: "suave ocultar-movil", text: res.r.ms })
+    );
+
+    const detalle = crear("tr", { class: "detalle oculto" },
+        crear("td", { colspan: 6 },
+            crear("div", { class: "detalle-columnas" },
+                crear("div", {}, crear("strong", { text: "Petición" + (res.conToken ? " (con token)" : " (sin token)") }), crear("pre", { text: formatear(res.enviado) || "(sin cuerpo)" })),
+                crear("div", {}, crear("strong", { text: "Respuesta " + res.r.status }), crear("pre", { text: formatear(res.r.data) }))
+            )
+        )
+    );
+
+    fila.addEventListener("click", () => detalle.classList.toggle("oculto"));
+
+    const tbody = document.getElementById("resultados");
+    tbody.append(fila, detalle);
+
+    if (document.getElementById("solo-fallos").checked && res.ok) fila.classList.add("oculto");
+
+    actualizarContadores();
+}
+
+function actualizarContadores() {
+    const correctas = resultados.filter(r => r.ok).length;
+    document.getElementById("total").textContent = resultados.length + " pruebas";
+    document.getElementById("correctas").textContent = correctas + " correctas";
+    document.getElementById("fallidas").textContent = (resultados.length - correctas) + " fallidas";
+    document.getElementById("progreso").style.width = Math.min(100, resultados.length / TOTAL_ESTIMADO * 100) + "%";
+}
+
+document.getElementById("solo-fallos").addEventListener("change", e => {
+    document.querySelectorAll("#resultados tr.prueba").forEach(fila => {
+        fila.classList.toggle("oculto", e.target.checked && !fila.classList.contains("fallo"));
+        fila.nextElementSibling.classList.add("oculto");
+    });
+});
+
+// Pequeñas ayudas para las comprobaciones
+const igual = (valor, esperado, campo) => Number(valor) === Number(esperado) || valor === esperado ? true : `${campo}: se esperaba ${esperado} y llegó ${valor}`;
+const cumple = (condicion, mensaje) => condicion ? true : mensaje;
+
+document.getElementById("ejecutar").addEventListener("click", ejecutarSuite);
+
+async function ejecutarSuite() {
+
+    const boton = document.getElementById("ejecutar");
+    boton.disabled = true;
+    resultados = [];
+    document.getElementById("resultados").replaceChildren();
+    document.getElementById("progreso").style.width = "0";
+    actualizarContadores();
+    const inicio = performance.now();
+
+    try {
+        await suite();
+    } catch (e) {
+        pintarResultado({ n: resultados.length + 1, seccion: seccionActual, nombre: "La suite se ha detenido por un error inesperado", metodo: "", ruta: "", esperado: "—", r: { status: 0, ms: 0, data: e.stack || String(e) }, ok: false, nota: e.message, enviado: undefined });
+    }
+
+    document.getElementById("progreso").style.width = "100%";
+    document.getElementById("tiempo").textContent = "en " + ((performance.now() - inicio) / 1000).toFixed(1) + " s";
+    boton.disabled = false;
+}
+
+async function suite() {
+
+    const sufijo = Math.random().toString(36).slice(2, 7);
+    const U1 = "prueba_" + sufijo;
+    const U2 = "prueba2_" + sufijo;
+    const PASS = "Prueba123";
+    const PASS_NUEVA = "Prueba456";
+
+    // Fechas fijas en el pasado para que las comprobaciones no dependan del día en que se ejecuta
+    const ANIO = 2025;
+
+    let T1, T2;
+    const yo = () => ({ token: T1 });
+
+    // ---------------------------------------------------------------
+    seccion("Usuarios y autenticación");
+    // ---------------------------------------------------------------
+
+    await prueba("Registrar usuario 1", "POST", "/api/usuarios",
+        { body: { nombre: "Prueba", apellidos: "Uno", nombreUsuario: U1, correo: U1 + "@pruebas.test", password: PASS } }, 201,
+        d => cumple(d.nombreUsuario === U1 && !("password" in d), "La respuesta no debe incluir la contraseña"));
+
+    await prueba("Registrar el mismo usuario otra vez", "POST", "/api/usuarios",
+        { body: { nombre: "Prueba", apellidos: "Uno", nombreUsuario: U1, correo: "otro_" + U1 + "@pruebas.test", password: PASS } }, 409);
+
+    await prueba("Registrar con datos inválidos", "POST", "/api/usuarios",
+        { body: { nombre: "", apellidos: "x", nombreUsuario: "ab", correo: "no-es-correo", password: "123" } }, 400);
+
+    await prueba("Registrar usuario 2", "POST", "/api/usuarios",
+        { body: { nombre: "Prueba", apellidos: "Dos", nombreUsuario: U2, correo: U2 + "@pruebas.test", password: PASS } }, 201);
+
+    await prueba("Login con contraseña incorrecta", "POST", "/api/auth/login",
+        { body: { nombreUsuario: U1, password: "incorrecta" } }, 401);
+
+    await prueba("Login de usuario inexistente", "POST", "/api/auth/login",
+        { body: { nombreUsuario: "no_existe_" + sufijo, password: PASS } }, 401);
+
+    let login = await prueba("Login usuario 1", "POST", "/api/auth/login",
+        { body: { nombreUsuario: U1, password: PASS } }, 200, d => cumple(!!d.token, "No llega el token"));
+    T1 = login && login.token;
+
+    login = await prueba("Login usuario 2", "POST", "/api/auth/login",
+        { body: { nombreUsuario: U2, password: PASS } }, 200);
+    T2 = login && login.token;
+
+    await prueba("Perfil sin token", "GET", "/api/usuarios/me", {}, 401);
+    await prueba("Perfil con token falso", "GET", "/api/usuarios/me", { token: "esto.no.vale" }, 401);
+    await prueba("Listar usuarios no es público", "GET", "/api/usuarios", {}, 401);
+
+    await prueba("Ver mi perfil", "GET", "/api/usuarios/me", yo(), 200, d => igual(d.nombreUsuario, U1, "nombreUsuario"));
+
+    await prueba("Actualizar mi perfil", "PUT", "/api/usuarios/me",
+        { ...yo(), body: { nombre: "Prueba editada", apellidos: "Automática", correo: "nuevo_" + U1 + "@pruebas.test" } }, 200,
+        d => igual(d.nombre, "Prueba editada", "nombre"));
+
+    await prueba("Usar el correo de otro usuario", "PUT", "/api/usuarios/me",
+        { ...yo(), body: { nombre: "Prueba", apellidos: "Uno", correo: U2 + "@pruebas.test" } }, 409);
+
+    await prueba("Cambiar contraseña con la actual incorrecta (400, no 401)", "PUT", "/api/usuarios/me/password",
+        { ...yo(), body: { passwordActual: "incorrecta", passwordNueva: PASS_NUEVA } }, 400);
+
+    await prueba("Cambiar contraseña por la misma", "PUT", "/api/usuarios/me/password",
+        { ...yo(), body: { passwordActual: PASS, passwordNueva: PASS } }, 400);
+
+    await prueba("Cambiar contraseña", "PUT", "/api/usuarios/me/password",
+        { ...yo(), body: { passwordActual: PASS, passwordNueva: PASS_NUEVA } }, 204);
+
+    await prueba("Login con la contraseña antigua", "POST", "/api/auth/login",
+        { body: { nombreUsuario: U1, password: PASS } }, 401);
+
+    login = await prueba("Login con la contraseña nueva", "POST", "/api/auth/login",
+        { body: { nombreUsuario: U1, password: PASS_NUEVA } }, 200);
+    if (login && login.token) T1 = login.token;
+
+    // ---------------------------------------------------------------
+    seccion("Categorías de gasto e ingreso");
+    // ---------------------------------------------------------------
+
+    const C1 = (await prueba("Crear categoría Comida", "POST", "/api/categorias", { ...yo(), body: { nombre: "Comida" } }, 201))?.id;
+    const C2 = (await prueba("Crear categoría Coche", "POST", "/api/categorias", { ...yo(), body: { nombre: "Coche" } }, 201))?.id;
+    await prueba("Crear categoría duplicada", "POST", "/api/categorias", { ...yo(), body: { nombre: "Comida" } }, 409);
+    await prueba("Crear categoría con nombre corto", "POST", "/api/categorias", { ...yo(), body: { nombre: "x" } }, 400);
+    await prueba("Listar categorías", "GET", "/api/categorias", yo(), 200, d => cumple(Array.isArray(d) && d.length >= 2, "Deberían salir al menos 2"));
+    await prueba("Ver categoría", "GET", `/api/categorias/${C1}`, yo(), 200, d => igual(d.nombre, "Comida", "nombre"));
+    await prueba("Renombrar categoría", "PUT", `/api/categorias/${C2}`, { ...yo(), body: { nombre: "Vehículo" } }, 200, d => igual(d.nombre, "Vehículo", "nombre"));
+    await prueba("Otro usuario no ve mi categoría", "GET", `/api/categorias/${C1}`, { token: T2 }, 404);
+
+    const CI = (await prueba("Crear categoría de ingreso Nómina", "POST", "/api/categorias-ingreso", { ...yo(), body: { nombre: "Nómina" } }, 201))?.id;
+    await prueba("Crear categoría de ingreso duplicada", "POST", "/api/categorias-ingreso", { ...yo(), body: { nombre: "Nómina" } }, 409);
+    await prueba("Listar categorías de ingreso", "GET", "/api/categorias-ingreso", yo(), 200, d => cumple(Array.isArray(d) && d.length === 1, "Debería salir 1"));
+    await prueba("Ver categoría de ingreso", "GET", `/api/categorias-ingreso/${CI}`, yo(), 200);
+    await prueba("Renombrar categoría de ingreso", "PUT", `/api/categorias-ingreso/${CI}`, { ...yo(), body: { nombre: "Salario" } }, 200, d => igual(d.nombre, "Salario", "nombre"));
+
+    // ---------------------------------------------------------------
+    seccion("Gastos: CRUD, filtros y paginación");
+    // ---------------------------------------------------------------
+
+    const gasto = (importe, fecha, descripcion, metodoPago, categoriaId) => ({ importe, fecha, descripcion, metodoPago, categoriaId });
+
+    const G1 = (await prueba("Crear gasto Mercadona", "POST", "/api/gastos", { ...yo(), body: gasto(12.5, `${ANIO}-03-05T10:00:00`, "Mercadona", "TARJETA", C1) }, 201,
+        d => igual(d.origen, "MANUAL", "origen")))?.id;
+    await prueba("Crear gasto Gasolinera", "POST", "/api/gastos", { ...yo(), body: gasto(30, `${ANIO}-03-10T18:30:00`, "Gasolinera", "EFECTIVO", C2) }, 201);
+    await prueba("Crear gasto el último minuto del mes", "POST", "/api/gastos", { ...yo(), body: gasto(7.5, `${ANIO}-03-31T23:59:00`, "Cena", "EFECTIVO", C1) }, 201);
+    const G4 = (await prueba("Crear gasto el primer minuto del mes siguiente", "POST", "/api/gastos", { ...yo(), body: gasto(100, `${ANIO}-04-01T00:00:00`, "Compra grande", "TARJETA", C1) }, 201))?.id;
+
+    await prueba("Crear gasto con importe negativo", "POST", "/api/gastos", { ...yo(), body: gasto(-5, `${ANIO}-03-05T10:00:00`, "Mal", "TARJETA", C1) }, 400);
+    await prueba("Crear gasto con método de pago inexistente", "POST", "/api/gastos", { ...yo(), body: gasto(5, `${ANIO}-03-05T10:00:00`, "Mal", "PAYPAL", C1) }, 400,
+        d => cumple(d.mensaje.includes("EFECTIVO"), "El mensaje debería listar los valores permitidos"));
+    await prueba("Crear gasto con fecha inválida", "POST", "/api/gastos", { ...yo(), body: gasto(5, "ayer", "Mal", "TARJETA", C1) }, 400);
+    await prueba("Crear gasto con la categoría de otro usuario", "POST", "/api/gastos", { token: T2, body: gasto(5, `${ANIO}-03-05T10:00:00`, "Mal", "TARJETA", C1) }, 404);
+
+    await prueba("Ver gasto", "GET", `/api/gastos/${G1}`, yo(), 200, d => igual(d.descripcion, "Mercadona", "descripcion"));
+    await prueba("Otro usuario no ve mi gasto", "GET", `/api/gastos/${G1}`, { token: T2 }, 404);
+    await prueba("Ver gasto con id no numérico", "GET", "/api/gastos/abc", yo(), 400);
+    await prueba("Ver gasto inexistente", "GET", "/api/gastos/999999", yo(), 404);
+
+    const marzo = `desde=${ANIO}-03-01&hasta=${ANIO}-03-31`;
+    await prueba("Listar gastos (respuesta paginada)", "GET", "/api/gastos", yo(), 200,
+        d => cumple(Array.isArray(d.contenido) && d.tamanio === 20 && d.pagina === 0 && d.totalElementos === 4, "Se esperaban 4 gastos en {contenido, pagina, tamanio, ...}"));
+    await prueba("Filtrar marzo (incluye el día 31 a las 23:59)", "GET", `/api/gastos?${marzo}`, yo(), 200, d => igual(d.totalElementos, 3, "totalElementos"));
+    await prueba("Buscar texto sin distinguir mayúsculas", "GET", "/api/gastos?texto=MERCA", yo(), 200, d => igual(d.totalElementos, 1, "totalElementos"));
+    await prueba("Filtrar por método de pago y categoría", "GET", `/api/gastos?metodoPago=EFECTIVO&categoriaId=${C1}`, yo(), 200,
+        d => cumple(d.totalElementos === 1 && d.contenido[0].descripcion === "Cena", "Debería salir solo la cena"));
+    await prueba("Paginar (2 por página, más reciente primero)", "GET", `/api/gastos?${marzo}&size=2&page=0`, yo(), 200,
+        d => cumple(d.contenido.length === 2 && d.totalPaginas === 2 && d.contenido[0].descripcion === "Cena", "Página o orden incorrectos"));
+    await prueba("Segunda página", "GET", `/api/gastos?${marzo}&size=2&page=1`, yo(), 200,
+        d => cumple(d.contenido.length === 1 && d.contenido[0].descripcion === "Mercadona", "La segunda página debería tener solo Mercadona"));
+    await prueba("Filtro con 'desde' posterior a 'hasta'", "GET", `/api/gastos?desde=${ANIO}-04-01&hasta=${ANIO}-03-01`, yo(), 400);
+    await prueba("Tamaño de página mayor de 100", "GET", "/api/gastos?size=500", yo(), 400);
+    await prueba("Página negativa", "GET", "/api/gastos?page=-1", yo(), 400);
+    await prueba("Otro usuario no ve mis gastos", "GET", "/api/gastos", { token: T2 }, 200, d => igual(d.totalElementos, 0, "totalElementos"));
+
+    await prueba("Editar gasto", "PUT", `/api/gastos/${G1}`, { ...yo(), body: gasto(13, `${ANIO}-03-05T10:00:00`, "Mercadona", "TARJETA", C1) }, 200, d => igual(d.importe, 13, "importe"));
+    await prueba("Otro usuario no puede editar mi gasto", "PUT", `/api/gastos/${G1}`, { token: T2, body: gasto(1, `${ANIO}-03-05T10:00:00`, "x", "TARJETA", C1) }, 404);
+    await prueba("Borrar gasto", "DELETE", `/api/gastos/${G4}`, yo(), 204);
+    await prueba("El gasto borrado ya no existe", "GET", `/api/gastos/${G4}`, yo(), 404);
+    await prueba("No se puede borrar una categoría con gastos", "DELETE", `/api/categorias/${C1}`, yo(), 409);
+
+    // ---------------------------------------------------------------
+    seccion("Ingresos");
+    // ---------------------------------------------------------------
+
+    const ingreso = (importe, fecha, descripcion, metodoIngreso) => ({ importe, fecha, descripcion, metodoIngreso, categoriaIngresoId: CI });
+
+    await prueba("Crear ingreso nómina (1 de marzo a las 00:00)", "POST", "/api/ingresos", { ...yo(), body: ingreso(1500, `${ANIO}-03-01T00:00:00`, "Nómina marzo", "TRANSFERENCIA") }, 201);
+    const I2 = (await prueba("Crear ingreso Bizum", "POST", "/api/ingresos", { ...yo(), body: ingreso(50, `${ANIO}-03-15T12:00:00`, "Bizum Juan", "BIZUM") }, 201))?.id;
+    const I3 = (await prueba("Crear ingreso el 1 de abril a las 00:00", "POST", "/api/ingresos", { ...yo(), body: ingreso(200, `${ANIO}-04-01T00:00:00`, "Venta", "TRANSFERENCIA") }, 201))?.id;
+    await prueba("Crear ingreso con método no válido", "POST", "/api/ingresos", { ...yo(), body: ingreso(10, `${ANIO}-03-15T12:00:00`, "x", "TARJETA") }, 400);
+
+    await prueba("Filtrar ingresos de marzo", "GET", `/api/ingresos?${marzo}`, yo(), 200, d => igual(d.totalElementos, 2, "totalElementos"));
+    await prueba("Filtrar ingresos por método", "GET", "/api/ingresos?metodoIngreso=BIZUM", yo(), 200, d => igual(d.totalElementos, 1, "totalElementos"));
+    await prueba("Ver ingreso", "GET", `/api/ingresos/${I2}`, yo(), 200);
+    await prueba("Otro usuario no ve mi ingreso", "GET", `/api/ingresos/${I2}`, { token: T2 }, 404);
+    await prueba("Editar ingreso", "PUT", `/api/ingresos/${I2}`, { ...yo(), body: ingreso(60, `${ANIO}-03-15T12:00:00`, "Bizum Juan", "BIZUM") }, 200, d => igual(d.importe, 60, "importe"));
+    await prueba("Borrar ingreso", "DELETE", `/api/ingresos/${I3}`, yo(), 204);
+    await prueba("No se puede borrar una categoría de ingreso con ingresos", "DELETE", `/api/categorias-ingreso/${CI}`, yo(), 409);
+
+    // ---------------------------------------------------------------
+    seccion("Presupuestos");
+    // ---------------------------------------------------------------
+
+    const P1 = (await prueba("Crear presupuesto de marzo", "POST", "/api/presupuestos", { ...yo(), body: { importe: 500, mes: 3, anio: ANIO } }, 201,
+        d => igual(d.gastado, 50.5, "gastado (13 + 30 + 7,5)")))?.id;
+    await prueba("Crear presupuesto duplicado", "POST", "/api/presupuestos", { ...yo(), body: { importe: 500, mes: 3, anio: ANIO } }, 409);
+    await prueba("Crear presupuesto con mes 13", "POST", "/api/presupuestos", { ...yo(), body: { importe: 500, mes: 13, anio: ANIO } }, 400);
+    await prueba("Ver presupuesto de marzo", "GET", `/api/presupuestos?mes=3&anio=${ANIO}`, yo(), 200, d => igual(d.restante, 449.5, "restante"));
+    await prueba("Ver presupuesto con mes 13", "GET", `/api/presupuestos?mes=13&anio=${ANIO}`, yo(), 400);
+    await prueba("Ver presupuesto de un mes sin presupuesto", "GET", `/api/presupuestos?mes=1&anio=${ANIO}`, yo(), 404);
+    await prueba("Ver presupuesto sin parámetros", "GET", "/api/presupuestos", yo(), 400);
+    const P2 = (await prueba("Crear presupuesto de abril", "POST", "/api/presupuestos", { ...yo(), body: { importe: 400, mes: 4, anio: ANIO } }, 201))?.id;
+    await prueba("Mover abril a marzo (ya existe)", "PUT", `/api/presupuestos/${P2}`, { ...yo(), body: { importe: 400, mes: 3, anio: ANIO } }, 409);
+    await prueba("Editar presupuesto", "PUT", `/api/presupuestos/${P2}`, { ...yo(), body: { importe: 600, mes: 4, anio: ANIO } }, 200, d => igual(d.importe, 600, "importe"));
+    await prueba("Otro usuario no puede editar mi presupuesto", "PUT", `/api/presupuestos/${P1}`, { token: T2, body: { importe: 1, mes: 3, anio: ANIO } }, 404);
+    await prueba("Otro usuario no puede borrar mi presupuesto", "DELETE", `/api/presupuestos/${P1}`, { token: T2 }, 404);
+    await prueba("Borrar presupuesto", "DELETE", `/api/presupuestos/${P2}`, yo(), 204);
+
+    // ---------------------------------------------------------------
+    seccion("Resumen y estadísticas");
+    // ---------------------------------------------------------------
+
+    await prueba("Resumen de marzo", "GET", `/api/resumen/${ANIO}/3`, yo(), 200, d => {
+        const r = [igual(d.ingresos, 1560, "ingresos (1500 + 60; el del 1 de abril no cuenta)"), igual(d.gastos, 50.5, "gastos"), igual(d.presupuesto, 500, "presupuesto")];
+        return r.find(x => x !== true) || true;
+    });
+    await prueba("Resumen con mes 13", "GET", `/api/resumen/${ANIO}/13`, yo(), 400);
+    await prueba("Gastos por categoría", "GET", `/api/estadisticas/gastos-por-categoria/${ANIO}/3`, yo(), 200, d => cumple(Array.isArray(d) && d.length === 2, "Se esperaban 2 categorías"));
+    await prueba("Ingresos por categoría", "GET", `/api/estadisticas/ingresos-por-categoria/${ANIO}/3`, yo(), 200, d => cumple(Array.isArray(d) && d.length === 1, "Se esperaba 1 categoría"));
+    await prueba("Gastos por método de pago", "GET", `/api/estadisticas/gastos-por-metodo-pago/${ANIO}/3`, yo(), 200, d => cumple(Array.isArray(d) && d.length === 2, "Se esperaban 2 métodos"));
+    await prueba("Evolución de gastos enero–abril", "GET", `/api/estadisticas/evolucion-gastos/${ANIO}/1/${ANIO}/4`, yo(), 200, d => cumple(Array.isArray(d), "Se esperaba una lista"));
+    await prueba("Evolución con el inicio posterior al fin", "GET", `/api/estadisticas/evolucion-gastos/${ANIO}/4/${ANIO}/1`, yo(), 400);
+    await prueba("Estadísticas con mes 0", "GET", `/api/estadisticas/gastos-por-categoria/${ANIO}/0`, yo(), 400);
+
+    // ---------------------------------------------------------------
+    seccion("Gastos recurrentes");
+    // ---------------------------------------------------------------
+
+    // Fechas en el futuro para que el scheduler no genere gastos de prueba
+    const recurrente = (extra = {}) => ({ importe: 9.99, descripcion: "Netflix", metodoPago: "TARJETA", periodicidad: "MENSUAL",
+        fechaInicio: "2030-01-31", proximaFecha: "2030-01-31", fechaFin: null, categoriaId: C1, ...extra });
+
+    const R1 = (await prueba("Crear recurrente mensual", "POST", "/api/gastos-recurrentes", { ...yo(), body: recurrente() }, 201, d => cumple(d.activo === true, "Debería empezar activo")))?.id;
+    await prueba("Recurrente con fin anterior al inicio", "POST", "/api/gastos-recurrentes", { ...yo(), body: recurrente({ fechaFin: "2029-12-31" }) }, 400);
+    await prueba("Recurrente con próxima fecha anterior al inicio", "POST", "/api/gastos-recurrentes", { ...yo(), body: recurrente({ proximaFecha: "2029-12-31" }) }, 400);
+    await prueba("Recurrente con periodicidad no válida", "POST", "/api/gastos-recurrentes", { ...yo(), body: recurrente({ periodicidad: "DIARIA" }) }, 400);
+    await prueba("Listar recurrentes", "GET", "/api/gastos-recurrentes", yo(), 200, d => cumple(d.length === 1, "Debería salir 1"));
+    await prueba("Ver recurrente", "GET", `/api/gastos-recurrentes/${R1}`, yo(), 200);
+    await prueba("Otro usuario no ve mi recurrente", "GET", `/api/gastos-recurrentes/${R1}`, { token: T2 }, 404);
+    await prueba("Editar recurrente", "PUT", `/api/gastos-recurrentes/${R1}`, { ...yo(), body: recurrente({ importe: 12.99 }) }, 200, d => igual(d.importe, 12.99, "importe"));
+    await prueba("Pausar recurrente", "PATCH", `/api/gastos-recurrentes/${R1}/estado`, yo(), 200, d => cumple(d.activo === false, "Debería quedar inactivo"));
+    await prueba("Reactivar recurrente", "PATCH", `/api/gastos-recurrentes/${R1}/estado`, yo(), 200, d => cumple(d.activo === true, "Debería quedar activo"));
+    await prueba("Borrar recurrente", "DELETE", `/api/gastos-recurrentes/${R1}`, yo(), 204);
+
+    // ---------------------------------------------------------------
+    seccion("Vehículos");
+    // ---------------------------------------------------------------
+
+    const vehiculo = { nombre: "Coche de pruebas", marca: "Seat", modelo: "Ibiza", matricula: "1234ABC", anio: 2018 };
+    const V1 = (await prueba("Crear vehículo", "POST", "/api/vehiculos", { ...yo(), body: vehiculo }, 201, d => cumple(d.activo === true, "Debería empezar activo")))?.id;
+    await prueba("Crear vehículo sin nombre", "POST", "/api/vehiculos", { ...yo(), body: { ...vehiculo, nombre: "" } }, 400);
+    await prueba("Listar vehículos", "GET", "/api/vehiculos", yo(), 200, d => cumple(d.length === 1, "Debería salir 1"));
+    await prueba("Ver vehículo", "GET", `/api/vehiculos/${V1}`, yo(), 200);
+    await prueba("Otro usuario no ve mi vehículo", "GET", `/api/vehiculos/${V1}`, { token: T2 }, 404);
+    await prueba("Editar vehículo", "PUT", `/api/vehiculos/${V1}`, { ...yo(), body: { ...vehiculo, modelo: "León" } }, 200, d => igual(d.modelo, "León", "modelo"));
+    await prueba("Desactivar vehículo", "PATCH", `/api/vehiculos/${V1}/estado`, yo(), 200, d => cumple(d.activo === false, "Debería quedar inactivo"));
+    await prueba("Reactivar vehículo", "PATCH", `/api/vehiculos/${V1}/estado`, yo(), 200, d => cumple(d.activo === true, "Debería quedar activo"));
+    const V2 = (await prueba("Crear segundo vehículo", "POST", "/api/vehiculos", { ...yo(), body: { ...vehiculo, nombre: "Moto", matricula: "5678DEF" } }, 201))?.id;
+    await prueba("Borrar vehículo sin registros", "DELETE", `/api/vehiculos/${V2}`, yo(), 204);
+
+    // Cada registro de vehículo genera su gasto; la respuesta incluye categoría y método de pago
+    const datosDelGasto = (metodoPago) => d => cumple(d.categoriaId === C2 && d.categoriaNombre === "Vehículo" && d.metodoPago === metodoPago,
+        `Se esperaba categoría ${C2} (Vehículo) y método ${metodoPago}`);
+    const base = `/api/vehiculos/${V1}`;
+
+    // Repostajes
+    const RP1 = (await prueba("Crear repostaje", "POST", `${base}/repostajes`,
+        { ...yo(), body: { fecha: `${ANIO}-05-01`, litros: 40, precioTotal: 60, kilometros: 50000, categoriaId: C2, metodoPago: "TARJETA" } }, 201, datosDelGasto("TARJETA")))?.id;
+    const RP2 = (await prueba("Crear segundo repostaje (calcula consumo real)", "POST", `${base}/repostajes`,
+        { ...yo(), body: { fecha: `${ANIO}-05-20`, litros: 35, precioTotal: 56, kilometros: 50700, categoriaId: C2, metodoPago: "EFECTIVO" } }, 201,
+        d => cumple(d.kilometrosRecorridos === 700 && Number(d.consumoReal) === 5, "Se esperaban 700 km y 5 l/100km")))?.id;
+    await prueba("Listar repostajes", "GET", `${base}/repostajes`, yo(), 200, d => cumple(d.length === 2, "Deberían salir 2"));
+    await prueba("Ver repostaje", "GET", `${base}/repostajes/${RP1}`, yo(), 200);
+    await prueba("Otro usuario no ve mis repostajes", "GET", `${base}/repostajes`, { token: T2 }, 404);
+    await prueba("Editar repostaje (cambia el método de pago)", "PUT", `${base}/repostajes/${RP2}`,
+        { ...yo(), body: { fecha: `${ANIO}-05-20`, litros: 35, precioTotal: 56, kilometros: 50700, categoriaId: C2, metodoPago: "BIZUM" } }, 200, datosDelGasto("BIZUM"));
+
+    // Aceite
+    const AC = (await prueba("Crear cambio de aceite", "POST", `${base}/aceites`,
+        { ...yo(), body: { fecha: `${ANIO}-05-05`, kilometros: 50100, precio: 80, categoriaId: C2, metodoPago: "TARJETA" } }, 201, datosDelGasto("TARJETA")))?.id;
+    await prueba("Listar cambios de aceite", "GET", `${base}/aceites`, yo(), 200);
+    await prueba("Ver cambio de aceite", "GET", `${base}/aceites/${AC}`, yo(), 200);
+    await prueba("Editar cambio de aceite", "PUT", `${base}/aceites/${AC}`,
+        { ...yo(), body: { fecha: `${ANIO}-05-05`, kilometros: 50100, precio: 85, categoriaId: C2, metodoPago: "EFECTIVO" } }, 200, datosDelGasto("EFECTIVO"));
+
+    // Neumáticos
+    const NE = (await prueba("Crear cambio de neumáticos", "POST", `${base}/neumaticos`,
+        { ...yo(), body: { fecha: `${ANIO}-05-08`, kilometros: 50200, posicion: "DELANTEROS", precio: 180, categoriaId: C2, metodoPago: "TARJETA" } }, 201, datosDelGasto("TARJETA")))?.id;
+    await prueba("Neumáticos con posición no válida", "POST", `${base}/neumaticos`,
+        { ...yo(), body: { fecha: `${ANIO}-05-08`, kilometros: 50200, posicion: "ARRIBA", precio: 180, categoriaId: C2, metodoPago: "TARJETA" } }, 400);
+    await prueba("Listar neumáticos", "GET", `${base}/neumaticos`, yo(), 200);
+    await prueba("Ver neumáticos", "GET", `${base}/neumaticos/${NE}`, yo(), 200);
+    await prueba("Editar neumáticos", "PUT", `${base}/neumaticos/${NE}`,
+        { ...yo(), body: { fecha: `${ANIO}-05-08`, kilometros: 50200, posicion: "TODOS", precio: 340, categoriaId: C2, metodoPago: "TARJETA" } }, 200, d => igual(d.posicion, "TODOS", "posicion"));
+
+    // Mantenimientos
+    const MA = (await prueba("Crear mantenimiento", "POST", `${base}/mantenimientos`,
+        { ...yo(), body: { tipo: "MANTENIMIENTO", titulo: "Revisión", descripcion: "Filtros", fecha: `${ANIO}-05-10`, kilometros: 50300, precio: 120, categoriaId: C2, metodoPago: "TARJETA" } }, 201, datosDelGasto("TARJETA")))?.id;
+    await prueba("Mantenimiento sin título", "POST", `${base}/mantenimientos`,
+        { ...yo(), body: { tipo: "MANTENIMIENTO", titulo: "", fecha: `${ANIO}-05-10`, kilometros: 50300, precio: 120, categoriaId: C2, metodoPago: "TARJETA" } }, 400);
+    await prueba("Listar mantenimientos", "GET", `${base}/mantenimientos`, yo(), 200);
+    await prueba("Ver mantenimiento", "GET", `${base}/mantenimientos/${MA}`, yo(), 200);
+    await prueba("Editar mantenimiento", "PUT", `${base}/mantenimientos/${MA}`,
+        { ...yo(), body: { tipo: "AVERIA_REPARACION", titulo: "Embrague", fecha: `${ANIO}-05-10`, kilometros: 50300, precio: 450, categoriaId: C2, metodoPago: "TARJETA" } }, 200, d => igual(d.tipo, "AVERIA_REPARACION", "tipo"));
+
+    // ITV
+    const IT = (await prueba("Crear ITV", "POST", `${base}/itv`,
+        { ...yo(), body: { fecha: `${ANIO}-05-15`, kilometros: 50400, resultado: "FAVORABLE", precio: 45, categoriaId: C2, metodoPago: "BIZUM" } }, 201, datosDelGasto("BIZUM")))?.id;
+    await prueba("Listar ITV", "GET", `${base}/itv`, yo(), 200);
+    await prueba("Ver ITV", "GET", `${base}/itv/${IT}`, yo(), 200);
+    await prueba("Editar ITV", "PUT", `${base}/itv/${IT}`,
+        { ...yo(), body: { fecha: `${ANIO}-05-15`, kilometros: 50400, resultado: "DESFAVORABLE", precio: 45, categoriaId: C2, metodoPago: "BIZUM" } }, 200, d => igual(d.resultado, "DESFAVORABLE", "resultado"));
+
+    // Integración con gastos
+    const mayo = `desde=${ANIO}-05-01&hasta=${ANIO}-05-31`;
+    const gastosMayo = await prueba("Los registros del vehículo aparecen como gastos", "GET", `/api/gastos?${mayo}`, yo(), 200,
+        d => cumple(d.totalElementos === 6 && d.contenido.every(g => g.origen !== "MANUAL"), "Se esperaban 6 gastos con origen de vehículo"));
+    const gastoRepostaje = gastosMayo?.contenido?.find(g => g.origen === "REPOSTAJE");
+    if (gastoRepostaje) {
+        await prueba("No se edita desde /api/gastos el gasto de un repostaje", "PUT", `/api/gastos/${gastoRepostaje.id}`,
+            { ...yo(), body: gasto(1, `${ANIO}-05-01T00:00:00`, "x", "TARJETA", C2) }, 409);
+        await prueba("No se borra desde /api/gastos el gasto de un repostaje", "DELETE", `/api/gastos/${gastoRepostaje.id}`, yo(), 409);
+    }
+    await prueba("No se puede borrar un vehículo con registros", "DELETE", `/api/vehiculos/${V1}`, yo(), 409);
+
+    await prueba("Borrar repostaje", "DELETE", `${base}/repostajes/${RP1}`, yo(), 204);
+    await prueba("Borrar repostaje", "DELETE", `${base}/repostajes/${RP2}`, yo(), 204);
+    await prueba("Borrar cambio de aceite", "DELETE", `${base}/aceites/${AC}`, yo(), 204);
+    await prueba("Borrar neumáticos", "DELETE", `${base}/neumaticos/${NE}`, yo(), 204);
+    await prueba("Borrar mantenimiento", "DELETE", `${base}/mantenimientos/${MA}`, yo(), 204);
+    await prueba("Borrar ITV", "DELETE", `${base}/itv/${IT}`, yo(), 204);
+    await prueba("Al borrar los registros se borran sus gastos", "GET", `/api/gastos?${mayo}`, yo(), 200, d => igual(d.totalElementos, 0, "totalElementos"));
+    await prueba("Ahora sí se puede borrar el vehículo", "DELETE", `/api/vehiculos/${V1}`, yo(), 204);
+
+    // ---------------------------------------------------------------
+    seccion("Tickets: imagen y conversión en gasto");
+    // ---------------------------------------------------------------
+
+    const ticket = { fecha: `${ANIO}-06-10`, comercio: "Mercadona", importe: 23.45, descripcion: "Compra semanal" };
+    const TK = (await prueba("Crear ticket (ignora rutaImagen)", "POST", "/api/tickets", { ...yo(), body: { ...ticket, rutaImagen: "../../etc/passwd" } }, 201,
+        d => cumple(d.imagenUrl === null && d.gastoId === null, "imagenUrl y gastoId deberían ser null")))?.id;
+    await prueba("Crear ticket sin comercio", "POST", "/api/tickets", { ...yo(), body: { ...ticket, comercio: "" } }, 400);
+    await prueba("Listar tickets", "GET", "/api/tickets", yo(), 200, d => cumple(d.length === 1, "Debería salir 1"));
+    await prueba("Editar ticket", "PUT", `/api/tickets/${TK}`, { ...yo(), body: { ...ticket, descripcion: "Compra del mes" } }, 200);
+    await prueba("Ver imagen de un ticket sin imagen", "GET", `/api/tickets/${TK}/imagen`, yo(), 404);
+
+    const formulario = (blob, nombre) => { const f = new FormData(); f.append("imagen", blob, nombre); return f; };
+    const png = await generarPng();
+
+    await prueba("Subir imagen PNG", "POST", `/api/tickets/${TK}/imagen`, { ...yo(), form: formulario(png, "ticket.png") }, 200,
+        d => igual(d.imagenUrl, `/api/tickets/${TK}/imagen`, "imagenUrl"));
+    await prueba("Descargar la imagen", "GET", `/api/tickets/${TK}/imagen`, yo(), 200,
+        (d, r) => cumple(r.tipo.startsWith("image/png") && r.blob.size === png.size, "La imagen descargada no coincide con la subida"));
+    await prueba("Otro usuario no ve la imagen", "GET", `/api/tickets/${TK}/imagen`, { token: T2 }, 404);
+    await prueba("Ver la imagen sin token", "GET", `/api/tickets/${TK}/imagen`, {}, 401);
+    await prueba("Subir un archivo que no es una imagen", "POST", `/api/tickets/${TK}/imagen`,
+        { ...yo(), form: formulario(new Blob(["MZ esto no es una imagen"], { type: "image/png" }), "falso.png") }, 400);
+
+    const grande = new Uint8Array(6 * 1024 * 1024);
+    grande.set([0x89, 0x50, 0x4E, 0x47]);
+    await prueba("Subir una imagen de 6 MB", "POST", `/api/tickets/${TK}/imagen`, { ...yo(), form: formulario(new Blob([grande], { type: "image/png" }), "grande.png") }, 413);
+    await prueba("Subir imagen enviando JSON", "POST", `/api/tickets/${TK}/imagen`, { ...yo(), body: {} }, 415);
+    await prueba("Subir sin el campo 'imagen'", "POST", `/api/tickets/${TK}/imagen`,
+        { ...yo(), form: (() => { const f = new FormData(); f.append("otro", png, "ticket.png"); return f; })() }, 400);
+
+    await prueba("Convertir en gasto sin categoría", "POST", `/api/tickets/${TK}/gasto`, { ...yo(), body: { metodoPago: "TARJETA" } }, 400);
+    const GT = (await prueba("Convertir ticket en gasto", "POST", `/api/tickets/${TK}/gasto`, { ...yo(), body: { categoriaId: C1, metodoPago: "TARJETA" } }, 201, d => {
+        const r = [igual(d.importe, 23.45, "importe"), igual(d.descripcion, "Mercadona", "descripcion"), igual(d.origen, "TICKET", "origen"), igual(d.fecha, `${ANIO}-06-10T00:00:00`, "fecha")];
+        return r.find(x => x !== true) || true;
+    }))?.id;
+    await prueba("Convertir el mismo ticket otra vez", "POST", `/api/tickets/${TK}/gasto`, { ...yo(), body: { categoriaId: C1, metodoPago: "TARJETA" } }, 409);
+    await prueba("El ticket indica su gasto", "GET", `/api/tickets/${TK}`, yo(), 200, d => igual(d.gastoId, GT, "gastoId"));
+    await prueba("El gasto de un ticket sí se puede editar", "PUT", `/api/gastos/${GT}`,
+        { ...yo(), body: gasto(23.45, `${ANIO}-06-10T13:00:00`, "Mercadona (editado)", "EFECTIVO", C1) }, 200, d => igual(d.origen, "TICKET", "origen"));
+    await prueba("Borrar la imagen", "DELETE", `/api/tickets/${TK}/imagen`, yo(), 204);
+    await prueba("Borrar la imagen otra vez", "DELETE", `/api/tickets/${TK}/imagen`, yo(), 404);
+    await prueba("Borrar ticket", "DELETE", `/api/tickets/${TK}`, yo(), 204);
+    await prueba("El gasto se conserva y pasa a MANUAL", "GET", `/api/gastos/${GT}`, yo(), 200, d => igual(d.origen, "MANUAL", "origen"));
+
+    // ---------------------------------------------------------------
+    seccion("Errores generales");
+    // ---------------------------------------------------------------
+
+    await prueba("Ruta que no existe", "GET", "/api/no-existe", yo(), 404);
+    await prueba("Método no permitido", "PATCH", "/api/gastos", yo(), 405);
+    await prueba("Content-Type no soportado", "POST", "/api/gastos", { ...yo(), raw: "importe=5", tipoContenido: "text/plain" }, 415);
+    await prueba("JSON mal formado", "POST", "/api/gastos", { ...yo(), raw: '{"importe": ' }, 400);
+    await prueba("Health en el puerto principal", "GET", "/livez", {}, 200, d => igual(d.status, "UP", "status"));
+    await prueba("Actuator no está en el puerto principal", "GET", "/actuator/prometheus", yo(), 404);
+
+    // ---------------------------------------------------------------
+    seccion("Limpieza de los datos de prueba");
+    // ---------------------------------------------------------------
+
+    const restantesGastos = await api("GET", "/api/gastos?size=100", yo());
+    for (const g of restantesGastos.data?.contenido || []) {
+        await prueba(`Borrar gasto "${g.descripcion}"`, "DELETE", `/api/gastos/${g.id}`, yo(), 204);
+    }
+    const restantesIngresos = await api("GET", "/api/ingresos?size=100", yo());
+    for (const i of restantesIngresos.data?.contenido || []) {
+        await prueba(`Borrar ingreso "${i.descripcion}"`, "DELETE", `/api/ingresos/${i.id}`, yo(), 204);
+    }
+    await prueba("Borrar presupuesto de marzo", "DELETE", `/api/presupuestos/${P1}`, yo(), 204);
+    await prueba("Borrar categoría sin gastos", "DELETE", `/api/categorias/${C1}`, yo(), 204);
+    await prueba("Borrar categoría sin gastos", "DELETE", `/api/categorias/${C2}`, yo(), 204);
+    await prueba("Borrar categoría de ingreso sin ingresos", "DELETE", `/api/categorias-ingreso/${CI}`, yo(), 204);
+
+    // Deja la sesión del usuario 1 lista en la consola manual
+    if (T1) {
+        guardarSesion(T1, U1);
+        document.getElementById("info-suite").textContent =
+            `Usuarios de prueba: ${U1} / ${PASS_NUEVA} y ${U2} / ${PASS} (no hay endpoint para borrarlos). ` +
+            `La sesión de ${U1} queda abierta en la consola manual.`;
+    }
+}
+
+// =====================================================================
+// CONSOLA MANUAL
+// =====================================================================
+
+const hoy = new Date().toISOString().slice(0, 10);
+const ahora = hoy + "T12:00:00";
+
+const ENDPOINTS = [
+    ["Usuarios", "POST", "/api/usuarios", { nombre: "Ana", apellidos: "Pérez", nombreUsuario: "ana", correo: "ana@correo.com", password: "12345678" }],
+    ["Usuarios", "POST", "/api/auth/login", { nombreUsuario: "ana", password: "12345678" }],
+    ["Usuarios", "GET", "/api/usuarios/me"],
+    ["Usuarios", "PUT", "/api/usuarios/me", { nombre: "Ana", apellidos: "Pérez", correo: "ana@correo.com" }],
+    ["Usuarios", "PUT", "/api/usuarios/me/password", { passwordActual: "12345678", passwordNueva: "nuevaClave1" }],
+
+    ["Categorías", "GET", "/api/categorias"],
+    ["Categorías", "POST", "/api/categorias", { nombre: "Comida" }],
+    ["Categorías", "GET", "/api/categorias/{id}"],
+    ["Categorías", "PUT", "/api/categorias/{id}", { nombre: "Supermercado" }],
+    ["Categorías", "DELETE", "/api/categorias/{id}"],
+    ["Categorías", "GET", "/api/categorias-ingreso"],
+    ["Categorías", "POST", "/api/categorias-ingreso", { nombre: "Nómina" }],
+    ["Categorías", "GET", "/api/categorias-ingreso/{id}"],
+    ["Categorías", "PUT", "/api/categorias-ingreso/{id}", { nombre: "Salario" }],
+    ["Categorías", "DELETE", "/api/categorias-ingreso/{id}"],
+
+    ["Gastos", "GET", "/api/gastos", null, "page=0&size=20"],
+    ["Gastos", "POST", "/api/gastos", { importe: 12.5, fecha: ahora, descripcion: "Mercadona", metodoPago: "TARJETA", categoriaId: 1 }],
+    ["Gastos", "GET", "/api/gastos/{id}"],
+    ["Gastos", "PUT", "/api/gastos/{id}", { importe: 12.5, fecha: ahora, descripcion: "Mercadona", metodoPago: "TARJETA", categoriaId: 1 }],
+    ["Gastos", "DELETE", "/api/gastos/{id}"],
+
+    ["Ingresos", "GET", "/api/ingresos", null, "page=0&size=20"],
+    ["Ingresos", "POST", "/api/ingresos", { importe: 1500, fecha: ahora, descripcion: "Nómina", metodoIngreso: "TRANSFERENCIA", categoriaIngresoId: 1 }],
+    ["Ingresos", "GET", "/api/ingresos/{id}"],
+    ["Ingresos", "PUT", "/api/ingresos/{id}", { importe: 1500, fecha: ahora, descripcion: "Nómina", metodoIngreso: "TRANSFERENCIA", categoriaIngresoId: 1 }],
+    ["Ingresos", "DELETE", "/api/ingresos/{id}"],
+
+    ["Presupuestos", "GET", "/api/presupuestos", null, `mes=${Number(hoy.slice(5, 7))}&anio=${hoy.slice(0, 4)}`],
+    ["Presupuestos", "POST", "/api/presupuestos", { importe: 800, mes: Number(hoy.slice(5, 7)), anio: Number(hoy.slice(0, 4)) }],
+    ["Presupuestos", "PUT", "/api/presupuestos/{id}", { importe: 900, mes: Number(hoy.slice(5, 7)), anio: Number(hoy.slice(0, 4)) }],
+    ["Presupuestos", "DELETE", "/api/presupuestos/{id}"],
+
+    ["Recurrentes", "GET", "/api/gastos-recurrentes"],
+    ["Recurrentes", "POST", "/api/gastos-recurrentes", { importe: 9.99, descripcion: "Netflix", metodoPago: "TARJETA", periodicidad: "MENSUAL", fechaInicio: hoy, proximaFecha: hoy, fechaFin: null, categoriaId: 1 }],
+    ["Recurrentes", "GET", "/api/gastos-recurrentes/{id}"],
+    ["Recurrentes", "PUT", "/api/gastos-recurrentes/{id}", { importe: 9.99, descripcion: "Netflix", metodoPago: "TARJETA", periodicidad: "MENSUAL", fechaInicio: hoy, proximaFecha: hoy, fechaFin: null, categoriaId: 1 }],
+    ["Recurrentes", "PATCH", "/api/gastos-recurrentes/{id}/estado"],
+    ["Recurrentes", "DELETE", "/api/gastos-recurrentes/{id}"],
+
+    ["Resumen y estadísticas", "GET", "/api/resumen/{anio}/{mes}"],
+    ["Resumen y estadísticas", "GET", "/api/estadisticas/gastos-por-categoria/{anio}/{mes}"],
+    ["Resumen y estadísticas", "GET", "/api/estadisticas/ingresos-por-categoria/{anio}/{mes}"],
+    ["Resumen y estadísticas", "GET", "/api/estadisticas/gastos-por-metodo-pago/{anio}/{mes}"],
+    ["Resumen y estadísticas", "GET", "/api/estadisticas/evolucion-gastos/{anioInicio}/{mesInicio}/{anioFin}/{mesFin}"],
+
+    ["Vehículos", "GET", "/api/vehiculos"],
+    ["Vehículos", "POST", "/api/vehiculos", { nombre: "Mi coche", marca: "Seat", modelo: "Ibiza", matricula: "1234ABC", anio: 2018 }],
+    ["Vehículos", "GET", "/api/vehiculos/{id}"],
+    ["Vehículos", "PUT", "/api/vehiculos/{id}", { nombre: "Mi coche", marca: "Seat", modelo: "León", matricula: "1234ABC", anio: 2018 }],
+    ["Vehículos", "PATCH", "/api/vehiculos/{id}/estado"],
+    ["Vehículos", "DELETE", "/api/vehiculos/{id}"]
+];
+
+// Los 5 submódulos de vehículos comparten las mismas operaciones
+const SUBMODULOS = [
+    ["repostajes", "Repostajes", { fecha: hoy, litros: 40, precioTotal: 60, kilometros: 50000, consumoOrdenador: 5.8, velocidadMedia: 62, notas: null, categoriaId: 1, metodoPago: "TARJETA" }],
+    ["aceites", "Aceite", { fecha: hoy, kilometros: 50000, precio: 80, notas: null, categoriaId: 1, metodoPago: "TARJETA" }],
+    ["neumaticos", "Neumáticos", { fecha: hoy, kilometros: 50000, posicion: "DELANTEROS", precio: 180, notas: null, categoriaId: 1, metodoPago: "TARJETA" }],
+    ["mantenimientos", "Mantenimientos", { tipo: "MANTENIMIENTO", titulo: "Revisión", descripcion: "Filtros y aceite", fecha: hoy, kilometros: 50000, precio: 120, notas: null, categoriaId: 1, metodoPago: "TARJETA" }],
+    ["itv", "ITV", { fecha: hoy, kilometros: 50000, resultado: "FAVORABLE", precio: 45, notas: null, categoriaId: 1, metodoPago: "TARJETA" }]
+];
+for (const [ruta, grupo, ejemplo] of SUBMODULOS) {
+    const base = `/api/vehiculos/{vehiculoId}/${ruta}`;
+    ENDPOINTS.push(
+        [grupo, "GET", base], [grupo, "POST", base, ejemplo], [grupo, "GET", base + "/{id}"],
+        [grupo, "PUT", base + "/{id}", ejemplo], [grupo, "DELETE", base + "/{id}"]
+    );
+}
+
+ENDPOINTS.push(
+    ["Tickets", "GET", "/api/tickets"],
+    ["Tickets", "POST", "/api/tickets", { fecha: hoy, comercio: "Mercadona", importe: 23.45, descripcion: "Compra semanal" }],
+    ["Tickets", "GET", "/api/tickets/{id}"],
+    ["Tickets", "PUT", "/api/tickets/{id}", { fecha: hoy, comercio: "Mercadona", importe: 23.45, descripcion: "Compra semanal" }],
+    ["Tickets", "DELETE", "/api/tickets/{id}"],
+    ["Tickets", "POST", "/api/tickets/{id}/imagen", "multipart"],
+    ["Tickets", "GET", "/api/tickets/{id}/imagen"],
+    ["Tickets", "DELETE", "/api/tickets/{id}/imagen"],
+    ["Tickets", "POST", "/api/tickets/{id}/gasto", { categoriaId: 1, metodoPago: "TARJETA", descripcion: null }],
+
+    ["Monitorización", "GET", "/livez"],
+    ["Monitorización", "GET", "/readyz"]
+);
+
+const selector = document.getElementById("endpoint");
+const grupos = {};
+ENDPOINTS.forEach(([grupo, metodo, ruta], i) => {
+    if (!grupos[grupo]) { grupos[grupo] = crear("optgroup", { label: grupo }); selector.append(grupos[grupo]); }
+    grupos[grupo].append(crear("option", { value: i, text: `${metodo.padEnd(6, " ")} ${ruta}` }));
+});
+
+// Recuerda los valores de los parámetros de ruta entre endpoints (p. ej. el id del vehículo)
+const valoresRuta = {};
+const anioActual = hoy.slice(0, 4), mesActual = String(Number(hoy.slice(5, 7)));
+Object.assign(valoresRuta, { anio: anioActual, mes: mesActual, anioInicio: anioActual, mesInicio: "1", anioFin: anioActual, mesFin: mesActual });
+
+function elegirEndpoint() {
+
+    const [, metodo, ruta, cuerpo, query] = ENDPOINTS[selector.value];
+    const contenedor = document.getElementById("parametros-ruta");
+    contenedor.replaceChildren();
+
+    for (const [, nombre] of ruta.matchAll(/\{(\w+)\}/g)) {
+        const input = crear("input", { "data-param": nombre, value: valoresRuta[nombre] || "", size: 8 });
+        input.addEventListener("input", () => valoresRuta[nombre] = input.value);
+        contenedor.append(crear("label", {}, nombre, input));
+    }
+
+    const multipart = cuerpo === "multipart";
+    const conCuerpo = cuerpo && !multipart;
+    document.getElementById("bloque-archivo").classList.toggle("oculto", !multipart);
+    document.getElementById("bloque-cuerpo").classList.toggle("oculto", !conCuerpo);
+    document.getElementById("cuerpo").value = conCuerpo ? JSON.stringify(cuerpo, null, 2) : "";
+    document.getElementById("query").value = query || "";
+    document.getElementById("query").closest("label").classList.toggle("oculto", metodo !== "GET");
+}
+
+selector.addEventListener("change", elegirEndpoint);
+elegirEndpoint();
+
+// ---------- Sesión ----------
+
+function guardarSesion(token, usuario) {
+    almacen.guardar("token", token);
+    almacen.guardar("usuario", usuario);
+    pintarSesion();
+}
+
+function pintarSesion() {
+    const usuario = almacen.leer("usuario");
+    document.getElementById("estado-sesion").textContent = almacen.leer("token") ? `Sesión iniciada como ${usuario}` : "Sin sesión";
+}
+
+document.getElementById("login").addEventListener("click", async () => {
+    const usuario = document.getElementById("login-usuario").value.trim();
+    const r = await api("POST", "/api/auth/login", { body: { nombreUsuario: usuario, password: document.getElementById("login-password").value } });
+    mostrarRespuesta(r, "POST /api/auth/login");
+    if (r.status === 200) guardarSesion(r.data.token, usuario);
+});
+
+document.getElementById("logout").addEventListener("click", () => guardarSesion(null, null));
+pintarSesion();
+
+// ---------- Enviar ----------
+
+document.getElementById("enviar").addEventListener("click", async () => {
+
+    const [, metodo, plantilla, cuerpo] = ENDPOINTS[selector.value];
+
+    let ruta = plantilla.replace(/\{(\w+)\}/g, (_, nombre) => encodeURIComponent(valoresRuta[nombre] || ""));
+    const query = document.getElementById("query").value.trim();
+    if (metodo === "GET" && query) ruta += "?" + query.replace(/^\?/, "");
+
+    const opciones = {};
+    if (!document.getElementById("sin-token").checked) opciones.token = almacen.leer("token");
+
+    if (cuerpo === "multipart") {
+        const archivo = document.getElementById("archivo").files[0];
+        if (!archivo) { mostrarRespuesta({ status: 0, data: "Elige una imagen primero", ms: 0 }, ruta); return; }
+        opciones.form = new FormData();
+        opciones.form.append("imagen", archivo);
+    } else if (cuerpo) {
+        opciones.raw = document.getElementById("cuerpo").value;
+    }
+
+    const r = await api(metodo, ruta, opciones);
+    mostrarRespuesta(r, `${metodo} ${ruta}`);
+
+    if (plantilla === "/api/auth/login" && r.status === 200) guardarSesion(r.data.token, r.data.nombreUsuario);
+});
+
+function mostrarRespuesta(r, peticion) {
+
+    const estado = document.getElementById("respuesta-estado");
+    estado.textContent = r.status || "Sin conexión";
+    estado.className = "insignia " + (r.status >= 200 && r.status < 300 ? "ok" : "error");
+    document.getElementById("respuesta-tiempo").textContent = r.ms ? r.ms + " ms" : "";
+    document.getElementById("respuesta-url").textContent = peticion;
+
+    const cuerpo = document.getElementById("respuesta-cuerpo");
+    cuerpo.className = "";
+    cuerpo.textContent = formatear(r.data);
+
+    const imagen = document.getElementById("consola-imagen");
+    if (imagen.src) URL.revokeObjectURL(imagen.src);
+    if (r.blob) {
+        imagen.src = URL.createObjectURL(r.blob);
+        imagen.classList.remove("oculto");
+    } else {
+        imagen.removeAttribute("src");
+        imagen.classList.add("oculto");
+    }
+}
+</script>
+</body>
+</html>
