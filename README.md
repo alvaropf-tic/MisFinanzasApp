@@ -62,4 +62,20 @@ La carpeta `Backend/mis-finanzas-backend/data/` guarda la base de datos y las im
 
 ## Documentación
 
-La documentación del proyecto (visión, roadmap, arquitectura, modelo de datos, API, despliegue…) se mantiene fuera del repositorio, en la carpeta `docs/` del proyecto. La referencia completa de la API está en `08_API_REST.md`.
+La documentación del proyecto está en [`Docs/`](Docs/):
+
+| Documento | Contenido |
+|---|---|
+| [00 Visión](Docs/00_Vision_del_proyecto.md) | Qué es Mis Finanzas y su filosofía |
+| [01 Roadmap](Docs/01_Roadmap.md) | Fases y estado de cada tarea |
+| [02 Arquitectura](Docs/02_Arquitectura.md) | Visión general técnica |
+| [03 Modelo de datos](Docs/03_Modelo_de_datos.md) | Entidades y reglas de negocio |
+| [04 Diagrama ER](Docs/04_Diagrama_Entidad_Relacion.md) | Relaciones entre entidades |
+| [05 Diseño BD](Docs/05_Diseño_Base_Datos.md) | Tablas y columnas |
+| [06 Backend](Docs/06_Backend.md) | Estructura, errores, seguridad y métricas |
+| [07 Frontend](Docs/07_Frontend.md) | Diseño del frontend |
+| [08 API REST](Docs/08_API_REST.md) | Referencia completa de los endpoints |
+| [09 IA](Docs/09_IA.md) | Chat y OCR (pendiente) |
+| [10 Despliegue](Docs/10_Despliegue.md) | Perfiles, variables de entorno y puertos |
+| [11 Guía de desarrollo](Docs/11_Guia_Desarrollo.md) | Normas y puesta en marcha |
+| [12 UI/UX](Docs/12_UI_UX.md) | Diseño de la interfaz |
