@@ -1,0 +1,7 @@
+{
+  "name": "Mis Finanzas",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

@@ -1,0 +1,14 @@
+<ion-item lines="full">
+  <ion-icon slot="start" [name]="icono()" color="primary" [attr.aria-label]="metodo()"></ion-icon>
+  <ion-label>
+    <h2>
+      {{ gasto().descripcion || gasto().categoriaNombre }}
+      @if (iconoOrigen(); as origen) {
+        <ion-icon [name]="origen" color="medium" class="movimiento__origen" aria-hidden="true"></ion-icon>
+      }
+    </h2>
+    <p>{{ gasto().categoriaNombre }} · {{ metodo() }}</p>
+    <p>{{ gasto().fecha | date: 'd MMM y, HH:mm' }}</p>
+  </ion-label>
+  <ion-note slot="end" class="movimiento__importe">−{{ gasto().importe | currency: 'EUR' }}</ion-note>
+</ion-item>

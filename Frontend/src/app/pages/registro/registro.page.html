@@ -1,0 +1,81 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/login" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Crear cuenta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="pantalla-acceso">
+    <form [formGroup]="formulario" (ngSubmit)="registrar()">
+      <ion-input
+        formControlName="nombre"
+        label="Nombre"
+        labelPlacement="floating"
+        fill="outline"
+        autocomplete="given-name"
+        [maxlength]="50"
+        errorText="El nombre es obligatorio"
+      ></ion-input>
+
+      <ion-input
+        formControlName="apellidos"
+        label="Apellidos"
+        labelPlacement="floating"
+        fill="outline"
+        autocomplete="family-name"
+        [maxlength]="100"
+        errorText="Los apellidos son obligatorios"
+      ></ion-input>
+
+      <ion-input
+        formControlName="nombreUsuario"
+        label="Nombre de usuario"
+        labelPlacement="floating"
+        fill="outline"
+        autocomplete="username"
+        autocapitalize="off"
+        [maxlength]="30"
+        helperText="Entre 3 y 30 caracteres. No se podrá cambiar."
+        errorText="Debe tener entre 3 y 30 caracteres"
+      ></ion-input>
+
+      <ion-input
+        formControlName="correo"
+        type="email"
+        label="Correo"
+        labelPlacement="floating"
+        fill="outline"
+        autocomplete="email"
+        [maxlength]="150"
+        errorText="Introduce un correo válido"
+      ></ion-input>
+
+      <ion-input
+        formControlName="password"
+        type="password"
+        label="Contraseña"
+        labelPlacement="floating"
+        fill="outline"
+        autocomplete="new-password"
+        helperText="Al menos 8 caracteres"
+        errorText="Debe tener al menos 8 caracteres"
+      >
+        <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+      </ion-input>
+
+      <ion-button type="submit" expand="block" [disabled]="enviando()">
+        @if (enviando()) {
+        <ion-spinner name="crescent"></ion-spinner>
+        } @else { Crear cuenta }
+      </ion-button>
+    </form>
+
+    <p class="pantalla-acceso__pie">
+      ¿Ya tienes cuenta?
+      <a routerLink="/login">Inicia sesión</a>
+    </p>
+  </div>
+</ion-content>

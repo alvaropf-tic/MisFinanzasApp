@@ -1,0 +1,46 @@
+<ion-content class="ion-padding">
+  <div class="pantalla-acceso">
+    <header class="pantalla-acceso__cabecera">
+      <ion-icon name="wallet-outline" color="primary" aria-hidden="true"></ion-icon>
+      <h1>Mis Finanzas</h1>
+      <ion-text color="medium"><p>Inicia sesión para continuar</p></ion-text>
+    </header>
+
+    <form [formGroup]="formulario" (ngSubmit)="iniciarSesion()">
+      <ion-input
+        formControlName="nombreUsuario"
+        label="Usuario"
+        labelPlacement="floating"
+        fill="outline"
+        autocomplete="username"
+        autocapitalize="off"
+        errorText="Introduce tu nombre de usuario"
+      ></ion-input>
+
+      <ion-input
+        formControlName="password"
+        type="password"
+        label="Contraseña"
+        labelPlacement="floating"
+        fill="outline"
+        autocomplete="current-password"
+        errorText="Introduce tu contraseña"
+      >
+        <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+      </ion-input>
+
+      <ion-checkbox formControlName="recordar" labelPlacement="end" justify="start">Recordarme</ion-checkbox>
+
+      <ion-button type="submit" expand="block" [disabled]="enviando()">
+        @if (enviando()) {
+        <ion-spinner name="crescent"></ion-spinner>
+        } @else { Iniciar sesión }
+      </ion-button>
+    </form>
+
+    <p class="pantalla-acceso__pie">
+      ¿No tienes cuenta?
+      <a routerLink="/registro">Regístrate</a>
+    </p>
+  </div>
+</ion-content>
