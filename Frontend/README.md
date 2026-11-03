@@ -21,10 +21,10 @@ src/app/
 ├── core/        ApiService, AuthService, StorageService, AvisoService, interceptor de auth
 ├── guards/      authGuard (pantallas privadas) y publicGuard (login y registro)
 ├── models/      DTO del backend
-├── services/    un servicio por recurso de la API (gastos, categorías, usuarios)
-├── components/  componentes reutilizables (MovementCard)
-├── shared/      (por ahora vacío)
-└── pages/       login, registro, gastos y el modal de nuevo gasto
+├── services/    un servicio por recurso de la API (gastos, ingresos, categorías, presupuestos, resumen, recurrentes, usuarios)
+├── components/  componentes reutilizables (MovementCard, para gastos e ingresos)
+├── shared/      cabecera común (logo, título y menú del avatar), EmptyState, ListaMovimientos (gastos e ingresos mezclados por fecha) e iniciales
+└── pages/       login, registro, tabs (/inicio, /finanzas, /calendario, /vehiculos, /ia), inicio (resumen del mes), finanzas (gastos e ingresos), perfil y las hojas de nuevo movimiento y presupuesto
 ```
 
 Las páginas solo hablan con los servicios; los servicios usan `ApiService`, que es el único que usa `HttpClient`.

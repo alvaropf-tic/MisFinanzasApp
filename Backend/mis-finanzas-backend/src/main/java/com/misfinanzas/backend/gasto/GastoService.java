@@ -142,7 +142,8 @@ public class GastoService {
 
         OrigenGasto origen = OrigenGasto.de(gasto);
 
-        if (origen != OrigenGasto.MANUAL && origen != OrigenGasto.TICKET) {
+        // Los de tickets y recurrentes se pueden corregir sueltos (p. ej. un mes te cobran distinto)
+        if (origen != OrigenGasto.MANUAL && origen != OrigenGasto.TICKET && origen != OrigenGasto.RECURRENTE) {
             throw new ConflictoException("Este gasto se gestiona desde el módulo de vehículos (" + origen.name().toLowerCase() + "). Modifícalo desde allí.");
         }
     }

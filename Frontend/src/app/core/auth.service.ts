@@ -1,5 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavController } from '@ionic/angular';
 import { type Observable, from, map, switchMap } from 'rxjs';
 
 import type { Login, LoginRespuesta } from '../models/usuario.model';
@@ -24,7 +24,7 @@ const DURACION_TOKEN_MS = 24 * 60 * 60 * 1000;
 export class AuthService {
   private readonly api = inject(ApiService);
   private readonly storage = inject(StorageService);
-  private readonly router = inject(Router);
+  private readonly navController = inject(NavController);
 
   private readonly sesion = signal<Sesion | null>(null);
 
@@ -64,7 +64,8 @@ export class AuthService {
   async cerrarSesion(): Promise<void> {
     this.sesion.set(null);
     await this.storage.borrar(CLAVE_SESION);
-    await this.router.navigateByUrl('/login', { replaceUrl: true });
+    // navigateRoot vacía la pila de pantallas: no se puede volver atrás a la app
+    await this.navController.navigateRoot('/login', { animationDirection: 'back' });
   }
 
   private async guardarSesion(respuesta: LoginRespuesta, recordar: boolean): Promise<void> {

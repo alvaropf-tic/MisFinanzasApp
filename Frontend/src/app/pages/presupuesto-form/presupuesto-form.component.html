@@ -1,0 +1,63 @@
+<ion-content>
+  <form id="form-presupuesto" class="hoja" [formGroup]="formulario" (ngSubmit)="guardar()">
+    <header class="hoja__cabecera">
+      <span class="hoja__insignia" aria-hidden="true">
+        <ion-icon name="pie-chart-outline"></ion-icon>
+      </span>
+      <h1>{{ presupuesto ? 'Editar presupuesto' : 'Nuevo presupuesto' }}</h1>
+      <ion-button fill="clear" color="medium" class="hoja__cerrar" (click)="cancelar()" aria-label="Cerrar">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </header>
+
+    <p class="presupuesto__explicacion">¿Cuánto quieres gastar como máximo en {{ nombreMes }}?</p>
+
+    <label class="hoja__importe" [class.hoja__importe--error]="importeInvalido()">
+      <input
+        formControlName="importe"
+        type="number"
+        inputmode="decimal"
+        min="0.01"
+        step="0.01"
+        placeholder="0,00"
+        aria-label="Presupuesto en euros"
+      />
+      <span class="hoja__moneda" aria-hidden="true">€</span>
+    </label>
+    @if (importeInvalido()) {
+      <p class="hoja__error hoja__error--centrado">Introduce un presupuesto mayor que 0</p>
+    }
+
+    <p class="hoja__ayuda presupuesto__nota">
+      La barra de Inicio te mostrará lo que llevas gastado y lo previsto con tus pagos recurrentes.
+    </p>
+
+    @if (presupuesto) {
+      <ion-button
+        class="presupuesto__eliminar"
+        fill="clear"
+        color="danger"
+        expand="block"
+        [disabled]="enviando()"
+        (click)="eliminar()"
+      >
+        <ion-icon slot="start" name="trash-outline" aria-hidden="true"></ion-icon>
+        Quitar presupuesto
+      </ion-button>
+    }
+  </form>
+</ion-content>
+
+<ion-footer class="hoja__pie">
+  <ion-button type="submit" form="form-presupuesto" expand="block" [disabled]="enviando()">
+    @if (enviando()) {
+      <ion-spinner name="crescent"></ion-spinner>
+    } @else {
+      <ion-icon slot="start" name="checkmark-outline" aria-hidden="true"></ion-icon>
+      Guardar presupuesto
+      @if (importeTexto(); as importe) {
+        · {{ importe }}
+      }
+    }
+  </ion-button>
+</ion-footer>

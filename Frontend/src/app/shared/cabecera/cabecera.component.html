@@ -1,0 +1,28 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-icon slot="start" name="wallet-outline" class="cabecera__logo" aria-hidden="true"></ion-icon>
+    <ion-title>{{ titulo() }}</ion-title>
+    <ion-buttons slot="end">
+      <!-- Acciones propias de la pestaña (p. ej. el filtro de Finanzas) -->
+      <ng-content select="[cabeceraAccion]"></ng-content>
+      <ion-button (click)="abrirMenu($event)" aria-label="Menú de usuario" aria-haspopup="menu">
+        <span class="cabecera__avatar">{{ iniciales() }}</span>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-popover [isOpen]="menuAbierto()" [event]="eventoMenu()" alignment="end" (didDismiss)="menuAbierto.set(false)">
+  <ng-template>
+    <ion-list lines="none">
+      <ion-item button [detail]="false" (click)="irAPerfil()">
+        <ion-icon slot="start" name="person-circle-outline" aria-hidden="true"></ion-icon>
+        <ion-label>Perfil</ion-label>
+      </ion-item>
+      <ion-item button [detail]="false" (click)="cerrarSesion()">
+        <ion-icon slot="start" name="log-out-outline" color="danger" aria-hidden="true"></ion-icon>
+        <ion-label color="danger">Cerrar sesión</ion-label>
+      </ion-item>
+    </ion-list>
+  </ng-template>
+</ion-popover>

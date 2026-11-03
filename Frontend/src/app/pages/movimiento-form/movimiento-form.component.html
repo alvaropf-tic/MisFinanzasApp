@@ -1,0 +1,134 @@
+<ion-content>
+  <form id="form-movimiento" class="hoja" [formGroup]="formulario" (ngSubmit)="guardar()">
+    <header class="hoja__cabecera">
+      <span class="hoja__insignia" aria-hidden="true">
+        <ion-icon [name]="tipo === 'gasto' ? 'trending-down-outline' : 'trending-up-outline'"></ion-icon>
+      </span>
+      <h1>{{ textos.titulo }}</h1>
+      <ion-button fill="clear" color="medium" class="hoja__cerrar" (click)="cancelar()" aria-label="Cerrar">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </header>
+
+    <!-- Importe: el protagonista -->
+    <label class="hoja__importe" [class.hoja__importe--error]="importeInvalido()">
+      <span class="hoja__signo" aria-hidden="true">{{ tipo === 'gasto' ? '−' : '+' }}</span>
+      <input
+        formControlName="importe"
+        type="number"
+        inputmode="decimal"
+        min="0.01"
+        step="0.01"
+        placeholder="0,00"
+        aria-label="Importe en euros"
+      />
+      <span class="hoja__moneda" aria-hidden="true">€</span>
+    </label>
+    @if (importeInvalido()) {
+      <p class="hoja__error hoja__error--centrado">Introduce un importe mayor que 0</p>
+    }
+
+    <section class="hoja__seccion">
+      <h2>Categoría</h2>
+      @if (cargandoCategorias()) {
+        <ion-spinner name="dots"></ion-spinner>
+      } @else {
+        <div class="chips" role="radiogroup" aria-label="Categoría">
+          @for (categoria of categorias(); track categoria.id) {
+            <button
+              type="button"
+              class="chip"
+              role="radio"
+              [class.chip--activo]="formulario.controls.categoriaId.value === categoria.id"
+              [attr.aria-checked]="formulario.controls.categoriaId.value === categoria.id"
+              (click)="elegirCategoria(categoria.id)"
+            >
+              {{ categoria.nombre }}
+            </button>
+          }
+          <button type="button" class="chip chip--nueva" (click)="nuevaCategoria()">
+            <ion-icon name="add-outline" aria-hidden="true"></ion-icon>
+            Nueva
+          </button>
+        </div>
+        @if (categorias().length === 0) {
+          <p class="hoja__ayuda">Aún no tienes categorías. Crea la primera con «Nueva».</p>
+        }
+        @if (categoriaInvalida()) {
+          <p class="hoja__error">Elige una categoría</p>
+        }
+      }
+    </section>
+
+    <section class="hoja__seccion">
+      <h2>{{ textos.metodo }}</h2>
+      <div class="metodos" role="radiogroup" [attr.aria-label]="textos.metodo">
+        @for (metodo of metodos; track metodo.valor) {
+          <button
+            type="button"
+            class="metodo"
+            role="radio"
+            [class.metodo--activo]="formulario.controls.metodo.value === metodo.valor"
+            [attr.aria-checked]="formulario.controls.metodo.value === metodo.valor"
+            (click)="formulario.controls.metodo.setValue(metodo.valor)"
+          >
+            <ion-icon [name]="iconosMetodo[metodo.valor]" aria-hidden="true"></ion-icon>
+            <span>{{ metodo.etiqueta }}</span>
+          </button>
+        }
+      </div>
+    </section>
+
+    <section class="hoja__seccion">
+      <h2>Detalles</h2>
+      <div class="detalles">
+        <div class="detalles__fila">
+          <ion-icon name="calendar-outline" aria-hidden="true"></ion-icon>
+          <span class="detalles__etiqueta">Fecha</span>
+          <ion-datetime-button datetime="fecha-movimiento"></ion-datetime-button>
+        </div>
+        <div class="detalles__fila">
+          <ion-icon name="create-outline" aria-hidden="true"></ion-icon>
+          <ion-input
+            formControlName="descripcion"
+            aria-label="Descripción"
+            placeholder="Añade una descripción (opcional)"
+            [maxlength]="255"
+          ></ion-input>
+        </div>
+      </div>
+      @if (formulario.controls.descripcion.invalid) {
+        <p class="hoja__error">Máximo 255 caracteres</p>
+      }
+    </section>
+
+    <ion-modal [keepContentsMounted]="true">
+      <ng-template>
+        <ion-datetime
+          id="fecha-movimiento"
+          formControlName="fecha"
+          presentation="date-time"
+          locale="es-ES"
+          [firstDayOfWeek]="1"
+          [showDefaultButtons]="true"
+          doneText="Aceptar"
+          cancelText="Cancelar"
+        ></ion-datetime>
+      </ng-template>
+    </ion-modal>
+  </form>
+</ion-content>
+
+<ion-footer class="hoja__pie">
+  <ion-button type="submit" form="form-movimiento" expand="block" [color]="color" [disabled]="enviando()">
+    @if (enviando()) {
+      <ion-spinner name="crescent"></ion-spinner>
+    } @else {
+      <ion-icon slot="start" name="checkmark-outline" aria-hidden="true"></ion-icon>
+      {{ textos.guardar }}
+      @if (importeTexto(); as importe) {
+        · {{ importe }}
+      }
+    }
+  </ion-button>
+</ion-footer>

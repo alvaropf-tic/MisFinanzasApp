@@ -127,8 +127,9 @@ Propietario de toda la información.
 | Mantenimiento | 0..1 : 1 | mantenimiento_id (única) |
 | ITV | 0..1 : 1 | itv_id (única) |
 | Ticket | 0..1 : 1 | ticket_id (única) |
+| GastoRecurrente | N : 1 | gasto_recurrente_id |
 
-Como mucho una de las seis claves de origen tiene valor. Si ninguna lo tiene, el gasto es MANUAL.
+Como mucho una de las siete claves de origen tiene valor. Si ninguna lo tiene, el gasto es MANUAL.
 
 ---
 
@@ -146,7 +147,7 @@ Como mucho una de las seis claves de origen tiene valor. Si ninguna lo tiene, el
 |---|---|
 | Categoría | N : 1 |
 
-No hay relación guardada con los gastos que genera: cada gasto generado es un Gasto normal (origen MANUAL).
+Cada gasto generado guarda `gasto_recurrente_id` (origen RECURRENTE). Al borrar el recurrente, esa clave se pone a null y los gastos se conservan.
 
 ---
 

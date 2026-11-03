@@ -12,5 +12,5 @@ export const authGuard: CanActivateFn = () => {
 /** Login y registro: con sesión se va directamente a la app. */
 export const publicGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
-  return !auth.haySesionValida() || inject(Router).createUrlTree(['/gastos']);
+  return !auth.haySesionValida() || inject(Router).createUrlTree(['/inicio']);
 };

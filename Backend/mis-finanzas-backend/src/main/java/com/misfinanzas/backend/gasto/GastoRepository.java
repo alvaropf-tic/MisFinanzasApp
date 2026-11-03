@@ -3,6 +3,7 @@ package com.misfinanzas.backend.gasto;
 import com.misfinanzas.backend.aceite.model.Aceite;
 import com.misfinanzas.backend.gasto.model.Gasto;
 import com.misfinanzas.backend.gasto.model.MetodoPago;
+import com.misfinanzas.backend.gastoRecurrente.model.GastoRecurrente;
 import com.misfinanzas.backend.itv.model.ITV;
 import com.misfinanzas.backend.mantenimiento.model.Mantenimiento;
 import com.misfinanzas.backend.neumatico.model.Neumatico;
@@ -12,6 +13,7 @@ import com.misfinanzas.backend.usuario.model.Usuario;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -83,4 +85,18 @@ public interface GastoRepository extends JpaRepository<Gasto, Long> {
     Optional<Gasto> findByTicket(Ticket ticket);
 
     boolean existsByTicket(Ticket ticket);
+
+    // Gastos ya cobrados de un recurrente que se va a borrar: se conservan, pero sin el enlace
+    @Modifying
+    @Query("UPDATE Gasto g SET g.gastoRecurrente = NULL WHERE g.gastoRecurrente = :recurrente")
+    void desvincularDeRecurrente(@Param("recurrente") GastoRecurrente recurrente);
+
+    @Query("""
+    SELECT COALESCE(SUM(g.importe), 0)
+    FROM Gasto g
+    WHERE g.usuario = :usuario
+      AND g.gastoRecurrente IS NOT NULL
+      AND g.fecha >= :inicio
+      AND g.fecha < :fin""")
+    BigDecimal sumarGastosRecurrentesEntreFechas(@Param("usuario") Usuario usuario, @Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);
 }

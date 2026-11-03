@@ -1,6 +1,7 @@
 export type MetodoPago = 'EFECTIVO' | 'TARJETA' | 'BIZUM';
 
-export type OrigenGasto = 'MANUAL' | 'REPOSTAJE' | 'ACEITE' | 'NEUMATICO' | 'MANTENIMIENTO' | 'ITV' | 'TICKET';
+export type OrigenGasto =
+  'MANUAL' | 'REPOSTAJE' | 'ACEITE' | 'NEUMATICO' | 'MANTENIMIENTO' | 'ITV' | 'TICKET' | 'RECURRENTE';
 
 export const METODOS_PAGO: { valor: MetodoPago; etiqueta: string }[] = [
   { valor: 'TARJETA', etiqueta: 'Tarjeta' },

@@ -3,6 +3,7 @@ package com.misfinanzas.backend.gasto.model;
 import com.misfinanzas.backend.aceite.model.Aceite;
 import com.misfinanzas.backend.categoria.model.Categoria;
 import com.misfinanzas.backend.gasto.GastoMetricasListener;
+import com.misfinanzas.backend.gastoRecurrente.model.GastoRecurrente;
 import com.misfinanzas.backend.itv.model.ITV;
 import com.misfinanzas.backend.mantenimiento.model.Mantenimiento;
 import com.misfinanzas.backend.neumatico.model.Neumatico;
@@ -75,4 +76,10 @@ public class Gasto {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ticket_id", unique = true)
     private Ticket ticket;
+
+    // Recurrente que generó este gasto (suscripciones, alquiler...). Varios gastos por recurrente.
+    // Al borrar el recurrente se pone a null: los gastos ya cobrados se quedan en el historial.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "gasto_recurrente_id")
+    private GastoRecurrente gastoRecurrente;
 }

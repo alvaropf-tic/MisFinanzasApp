@@ -1,0 +1,14 @@
+<span class="pago__fecha" aria-hidden="true">
+  <strong>{{ fecha().dia }}</strong>
+  <span>{{ fecha().mes }}</span>
+</span>
+<div class="pago__texto">
+  <strong>{{ recurrente().descripcion }}</strong>
+  <span>
+    {{ recurrente().categoriaNombre }} · {{ periodicidades[recurrente().periodicidad] }}
+    @if (!recurrente().activo) {
+      · Pausado
+    }
+  </span>
+</div>
+<span class="pago__importe">−{{ recurrente().importe | currency: 'EUR' }}</span>

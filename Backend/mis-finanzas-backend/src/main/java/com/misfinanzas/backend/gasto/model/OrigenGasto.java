@@ -8,7 +8,8 @@ public enum OrigenGasto {
     NEUMATICO,
     MANTENIMIENTO,
     ITV,
-    TICKET;
+    TICKET,
+    RECURRENTE;
 
     public static OrigenGasto de(Gasto gasto) {
 
@@ -18,6 +19,7 @@ public enum OrigenGasto {
         if (gasto.getMantenimiento() != null) return MANTENIMIENTO;
         if (gasto.getItv() != null) return ITV;
         if (gasto.getTicket() != null) return TICKET;
+        if (gasto.getGastoRecurrente() != null) return RECURRENTE;
 
         return MANUAL;
     }

@@ -121,6 +121,7 @@ Gracias a JPA, pasar a PostgreSQL solo requiere añadir su driver y cambiar `DB_
 | mantenimiento_id | BIGINT | UNIQUE, FK mantenimientos |
 | itv_id | BIGINT | UNIQUE, FK itv |
 | ticket_id | BIGINT | UNIQUE, FK tickets |
+| gasto_recurrente_id | BIGINT | FK gastos_recurrentes (varios gastos por recurrente) |
 
 ## ingresos
 

@@ -4,8 +4,7 @@ import com.misfinanzas.backend.common.exception.ConflictoException;
 import com.misfinanzas.backend.common.exception.RecursoNoEncontradoException;
 import com.misfinanzas.backend.common.util.PeriodoUtils;
 import com.misfinanzas.backend.gasto.GastoRepository;
-import com.misfinanzas.backend.gastoRecurrente.GastoRecurrenteRepository;
-import com.misfinanzas.backend.gastoRecurrente.model.GastoRecurrente;
+import com.misfinanzas.backend.gastoRecurrente.GastoRecurrenteService;
 import com.misfinanzas.backend.presupuesto.model.Presupuesto;
 import com.misfinanzas.backend.presupuesto.model.dto.PresupuestoRegistroDTO;
 import com.misfinanzas.backend.presupuesto.model.dto.PresupuestoResponseDTO;
@@ -15,22 +14,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.util.List;
 
 @Service
 public class PresupuestoService {
 
     private final PresupuestoRepository presupuestoRepository;
     private final GastoRepository gastoRepository;
-    private final GastoRecurrenteRepository gastoRecurrenteRepository;
+    private final GastoRecurrenteService gastoRecurrenteService;
 
-    public PresupuestoService(PresupuestoRepository presupuestoRepository, GastoRepository gastoRepository, GastoRecurrenteRepository gastoRecurrenteRepository) {
+    public PresupuestoService(PresupuestoRepository presupuestoRepository, GastoRepository gastoRepository, GastoRecurrenteService gastoRecurrenteService) {
         this.presupuestoRepository = presupuestoRepository;
         this.gastoRepository = gastoRepository;
-        this.gastoRecurrenteRepository = gastoRecurrenteRepository;
+        this.gastoRecurrenteService = gastoRecurrenteService;
     }
 
     @Transactional
@@ -107,7 +104,7 @@ public class PresupuestoService {
 
         BigDecimal gastado = gastoRepository.sumarGastosEntreFechas(presupuesto.getUsuario(), inicio, fin);
 
-        BigDecimal recurrentesDelMes = calcularRecurrentesDelMes(presupuesto.getUsuario(), periodo);
+        BigDecimal recurrentesDelMes = gastoRecurrenteService.calcularPendienteDelMes(presupuesto.getUsuario(), periodo);
 
         BigDecimal prevision = gastado.add(recurrentesDelMes);
 
@@ -118,46 +115,6 @@ public class PresupuestoService {
         BigDecimal porcentajePrevision = prevision.divide(presupuesto.getImporte(), 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100));
 
         return new PresupuestoResponseDTO(presupuesto.getId(), presupuesto.getImporte(), presupuesto.getMes(), presupuesto.getAnio(), gastado, prevision, restante, porcentajeGastado, porcentajePrevision);
-    }
-
-    private BigDecimal calcularRecurrentesDelMes(Usuario usuario, YearMonth periodo) {
-
-        List<GastoRecurrente> recurrentes = gastoRecurrenteRepository.findByUsuarioAndActivoTrue(usuario);
-
-        BigDecimal total = BigDecimal.ZERO;
-
-        LocalDate inicioMes = periodo.atDay(1);
-        LocalDate finMes = periodo.atEndOfMonth();
-        LocalDate hoy = LocalDate.now();
-
-        boolean esMesActual = YearMonth.from(hoy).equals(periodo);
-
-        for (GastoRecurrente recurrente : recurrentes) {
-
-            LocalDate fecha = recurrente.getProximaFecha();
-
-            while (!fecha.isAfter(finMes)) {
-
-                boolean perteneceAlMes = !fecha.isBefore(inicioMes);
-
-                boolean yaHaOcurrido = fecha.isBefore(hoy);
-
-                boolean esHoy = fecha.isEqual(hoy);
-
-                boolean dentroDeFechaFin = recurrente.getFechaFin() == null || !fecha.isAfter(recurrente.getFechaFin());
-
-                if (perteneceAlMes && dentroDeFechaFin) {
-
-                    if (!esMesActual || (!yaHaOcurrido && !esHoy)) {
-                        total = total.add(recurrente.getImporte());
-                    }
-                }
-
-                fecha = recurrente.getPeriodicidad().siguienteFecha(fecha, recurrente.getFechaInicio().getDayOfMonth());
-            }
-        }
-
-        return total;
     }
 
     @Transactional(readOnly = true)

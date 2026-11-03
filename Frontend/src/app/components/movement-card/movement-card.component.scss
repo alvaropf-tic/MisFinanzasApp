@@ -1,10 +1,18 @@
 .movimiento__importe {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 1rem;
   font-weight: 600;
   color: var(--ion-text-color);
 }
 
+.movimiento__importe--ingreso {
+  color: var(--ion-color-success);
+}
+
+// Origen junto al importe: ⟳ recurrente, recibo ticket, coche vehículos
 .movimiento__origen {
-  vertical-align: middle;
-  font-size: 0.9em;
+  font-size: 1.05em;
+  color: var(--ion-color-medium);
 }

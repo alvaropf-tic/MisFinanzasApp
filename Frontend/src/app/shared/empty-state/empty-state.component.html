@@ -1,0 +1,12 @@
+@if (icono(); as nombre) {
+  <ion-icon [name]="nombre" color="medium" aria-hidden="true"></ion-icon>
+}
+@if (titulo()) {
+  <h2>{{ titulo() }}</h2>
+}
+@if (mensaje()) {
+  <ion-text color="medium">
+    <p>{{ mensaje() }}</p>
+  </ion-text>
+}
+<ng-content></ng-content>

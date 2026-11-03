@@ -77,7 +77,7 @@ export class RegistroPage {
           this.enviando.set(false);
           this.formulario.reset();
           void this.avisos.exito('Cuenta creada. ¡Te damos la bienvenida!');
-          void this.router.navigateByUrl('/gastos', { replaceUrl: true });
+          void this.router.navigateByUrl('/inicio', { replaceUrl: true });
         },
         error: (error: unknown) => {
           this.enviando.set(false);

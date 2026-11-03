@@ -1,0 +1,131 @@
+<app-cabecera titulo="Inicio"></app-cabecera>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refrescar($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  @if (cargandoInicial()) {
+  <app-empty-state>
+    <ion-spinner name="crescent"></ion-spinner>
+  </app-empty-state>
+  } @else if (errorCarga()) {
+  <app-empty-state icono="cloud-offline-outline" titulo="No se ha podido cargar el resumen">
+    <ion-button fill="outline" (click)="cargar()">Reintentar</ion-button>
+  </app-empty-state>
+  } @else if (resumen(); as r) {
+  <div class="inicio">
+    <!-- Saldo del mes -->
+    <section class="saldo">
+      <p class="saldo__mes">{{ nombreMes() }}</p>
+      <p class="saldo__etiqueta">Saldo del mes</p>
+      <p class="saldo__importe">{{ r.saldo > 0 ? '+' : '' }}{{ r.saldo | currency: 'EUR' }}</p>
+      <div class="saldo__totales">
+        <div class="saldo__total">
+          <span class="saldo__icono saldo__icono--ingreso" aria-hidden="true">
+            <ion-icon name="arrow-up-outline"></ion-icon>
+          </span>
+          <div>
+            <span class="saldo__total-etiqueta">Ingresos</span>
+            <strong>{{ r.ingresos | currency: 'EUR' }}</strong>
+          </div>
+        </div>
+        <div class="saldo__total">
+          <span class="saldo__icono saldo__icono--gasto" aria-hidden="true">
+            <ion-icon name="arrow-down-outline"></ion-icon>
+          </span>
+          <div>
+            <span class="saldo__total-etiqueta">Gastos</span>
+            <strong>{{ r.gastos | currency: 'EUR' }}</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Presupuesto -->
+    <section class="tarjeta">
+      <header class="tarjeta__cabecera">
+        <h2>Presupuesto</h2>
+        @if (presupuesto()) {
+        <ion-button fill="clear" size="small" (click)="editarPresupuesto()">
+          <ion-icon slot="start" name="create-outline" aria-hidden="true"></ion-icon>
+          Editar
+        </ion-button>
+        }
+      </header>
+
+      @if (presupuesto(); as p) {
+      <p class="presupuesto__cifras">
+        <strong>{{ p.gastado | currency: 'EUR' }}</strong>
+        <span> de {{ p.importe | currency: 'EUR' }}</span>
+      </p>
+      <div
+        [class]="'barra barra--' + estado()"
+        role="img"
+        [attr.aria-label]="
+              'Gastado ' + p.porcentajeGastado + ' %, previsto a fin de mes ' + p.porcentajePrevision + ' %'
+            "
+      >
+        <span class="barra__previsto" [style.width.%]="barra().previsto"></span>
+        <span class="barra__gastado" [style.width.%]="barra().gastado"></span>
+      </div>
+      <div class="presupuesto__leyenda">
+        <span><span class="punto punto--gastado"></span>Gastado {{ p.porcentajeGastado | number: '1.0-0' }} %</span>
+        <span><span class="punto punto--previsto"></span>Previsto {{ p.porcentajePrevision | number: '1.0-0' }} %</span>
+      </div>
+      <p [class]="'presupuesto__mensaje presupuesto__mensaje--' + estado()">{{ mensajePresupuesto() }}</p>
+      } @else {
+      <div class="presupuesto__vacio">
+        <ion-icon name="pie-chart-outline" aria-hidden="true"></ion-icon>
+        <p>Define cuánto quieres gastar este mes y te avisamos si te acercas al límite.</p>
+        <ion-button shape="round" (click)="editarPresupuesto()">
+          <ion-icon slot="start" name="add-outline" aria-hidden="true"></ion-icon>
+          Definir presupuesto
+        </ion-button>
+      </div>
+      }
+    </section>
+
+    <!-- Próximos pagos (gastos recurrentes activos) -->
+    <section class="tarjeta">
+      <header class="tarjeta__cabecera">
+        <h2>Próximos pagos</h2>
+        <ion-button fill="clear" size="small" routerLink="/recurrentes">
+          Ver todos
+          <ion-icon slot="end" name="chevron-forward-outline" aria-hidden="true"></ion-icon>
+        </ion-button>
+      </header>
+      @for (pago of proximosPagos(); track pago.id) {
+      <app-pago-recurrente class="inicio__pago" [recurrente]="pago"></app-pago-recurrente>
+      } @empty {
+      <p class="tarjeta__vacio">
+        <ion-icon name="repeat-outline" aria-hidden="true"></ion-icon>
+        No tienes pagos recurrentes activos.
+      </p>
+      }
+    </section>
+
+    <!-- Últimos movimientos -->
+    <section class="tarjeta tarjeta--lista">
+      <header class="tarjeta__cabecera">
+        <h2>Últimos movimientos</h2>
+        @if (ultimos().length > 0) {
+        <ion-button fill="clear" size="small" routerLink="/finanzas">
+          Ver todo
+          <ion-icon slot="end" name="chevron-forward-outline" aria-hidden="true"></ion-icon>
+        </ion-button>
+        }
+      </header>
+      @if (ultimos().length > 0) {
+      <ion-list lines="none">
+        @for (movimiento of ultimos(); track clave(movimiento)) {
+        <app-movement-card [movimiento]="movimiento"></app-movement-card>
+        }
+      </ion-list>
+      } @else {
+      <p class="tarjeta__vacio">Aún no hay movimientos. Regístralos con el + de Finanzas.</p>
+      }
+    </section>
+  </div>
+  }
+</ion-content>

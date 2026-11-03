@@ -2,6 +2,7 @@ package com.misfinanzas.backend.gastoRecurrente;
 
 import com.misfinanzas.backend.gastoRecurrente.model.dto.GastoRecurrenteRegistroDTO;
 import com.misfinanzas.backend.gastoRecurrente.model.dto.GastoRecurrenteResponseDTO;
+import com.misfinanzas.backend.gastoRecurrente.model.dto.GastoRecurrenteResumenDTO;
 import com.misfinanzas.backend.usuario.model.Usuario;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,15 @@ public class GastoRecurrenteController {
         Usuario usuario = (Usuario) authentication.getPrincipal();
 
         return ResponseEntity.ok(gastoRecurrenteService.obtenerGastosRecurrentes(usuario));
+    }
+
+    // Ej: /api/gastos-recurrentes/resumen/2026/11 → activos, cobrado, pendiente, total y próximo cobro del mes
+    @GetMapping("/resumen/{anio}/{mes}")
+    public ResponseEntity<GastoRecurrenteResumenDTO> obtenerResumen(@PathVariable Integer anio, @PathVariable Integer mes, Authentication authentication) {
+
+        Usuario usuario = (Usuario) authentication.getPrincipal();
+
+        return ResponseEntity.ok(gastoRecurrenteService.obtenerResumen(anio, mes, usuario));
     }
 
     @GetMapping("/{id}")

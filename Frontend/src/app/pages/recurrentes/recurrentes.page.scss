@@ -1,0 +1,77 @@
+.recurrentes {
+  --superficie: var(--ion-color-step-50, rgba(127, 127, 127, 0.08));
+  --borde: var(--ion-color-step-150, rgba(127, 127, 127, 0.25));
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--mf-espacio) var(--mf-espacio) 32px;
+}
+
+.recurrentes__resumen {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: rgba(var(--ion-color-danger-rgb), 0.1);
+
+  strong {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--ion-color-danger);
+  }
+}
+
+.recurrentes__etiqueta {
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+}
+
+.tarjeta {
+  padding: 12px 16px 6px;
+  border: 1px solid var(--borde);
+  border-radius: 20px;
+  background: var(--superficie);
+
+  h2 {
+    margin: 4px 0 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--ion-color-medium);
+  }
+}
+
+// Cada fila es un botón para editar el pago
+.recurrentes__fila {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  & + & {
+    border-top: 1px solid var(--borde);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+}
+
+.recurrentes__nota {
+  margin: 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+}

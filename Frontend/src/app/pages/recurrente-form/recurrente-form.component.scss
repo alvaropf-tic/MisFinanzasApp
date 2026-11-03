@@ -1,0 +1,41 @@
+// Un pago recurrente es un gasto: mismo acento rojo (estilo común en theme/hojas.scss)
+:host {
+  --acento: var(--ion-color-danger);
+  --acento-rgb: var(--ion-color-danger-rgb);
+  --acento-contraste: var(--ion-color-danger-contrast);
+}
+
+.recurrente__pausado {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(var(--ion-color-warning-rgb), 0.15);
+  color: var(--ion-color-warning-shade);
+  font-size: 0.9rem;
+}
+
+// La fila del toggle ocupa todo el ancho; la del último cobro se alinea con las de icono
+.detalles__fila ion-toggle {
+  flex: 1;
+}
+
+.detalles__hueco {
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.recurrente__acciones {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 28px;
+
+  ion-button {
+    margin: 0;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+}

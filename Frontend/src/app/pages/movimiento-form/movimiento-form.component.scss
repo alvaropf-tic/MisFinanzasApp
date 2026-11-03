@@ -1,0 +1,12 @@
+// Color de acento según el tipo: rojo para gastos, verde para ingresos
+:host {
+  --acento: var(--ion-color-danger);
+  --acento-rgb: var(--ion-color-danger-rgb);
+  --acento-contraste: var(--ion-color-danger-contrast);
+}
+
+:host(.tipo-ingreso) {
+  --acento: var(--ion-color-success);
+  --acento-rgb: var(--ion-color-success-rgb);
+  --acento-contraste: var(--ion-color-success-contrast);
+}

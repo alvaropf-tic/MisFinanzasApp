@@ -61,7 +61,7 @@ export class LoginPage {
       next: () => {
         this.enviando.set(false);
         this.formulario.reset();
-        void this.router.navigateByUrl('/gastos', { replaceUrl: true });
+        void this.router.navigateByUrl('/inicio', { replaceUrl: true });
       },
       error: (error: unknown) => {
         this.enviando.set(false);

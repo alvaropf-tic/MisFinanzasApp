@@ -1,14 +1,24 @@
 <ion-item lines="full">
-  <ion-icon slot="start" [name]="icono()" color="primary" [attr.aria-label]="metodo()"></ion-icon>
+  <ion-icon
+    slot="start"
+    [name]="icono()"
+    [color]="esIngreso() ? 'success' : 'primary'"
+    [attr.aria-label]="metodo()"
+  ></ion-icon>
   <ion-label>
-    <h2>
-      {{ gasto().descripcion || gasto().categoriaNombre }}
-      @if (iconoOrigen(); as origen) {
-        <ion-icon [name]="origen" color="medium" class="movimiento__origen" aria-hidden="true"></ion-icon>
-      }
-    </h2>
-    <p>{{ gasto().categoriaNombre }} · {{ metodo() }}</p>
-    <p>{{ gasto().fecha | date: 'd MMM y, HH:mm' }}</p>
+    <h2>{{ movimiento().descripcion || categoria() }}</h2>
+    <p>{{ categoria() }} · {{ metodo() }}</p>
+    <p>{{ movimiento().fecha | date: 'd MMM y, HH:mm' }}</p>
   </ion-label>
-  <ion-note slot="end" class="movimiento__importe">−{{ gasto().importe | currency: 'EUR' }}</ion-note>
+  <ion-note slot="end" class="movimiento__importe" [class.movimiento__importe--ingreso]="esIngreso()">
+    @if (origen(); as o) {
+      <ion-icon
+        [name]="o.icono"
+        class="movimiento__origen"
+        [attr.aria-label]="o.etiqueta"
+        [title]="o.etiqueta"
+      ></ion-icon>
+    }
+    {{ esIngreso() ? '+' : '−' }}{{ movimiento().importe | currency: 'EUR' }}
+  </ion-note>
 </ion-item>

@@ -1,0 +1,23 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 60%;
+  padding: var(--mf-espacio);
+  text-align: center;
+}
+
+ion-icon {
+  font-size: 56px;
+}
+
+h2 {
+  margin: 8px 0 0;
+  font-size: 1.1rem;
+}
+
+p {
+  margin: 0;
+}

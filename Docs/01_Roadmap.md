@@ -382,7 +382,8 @@ Toda nueva funcionalidad deberá actualizar la documentación correspondiente an
 
 - **Documentación**: terminada y actualizada a lo implementado (versión 1.1).
 - **Backend V0**: la mayor parte hecho y probado. Funcionan usuarios, gastos, ingresos, categorías, presupuestos, recurrentes, resumen, estadísticas, vehículos con sus cinco tipos de registro y tickets con imagen. Ha pasado una revisión completa de errores, seguridad y configuración.
-- **Frontend**: pendiente. Es el siguiente paso.
+- **Frontend**: en desarrollo. Hechos el acceso (login y registro), la navegación por pestañas, Inicio (saldo, presupuesto, próximos pagos y últimos movimientos), Finanzas (gastos e ingresos con filtros), pagos recurrentes (sección en Finanzas y pantalla de administración) y el perfil.
+- **Pendiente del frontend**: objetivo de ahorro en Inicio (espera a que el backend tenga objetivos).
 - **Pendiente del backend**: configuración, etiquetas, objetivos, ingresos recurrentes, calendario, IA, copias de seguridad y Docker.
 
 ---

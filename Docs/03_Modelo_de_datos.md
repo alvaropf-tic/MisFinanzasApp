@@ -118,9 +118,10 @@ No se guarda: se calcula a partir de sus relaciones y se devuelve en la API como
 
 | Origen | Cuándo |
 |---|---|
-| MANUAL | Creado por el usuario (o por un recurrente) |
+| MANUAL | Creado por el usuario |
 | REPOSTAJE, ACEITE, NEUMATICO, MANTENIMIENTO, ITV | Generado por el módulo de vehículos |
 | TICKET | Creado al convertir un ticket |
+| RECURRENTE | Generado por un gasto recurrente |
 
 ---
 
@@ -254,7 +255,7 @@ Justificante de una compra, con su imagen opcional.
 | MetodoPago | EFECTIVO, TARJETA, BIZUM |
 | MetodoIngreso | EFECTIVO, TRANSFERENCIA, BIZUM |
 | Periodicidad | SEMANAL, MENSUAL, TRIMESTRAL, SEMESTRAL, ANUAL |
-| OrigenGasto (calculado) | MANUAL, REPOSTAJE, ACEITE, NEUMATICO, MANTENIMIENTO, ITV, TICKET |
+| OrigenGasto (calculado) | MANUAL, REPOSTAJE, ACEITE, NEUMATICO, MANTENIMIENTO, ITV, TICKET, RECURRENTE |
 | PosicionNeumaticos | DELANTEROS, TRASEROS, TODOS, DELANTERO_IZQUIERDO, DELANTERO_DERECHO, TRASERO_IZQUIERDO, TRASERO_DERECHO |
 | TipoMantenimiento | MANTENIMIENTO, AVERIA_REPARACION |
 | ResultadoITV | FAVORABLE, DESFAVORABLE, NEGATIVA |
@@ -342,6 +343,9 @@ Todos los gastos consumen presupuesto, se paguen como se paguen. La filosofía o
 - Los mensuales, trimestrales, semestrales y anuales **respetan el día de `fechaInicio`**: uno del día 31 se cobra el 28/29 en febrero y vuelve al 31 en los meses que lo tienen.
 - El proceso se ejecuta cada día a medianoche y también al arrancar el servidor, por si estaba apagado. Nunca duplica gastos.
 - Al superar `fechaFin` el recurrente se desactiva solo.
+- Al crearlo o editarlo con `proximaFecha` de hoy o anterior, el gasto se genera al momento.
+- Cada gasto generado guarda el recurrente que lo creó (origen RECURRENTE) y se puede editar suelto.
+- Al reactivarlo no se cobran los periodos pausados. Al borrarlo, sus gastos se conservan sin el enlace.
 
 ## Tickets
 

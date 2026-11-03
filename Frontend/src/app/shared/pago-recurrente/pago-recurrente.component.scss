@@ -1,0 +1,63 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+// Pausado: atenuado, con la fecha en gris
+:host(.pausado) {
+  opacity: 0.6;
+
+  .pago__fecha {
+    background: rgba(127, 127, 127, 0.15);
+    color: var(--ion-color-medium);
+  }
+}
+
+.pago__fecha {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: rgba(var(--ion-color-primary-rgb), 0.12);
+  color: var(--ion-color-primary);
+  line-height: 1.1;
+
+  strong {
+    font-size: 1.05rem;
+  }
+
+  span {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+  }
+}
+
+.pago__texto {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  text-align: start;
+
+  strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    font-size: 0.8rem;
+    color: var(--ion-color-medium);
+  }
+}
+
+.pago__importe {
+  font-weight: 600;
+  white-space: nowrap;
+}

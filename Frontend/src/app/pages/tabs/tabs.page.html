@@ -1,0 +1,10 @@
+<ion-tabs>
+  <ion-tab-bar slot="bottom">
+    @for (pestania of pestanias; track pestania.ruta) {
+    <ion-tab-button [tab]="pestania.ruta">
+      <ion-icon [name]="pestania.icono" aria-hidden="true"></ion-icon>
+      <ion-label>{{ pestania.etiqueta }}</ion-label>
+    </ion-tab-button>
+    }
+  </ion-tab-bar>
+</ion-tabs>

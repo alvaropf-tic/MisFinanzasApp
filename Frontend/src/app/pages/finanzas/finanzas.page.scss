@@ -1,0 +1,300 @@
+.finanzas__resumen {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 40px;
+  margin: 4px 0;
+  font-size: 0.85rem;
+
+  ion-button {
+    margin: 0;
+    font-size: 0.8rem;
+  }
+}
+
+// Punto en la esquina del icono de filtro cuando hay filtros aplicados.
+// Se posiciona respecto a la zona interna del botón, que mide lo mismo que el icono.
+.finanzas__punto-filtro {
+  position: absolute;
+  top: -3px;
+  right: -4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ion-color-warning);
+  border: 1.5px solid var(--ion-color-primary);
+}
+
+// ---------- Sección de pagos recurrentes ----------
+
+.recurrentes {
+  --borde: var(--ion-color-step-150, rgba(127, 127, 127, 0.25));
+
+  margin: var(--mf-espacio) var(--mf-espacio) 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--borde);
+  border-radius: 20px;
+  background: var(--ion-color-step-50, rgba(127, 127, 127, 0.08));
+}
+
+.recurrentes__cabecera {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  ion-button {
+    margin: 0;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+}
+
+.recurrentes__icono {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(var(--ion-color-danger-rgb), 0.15);
+  color: var(--ion-color-danger);
+  font-size: 20px;
+}
+
+.recurrentes__titulo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+
+  span {
+    font-size: 0.8rem;
+    color: var(--ion-color-medium);
+  }
+}
+
+.recurrentes__mas {
+  --padding-start: 6px;
+  --padding-end: 6px;
+}
+
+.recurrentes__cifras {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: var(--ion-background-color);
+  }
+
+  span {
+    font-size: 0.75rem;
+    color: var(--ion-color-medium);
+  }
+
+  strong {
+    font-size: 1.1rem;
+  }
+}
+
+.recurrentes__proximo,
+.recurrentes__vacio {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+
+  strong {
+    color: var(--ion-text-color);
+  }
+}
+
+// ---------- Sección de pagos recurrentes ----------
+
+.recurrentes {
+  --borde: var(--ion-color-step-150, rgba(127, 127, 127, 0.25));
+
+  margin: var(--mf-espacio) var(--mf-espacio) 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--borde);
+  border-radius: 20px;
+  background: var(--ion-color-step-50, rgba(127, 127, 127, 0.08));
+}
+
+.recurrentes__cabecera {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  ion-button {
+    margin: 0;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+}
+
+.recurrentes__icono {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(var(--ion-color-danger-rgb), 0.15);
+  color: var(--ion-color-danger);
+  font-size: 20px;
+}
+
+.recurrentes__titulo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+
+  span {
+    font-size: 0.8rem;
+    color: var(--ion-color-medium);
+  }
+}
+
+.recurrentes__mas {
+  --padding-start: 6px;
+  --padding-end: 6px;
+}
+
+.recurrentes__cifras {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: var(--ion-background-color);
+  }
+
+  span {
+    font-size: 0.75rem;
+    color: var(--ion-color-medium);
+  }
+
+  strong {
+    font-size: 1.1rem;
+  }
+}
+
+.recurrentes__proximo,
+.recurrentes__vacio {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+
+  strong {
+    color: var(--ion-text-color);
+  }
+}
+
+// Deja sitio al botón flotante para que no tape el último movimiento
+ion-list {
+  margin-bottom: 80px;
+}
+
+// Ventana centrada del "+": tamaño ajustado al contenido en vez de pantalla completa
+ion-modal.modal-centrado {
+  --width: min(340px, calc(100% - 32px));
+  --height: auto;
+  --border-radius: var(--mf-radio);
+
+  .ion-page {
+    position: relative;
+    display: block;
+    contain: content;
+  }
+}
+
+.eleccion {
+  padding: 20px var(--mf-espacio) 8px;
+  text-align: center;
+
+  h2 {
+    margin: 0 0 16px;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+}
+
+.eleccion__opciones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.eleccion__opcion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 8px;
+  border: 1px solid var(--ion-color-step-200, rgba(127, 127, 127, 0.3));
+  border-radius: var(--mf-radio);
+  background: transparent;
+  color: var(--ion-text-color);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  ion-icon {
+    font-size: 36px;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background: var(--ion-color-step-50, rgba(127, 127, 127, 0.08));
+  }
+}
+
+.filtros {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px var(--mf-espacio) 12px;
+
+  h2 {
+    margin: 0 0 4px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: center;
+  }
+}
+
+// En una ventana de ~340 px los tres botones del segmento no caben con el relleno por defecto
+.filtros ion-segment-button {
+  min-width: 0;
+  --padding-start: 4px;
+  --padding-end: 4px;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.filtros__etiqueta {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
+}
+
+.filtros__acciones {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+}

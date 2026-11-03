@@ -1,0 +1,154 @@
+<app-cabecera titulo="Finanzas">
+  <ion-button cabeceraAccion (click)="abrirFiltros()" aria-label="Filtrar movimientos">
+    <ion-icon slot="icon-only" name="filter-outline"></ion-icon>
+    @if (hayFiltros()) {
+    <span class="finanzas__punto-filtro" aria-label="Hay filtros activos"></span>
+    }
+  </ion-button>
+</app-cabecera>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refrescar($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Pagos recurrentes del mes: resumen, administrar y añadir -->
+  @if (seccionRecurrentes(); as r) {
+  <section class="recurrentes">
+    <header class="recurrentes__cabecera">
+      <span class="recurrentes__icono" aria-hidden="true">
+        <ion-icon name="repeat-outline"></ion-icon>
+      </span>
+      <div class="recurrentes__titulo">
+        <strong>Pagos recurrentes</strong>
+        <span>{{ r.activos }} {{ r.activos === 1 ? 'activo' : 'activos' }}</span>
+      </div>
+      <ion-button fill="clear" size="small" routerLink="/recurrentes">Administrar</ion-button>
+      <ion-button
+        class="recurrentes__mas"
+        shape="round"
+        size="small"
+        (click)="nuevoRecurrente()"
+        aria-label="Nuevo pago recurrente"
+      >
+        <ion-icon slot="icon-only" name="add"></ion-icon>
+      </ion-button>
+    </header>
+
+    @if (r.activos > 0 || r.total > 0) {
+    <div class="recurrentes__cifras">
+      <div>
+        <span>Este mes</span>
+        <strong>{{ r.total | currency: 'EUR' }}</strong>
+      </div>
+      <div>
+        <span>Pendiente de pago</span>
+        <strong>{{ r.pendiente | currency: 'EUR' }}</strong>
+      </div>
+    </div>
+    <p class="recurrentes__proximo">{{ proximoCobro() }}</p>
+    } @else {
+    <p class="recurrentes__vacio">Apunta suscripciones, alquiler o cuotas y se registrarán solos cada periodo.</p>
+    }
+  </section>
+  } @if (lista.cargandoInicial()) {
+  <app-empty-state>
+    <ion-spinner name="crescent"></ion-spinner>
+  </app-empty-state>
+  } @else if (lista.errorCarga()) {
+  <app-empty-state icono="cloud-offline-outline" titulo="No se han podido cargar los movimientos">
+    <ion-button fill="outline" (click)="recargar()">Reintentar</ion-button>
+  </app-empty-state>
+  } @else if (lista.elementos().length === 0) {
+  <app-empty-state [icono]="vacio().icono" [titulo]="vacio().titulo" [mensaje]="vacio().mensaje">
+    @if (hayFiltros()) {
+    <ion-button fill="outline" (click)="quitarFiltros()">Quitar filtros</ion-button>
+    }
+  </app-empty-state>
+  } @else {
+  <div class="finanzas__resumen ion-padding-horizontal">
+    <ion-text color="medium">
+      {{ lista.totalElementos() }} {{ lista.totalElementos() === 1 ? 'movimiento' : 'movimientos' }} @if (hayFiltros())
+      { · {{ resumenFiltros() }} }
+    </ion-text>
+    @if (hayFiltros()) {
+    <ion-button fill="clear" size="small" (click)="quitarFiltros()">Quitar filtros</ion-button>
+    }
+  </div>
+  <ion-list>
+    @for (movimiento of lista.elementos(); track clave(movimiento)) {
+    <app-movement-card [movimiento]="movimiento"></app-movement-card>
+    }
+  </ion-list>
+  <ion-infinite-scroll [disabled]="!lista.hayMas()" (ionInfinite)="cargarMas($event)">
+    <ion-infinite-scroll-content loadingText="Cargando más movimientos…"></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+  }
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button (click)="eligiendoTipo.set(true)" aria-label="Nuevo movimiento">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>
+
+<!-- Elección del "+": ventana pequeña centrada en la pantalla -->
+<ion-modal class="modal-centrado" [isOpen]="eligiendoTipo()" (didDismiss)="eligiendoTipo.set(false)">
+  <ng-template>
+    <div class="eleccion">
+      <h2>¿Qué quieres registrar?</h2>
+      <div class="eleccion__opciones">
+        <button type="button" class="eleccion__opcion" (click)="elegir('gasto')">
+          <ion-icon name="trending-down-outline" color="danger" aria-hidden="true"></ion-icon>
+          <span>Gasto</span>
+        </button>
+        <button type="button" class="eleccion__opcion" (click)="elegir('ingreso')">
+          <ion-icon name="trending-up-outline" color="success" aria-hidden="true"></ion-icon>
+          <span>Ingreso</span>
+        </button>
+      </div>
+      <ion-button fill="clear" color="medium" expand="block" (click)="eligiendoTipo.set(false)">Cancelar</ion-button>
+    </div>
+  </ng-template>
+</ion-modal>
+
+<!-- Filtros: misma ventana centrada que el "+"; se aplican al pulsar Aplicar -->
+<ion-modal class="modal-centrado" [isOpen]="filtrando()" (didDismiss)="filtrando.set(false)">
+  <ng-template>
+    <div class="filtros">
+      <h2>Filtrar movimientos</h2>
+
+      <p class="filtros__etiqueta">Tipo</p>
+      <ion-segment [value]="borradorTipo()" (ionChange)="cambiarBorradorTipo($event)">
+        <ion-segment-button value="todos">
+          <ion-label>Todos</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="gasto">
+          <ion-label>Gastos</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="ingreso">
+          <ion-label>Ingresos</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+
+      <ion-select
+        [value]="borradorCategoria()"
+        (ionChange)="cambiarBorradorCategoria($event)"
+        label="Categoría"
+        labelPlacement="floating"
+        fill="outline"
+        interface="popover"
+      >
+        <ion-select-option value="">Todas</ion-select-option>
+        @for (opcion of opcionesCategoria(); track opcion.valor) {
+        <ion-select-option [value]="opcion.valor">{{ opcion.etiqueta }}</ion-select-option>
+        }
+      </ion-select>
+
+      <div class="filtros__acciones">
+        <ion-button fill="clear" color="medium" (click)="quitarFiltros()">Quitar filtros</ion-button>
+        <ion-button (click)="aplicarFiltros()">Aplicar</ion-button>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>

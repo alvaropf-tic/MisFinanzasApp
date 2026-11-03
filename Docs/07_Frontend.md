@@ -485,7 +485,8 @@ La referencia completa está en `08_API_REST.md`. Lo que más afecta al frontend
 - **Errores**: siempre `{ timestamp, status, error, mensaje, path }`. El campo `mensaje` está en español y se puede mostrar directamente al usuario.
 - **Listados paginados** (`/api/gastos`, `/api/ingresos`): la lista viene en `contenido`, junto con `pagina`, `tamanio`, `totalElementos` y `totalPaginas`. Útil para el scroll infinito.
 - **Imágenes de tickets**: se suben con `FormData` (campo `imagen`, máximo 5 MB, JPG/PNG/WEBP). Para mostrarlas hay que pedirlas con el token y convertirlas en blob; un `<img src>` directo daría 401.
-- **Gastos de vehículos**: los gastos con `origen` distinto de `MANUAL` y `TICKET` no se pueden editar desde Finanzas; la interfaz debe llevar al registro del vehículo.
+- **Gastos de vehículos**: los gastos con `origen` de vehículo (REPOSTAJE, ACEITE, NEUMATICO, MANTENIMIENTO, ITV) no se pueden editar desde Finanzas; la interfaz debe llevar al registro del vehículo. Los de `TICKET` y `RECURRENTE` sí se editan.
+- **Pagos recurrentes**: se crean y resumen en una sección arriba de Finanzas y se administran en `/recurrentes`. Sus gastos llevan un icono de bucle junto al importe.
 - **Nombre de usuario**: no se puede cambiar en el perfil.
 
 ---

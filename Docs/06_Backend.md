@@ -252,6 +252,8 @@ Formato de todas las respuestas de error:
 
 Genera un Gasto por cada fecha pendiente (`proximaFecha <= hoy`), avanza la próxima fecha respetando el día de inicio y desactiva el recurrente al superar su `fechaFin`. Nunca duplica gastos.
 
+`GastoRecurrenteService` usa el mismo proceso (`generarGastosPendientes`) al crear o editar un recurrente, para que un cobro de hoy se apunte al momento. Cada gasto generado se enlaza al recurrente (origen RECURRENTE). El cálculo de lo pendiente del mes (`calcularPendienteDelMes`) lo comparten la previsión del presupuesto y el resumen de recurrentes.
+
 ---
 
 # 11. Almacenamiento de archivos

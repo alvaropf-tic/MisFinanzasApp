@@ -1,0 +1,304 @@
+/*
+ * Hojas de alta y edición (formularios que suben desde abajo): estilo común aprobado.
+ * Referencia de uso: pages/movimiento-form. Estructura:
+ *   ion-content > .hoja > .hoja__cabecera (.hoja__insignia, h1, .hoja__cerrar)
+ *                       > label.hoja__importe (.hoja__signo, input, .hoja__moneda)
+ *                       > section.hoja__seccion (h2 + contenido)
+ *   ion-footer.hoja__pie > ion-button
+ * Dentro de .hoja también: .chips/.chip (selección con toque), .metodos/.metodo (tarjetas con icono)
+ * y .detalles/.detalles__fila (filas con icono agrupadas en una tarjeta).
+ * El componente define en su :host el color de acento: --acento, --acento-rgb y --acento-contraste.
+ */
+
+.hoja {
+  --superficie: var(--ion-color-step-50, rgba(127, 127, 127, 0.08));
+  --borde: var(--ion-color-step-150, rgba(127, 127, 127, 0.25));
+
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 8px var(--mf-espacio) var(--mf-espacio);
+}
+
+// ---------- Cabecera ----------
+
+.hoja__cabecera {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0 4px;
+
+  h1 {
+    flex: 1;
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+}
+
+.hoja__insignia {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(var(--acento-rgb), 0.15);
+  color: var(--acento);
+  font-size: 22px;
+}
+
+.hoja__cerrar {
+  margin: 0;
+  --padding-start: 6px;
+  --padding-end: 6px;
+}
+
+// ---------- Importe ----------
+
+.hoja__importe {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  margin: 20px 0 4px;
+  padding: 16px 12px;
+  border-radius: 20px;
+  background: rgba(var(--acento-rgb), 0.08);
+  color: var(--acento);
+  cursor: text;
+  transition: box-shadow 0.15s ease;
+
+  &:focus-within {
+    box-shadow: 0 0 0 2px rgba(var(--acento-rgb), 0.5);
+  }
+
+  input {
+    // El campo crece con lo escrito para que el signo y el € queden pegados al número
+    field-sizing: content;
+    min-width: 3ch;
+    max-width: 100%;
+    flex: 0 1 auto;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 2.75rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    text-align: center;
+    // Sin flechas de número del navegador
+    -moz-appearance: textfield;
+    appearance: textfield;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    &::placeholder {
+      color: rgba(var(--acento-rgb), 0.4);
+    }
+  }
+}
+
+.hoja__importe--error {
+  box-shadow: 0 0 0 2px var(--ion-color-danger);
+}
+
+.hoja__signo,
+.hoja__moneda {
+  font-size: 1.75rem;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+// ---------- Secciones ----------
+
+.hoja__seccion {
+  margin-top: 24px;
+
+  h2 {
+    margin: 0 0 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--ion-color-medium);
+  }
+}
+
+.hoja__ayuda,
+.hoja__error {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+}
+
+.hoja__ayuda {
+  color: var(--ion-color-medium);
+}
+
+.hoja__error {
+  color: var(--ion-color-danger);
+}
+
+.hoja__error--centrado {
+  text-align: center;
+}
+
+// ---------- Botón de guardar ----------
+
+.hoja__pie {
+  padding: 12px var(--mf-espacio) calc(12px + var(--ion-safe-area-bottom, 0px));
+  background: var(--ion-background-color);
+  box-shadow: none;
+
+  ion-button {
+    max-width: 560px;
+    margin: 0 auto;
+    min-height: 52px;
+    --border-radius: 16px;
+    --box-shadow: 0 6px 16px rgba(var(--acento-rgb), 0.3);
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+}
+
+// ---------- Piezas de formulario: chips, tarjetas de opción y tarjeta de detalles ----------
+// Anidadas en .hoja para no chocar con otras clases globales.
+
+.hoja {
+  // Botones propios (chips y métodos): sin el estilo nativo del navegador
+  button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+
+    &:focus-visible {
+      outline: 2px solid var(--acento);
+      outline-offset: 2px;
+    }
+  }
+
+  // ---------- Categorías ----------
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 14px;
+    border: 1px solid var(--borde);
+    border-radius: 999px;
+    background: var(--superficie);
+    font-size: 0.9rem;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .chip--activo {
+    border-color: var(--acento);
+    background: var(--acento);
+    color: var(--acento-contraste);
+    font-weight: 600;
+  }
+
+  .chip--nueva {
+    border-style: dashed;
+    background: transparent;
+    color: var(--ion-color-medium);
+
+    ion-icon {
+      font-size: 1.1em;
+    }
+  }
+
+  // ---------- Método ----------
+
+  .metodos {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .metodo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 6px;
+    border: 1.5px solid var(--borde);
+    border-radius: 16px;
+    background: var(--superficie);
+    font-size: 0.85rem;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease;
+
+    ion-icon {
+      font-size: 24px;
+      color: var(--ion-color-medium);
+    }
+  }
+
+  .metodo--activo {
+    border-color: var(--acento);
+    background: rgba(var(--acento-rgb), 0.12);
+    font-weight: 600;
+
+    ion-icon {
+      color: var(--acento);
+    }
+  }
+
+  // ---------- Detalles (fecha y descripción) ----------
+
+  .detalles {
+    border: 1px solid var(--borde);
+    border-radius: 16px;
+    background: var(--superficie);
+    overflow: hidden;
+  }
+
+  .detalles__fila {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 0 14px;
+
+    & + & {
+      border-top: 1px solid var(--borde);
+    }
+
+    > ion-icon {
+      flex-shrink: 0;
+      font-size: 20px;
+      color: var(--ion-color-medium);
+    }
+
+    ion-input {
+      --padding-start: 0;
+      --padding-end: 0;
+      min-height: 52px;
+    }
+  }
+
+  .detalles__etiqueta {
+    flex: 1;
+  }
+}

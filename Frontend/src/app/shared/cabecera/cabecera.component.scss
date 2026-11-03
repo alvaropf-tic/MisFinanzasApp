@@ -1,0 +1,18 @@
+.cabecera__logo {
+  font-size: 26px;
+  margin-inline-start: var(--mf-espacio);
+}
+
+.cabecera__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--ion-color-primary-contrast);
+  color: var(--ion-color-primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}

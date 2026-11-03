@@ -191,7 +191,7 @@ Igual que las de gasto, en `/api/categorias-ingreso`. Al borrar, 409 si tiene in
 | GET | `/api/gastos` | — | 200 página de Gasto |
 | POST | `/api/gastos` | GastoRegistro | 201 Gasto · 404 categoría |
 | GET | `/api/gastos/{id}` | — | 200 Gasto |
-| PUT | `/api/gastos/{id}` | GastoRegistro | 200 · 409 si lo gestiona un vehículo |
+| PUT | `/api/gastos/{id}` | GastoRegistro | 200 · 409 si lo gestiona un vehículo (los de ticket y recurrente sí se editan) |
 | DELETE | `/api/gastos/{id}` | — | 204 · 409 si lo gestiona un vehículo |
 
 Filtros de `GET /api/gastos`: `desde`, `hasta`, `categoriaId`, `metodoPago`, `texto`, `page`, `size`.
@@ -209,7 +209,7 @@ GET /api/gastos?desde=2026-11-01&hasta=2026-11-30&categoriaId=1&metodoPago=TARJE
   "categoriaId": 1, "categoriaNombre": "Comida", "origen": "MANUAL" }
 ```
 
-`metodoPago`: EFECTIVO, TARJETA o BIZUM. `origen`: MANUAL, REPOSTAJE, ACEITE, NEUMATICO, MANTENIMIENTO, ITV o TICKET.
+`metodoPago`: EFECTIVO, TARJETA o BIZUM. `origen`: MANUAL, REPOSTAJE, ACEITE, NEUMATICO, MANTENIMIENTO, ITV, TICKET o RECURRENTE (generado por un gasto recurrente).
 
 ---
 
@@ -266,6 +266,7 @@ Filtros: `desde`, `hasta`, `categoriaIngresoId`, `metodoIngreso`, `texto`, `page
 | Método | Ruta | Cuerpo | Respuesta |
 |---|---|---|---|
 | GET | `/api/gastos-recurrentes` | — | 200 lista |
+| GET | `/api/gastos-recurrentes/resumen/{anio}/{mes}` | — | 200 resumen del mes · 400 mes/año fuera de rango |
 | POST | `/api/gastos-recurrentes` | RecurrenteRegistro | 201 · 400 fechas incoherentes |
 | GET | `/api/gastos-recurrentes/{id}` | — | 200 |
 | PUT | `/api/gastos-recurrentes/{id}` | RecurrenteRegistro | 200 |
@@ -279,6 +280,19 @@ Filtros: `desde`, `hasta`, `categoriaIngresoId`, `metodoIngreso`, `texto`, `page
 ```
 
 La respuesta añade `id`, `activo` y `categoriaNombre`. `periodicidad`: SEMANAL, MENSUAL, TRIMESTRAL, SEMESTRAL o ANUAL.
+
+- Al crear o editar, si `proximaFecha` es hoy o anterior, los gastos pendientes se generan **al momento** (no esperan a medianoche).
+- Cada gasto generado queda enlazado al recurrente y llega con `origen` RECURRENTE.
+- Al reactivar (PATCH estado) no se cobran los periodos pausados: `proximaFecha` salta a la siguiente desde hoy.
+- Al borrar, los gastos ya generados se conservan sin el enlace (pasan a MANUAL).
+
+```json
+// Resumen de recurrentes del mes
+{ "activos": 2, "cobrado": 9.99, "pendiente": 900.00, "total": 909.99,
+  "proximoDescripcion": "Alquiler", "proximaFecha": "2026-11-20", "proximoImporte": 900.00 }
+```
+
+`cobrado`: gastos generados por recurrentes en el mes. `pendiente`: cobros que aún quedan (en el mes actual, desde mañana). `proximo*` son null si no hay activos.
 
 ---
 

@@ -31,34 +31,47 @@ public class GastoRecurrenteScheduler {
     @Transactional
     public void procesarGastosRecurrentes() {
 
-        LocalDate hoy = LocalDate.now();
-
         List<GastoRecurrente> recurrentes = gastoRecurrenteRepository.findAll().stream().filter(GastoRecurrente::isActivo).toList();
 
         for (GastoRecurrente recurrente : recurrentes) {
 
-            while (!recurrente.getProximaFecha().isAfter(hoy)) {
+            generarGastosPendientes(recurrente);
+        }
+    }
 
-                // Si existe una fecha de finalización y ya la hemos superado
-                if (recurrente.getFechaFin() != null && recurrente.getProximaFecha().isAfter(recurrente.getFechaFin())) {
+    // Genera los gastos de un recurrente cuya fecha ya ha llegado (proximaFecha <= hoy) y avanza proximaFecha.
+    // También lo usa GastoRecurrenteService al crear o editar, para que un cobro de hoy aparezca al momento
+    // en vez de esperar a la medianoche.
+    @Transactional
+    public void generarGastosPendientes(GastoRecurrente recurrente) {
 
-                    recurrente.setActivo(false);
-                    break;
-                }
+        if (!recurrente.isActivo()) {
+            return;
+        }
 
-                crearGasto(recurrente);
+        LocalDate hoy = LocalDate.now();
 
-                actualizarProximaFecha(recurrente);
-            }
+        while (!recurrente.getProximaFecha().isAfter(hoy)) {
 
-            // Si la siguiente fecha ya supera la fecha fin y el recurrente deja de estar activo.
+            // Si existe una fecha de finalización y ya la hemos superado
             if (recurrente.getFechaFin() != null && recurrente.getProximaFecha().isAfter(recurrente.getFechaFin())) {
 
                 recurrente.setActivo(false);
+                break;
             }
 
-            gastoRecurrenteRepository.save(recurrente);
+            crearGasto(recurrente);
+
+            actualizarProximaFecha(recurrente);
         }
+
+        // Si la siguiente fecha ya supera la fecha fin y el recurrente deja de estar activo.
+        if (recurrente.getFechaFin() != null && recurrente.getProximaFecha().isAfter(recurrente.getFechaFin())) {
+
+            recurrente.setActivo(false);
+        }
+
+        gastoRecurrenteRepository.save(recurrente);
     }
 
     private void crearGasto(GastoRecurrente recurrente) {
@@ -71,6 +84,7 @@ public class GastoRecurrenteScheduler {
         gasto.setMetodoPago(recurrente.getMetodoPago());
         gasto.setCategoria(recurrente.getCategoria());
         gasto.setUsuario(recurrente.getUsuario());
+        gasto.setGastoRecurrente(recurrente);
 
         gastoRepository.save(gasto);
     }
