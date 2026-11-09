@@ -1,0 +1,31 @@
+.legal {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: var(--mf-espacio) var(--mf-espacio) 40px;
+  line-height: 1.55;
+
+  h2 {
+    margin: 24px 0 8px;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  p,
+  li {
+    font-size: 0.95rem;
+  }
+
+  ul {
+    padding-inline-start: 20px;
+  }
+
+  li + li {
+    margin-top: 6px;
+  }
+}
+
+.legal__fecha {
+  margin: 0;
+  font-size: 0.8rem !important;
+  color: var(--ion-color-medium);
+}

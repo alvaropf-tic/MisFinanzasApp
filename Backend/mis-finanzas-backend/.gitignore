@@ -34,3 +34,6 @@ build/
 
 ### Datos locales (base de datos H2 e imágenes de tickets) ###
 data/
+
+### Claves locales (Groq...) ###
+secretos.properties

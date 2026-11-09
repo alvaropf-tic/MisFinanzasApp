@@ -1,5 +1,6 @@
 package com.misfinanzas.backend.ingreso.model;
 
+import com.misfinanzas.backend.ingresoRecurrente.model.IngresoRecurrente;
 import com.misfinanzas.backend.usuario.model.Usuario;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -42,4 +43,9 @@ public class Ingreso {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "categoria_ingreso_id", nullable = false)
     private CategoriaIngreso categoriaIngreso;
+
+    // Recurrente que generó este ingreso (nómina...). Al borrar el recurrente se pone a null y el ingreso se conserva.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ingreso_recurrente_id")
+    private IngresoRecurrente ingresoRecurrente;
 }

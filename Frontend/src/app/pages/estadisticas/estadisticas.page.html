@@ -1,0 +1,90 @@
+<app-cabecera-pantalla titulo="Estadísticas"></app-cabecera-pantalla>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refrescar($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  @if (cargandoInicial()) {
+  <app-empty-state>
+    <ion-spinner name="crescent"></ion-spinner>
+  </app-empty-state>
+  } @else if (errorCarga()) {
+  <app-empty-state icono="cloud-offline-outline" titulo="No se han podido cargar las estadísticas">
+    <ion-button fill="outline" (click)="cargar()">Reintentar</ion-button>
+  </app-empty-state>
+  } @else {
+  <div class="estadisticas" [class.estadisticas--cargando]="cargando()">
+    <!-- Selector de mes -->
+    <div class="mes">
+      <ion-button fill="clear" (click)="cambiarMes(-1)" aria-label="Mes anterior">
+        <ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon>
+      </ion-button>
+      <h2>{{ nombreMes() }}</h2>
+      <ion-button fill="clear" [disabled]="esMesActual()" (click)="cambiarMes(1)" aria-label="Mes siguiente">
+        <ion-icon slot="icon-only" name="chevron-forward-outline"></ion-icon>
+      </ion-button>
+    </div>
+
+    <!-- La cifra principal: lo gastado en el mes -->
+    @if (resumen(); as r) {
+    <section class="principal">
+      <span>Gastado en {{ nombreMesCorto() }}</span>
+      <strong>{{ r.gastos | currency }}</strong>
+      <p>
+        Ingresos {{ r.ingresos | currency }} · Saldo
+        <span [class.principal__negativo]="r.saldo < 0">{{ r.saldo | currency }}</span>
+      </p>
+    </section>
+    }
+
+    <section class="tarjeta">
+      <header class="tarjeta__cabecera">
+        <h3>Últimos 12 meses</h3>
+        @if (mediaMensual(); as media) {
+        <span>Media {{ media | currency: undefined : 'symbol' : '1.0-0' }}</span>
+        }
+      </header>
+      <app-columnas-meses
+        [meses]="evolucion()"
+        [seleccionado]="claveSeleccionada()"
+        (elegir)="elegirMes($event)"
+      ></app-columnas-meses>
+      <p class="tarjeta__nota">Toca un mes para ver sus estadísticas.</p>
+    </section>
+
+    <section class="tarjeta">
+      <header class="tarjeta__cabecera">
+        <h3>Gastos por categoría</h3>
+      </header>
+      @if (gastosCategoria().length > 0) {
+      <app-barras-ranking [partes]="gastosCategoria()" titulo="Gastos por categoría"></app-barras-ranking>
+      } @else {
+      <p class="tarjeta__vacio">Sin gastos en {{ nombreMesCorto() }}.</p>
+      }
+    </section>
+
+    <section class="tarjeta">
+      <header class="tarjeta__cabecera">
+        <h3>Gastos por método de pago</h3>
+      </header>
+      @if (gastosMetodo().length > 0) {
+      <app-barras-ranking [partes]="gastosMetodo()" titulo="Gastos por método de pago"></app-barras-ranking>
+      } @else {
+      <p class="tarjeta__vacio">Sin gastos en {{ nombreMesCorto() }}.</p>
+      }
+    </section>
+
+    <section class="tarjeta">
+      <header class="tarjeta__cabecera">
+        <h3>Ingresos por categoría</h3>
+      </header>
+      @if (ingresosPorCategoria().length > 0) {
+      <app-barras-ranking [partes]="ingresosPorCategoria()" titulo="Ingresos por categoría"></app-barras-ranking>
+      } @else {
+      <p class="tarjeta__vacio">Sin ingresos en {{ nombreMesCorto() }}.</p>
+      }
+    </section>
+  </div>
+  }
+</ion-content>

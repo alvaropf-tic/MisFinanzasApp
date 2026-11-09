@@ -24,4 +24,5 @@ public class VehiculoResponseDTO {
     private Integer anio;
 
     private boolean activo;
+    private Integer kilometrosIniciales;
 }

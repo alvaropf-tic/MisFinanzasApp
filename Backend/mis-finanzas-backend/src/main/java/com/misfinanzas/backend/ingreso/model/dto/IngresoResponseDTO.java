@@ -22,4 +22,7 @@ public class IngresoResponseDTO {
     private MetodoIngreso metodoIngreso;
     private Long categoriaIngresoId;
     private String categoriaIngresoNombre;
+
+    // true si lo generó un ingreso recurrente
+    private boolean recurrente;
 }

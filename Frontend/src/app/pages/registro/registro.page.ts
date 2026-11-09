@@ -1,35 +1,23 @@
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import {
-  IonBackButton,
-  IonButton,
-  IonButtons,
-  IonContent,
-  IonHeader,
-  IonInput,
-  IonInputPasswordToggle,
-  IonSpinner,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/angular';
+import { IonButton, IonCheckbox, IonContent, IonInput, IonInputPasswordToggle, IonSpinner } from '@ionic/angular';
 import { switchMap } from 'rxjs';
 
 import { AuthService } from '../../core/auth.service';
 import { AvisoService } from '../../core/aviso.service';
 import { UsuarioService } from '../../services/usuario.service';
+import { CabeceraPantallaComponent } from '../../shared/cabecera-pantalla/cabecera-pantalla.component';
 
 @Component({
   selector: 'app-registro',
   templateUrl: 'registro.page.html',
+  styleUrls: ['registro.page.scss'],
   imports: [
+    CabeceraPantallaComponent,
     ReactiveFormsModule,
     RouterLink,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonButtons,
-    IonBackButton,
+    IonCheckbox,
     IonContent,
     IonInput,
     IonInputPasswordToggle,
@@ -52,7 +40,14 @@ export class RegistroPage {
     nombreUsuario: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(30)]],
     correo: ['', [Validators.required, Validators.email, Validators.maxLength(150)]],
     password: ['', [Validators.required, Validators.minLength(8)]],
+    // Sin aceptarlo no se puede crear la cuenta (el backend también lo exige)
+    aceptaTerminos: [false, Validators.requiredTrue],
   });
+
+  terminosSinAceptar(): boolean {
+    const control = this.formulario.controls.aceptaTerminos;
+    return control.invalid && control.touched;
+  }
 
   registrar(): void {
     if (this.formulario.invalid) {
@@ -66,6 +61,7 @@ export class RegistroPage {
       nombreUsuario: valores.nombreUsuario.trim(),
       correo: valores.correo.trim(),
       password: valores.password,
+      aceptaTerminos: valores.aceptaTerminos,
     };
     this.enviando.set(true);
     // Tras crear la cuenta se inicia sesión directamente (y se recuerda en el dispositivo)

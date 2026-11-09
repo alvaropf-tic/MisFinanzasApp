@@ -1,0 +1,26 @@
+// Registros del vehículo: acento principal de la app (estilo común en theme/hojas.scss)
+:host {
+  --acento: var(--ion-color-primary);
+  --acento-rgb: var(--ion-color-primary-rgb);
+  --acento-contraste: var(--ion-color-primary-contrast);
+}
+
+// Km a la derecha de la fila, con su unidad
+.registro__numero {
+  flex: 0 0 110px;
+  text-align: end;
+  --padding-end: 4px;
+}
+
+.registro__unidad {
+  flex-shrink: 0;
+  min-width: 24px;
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+}
+
+.registro__eliminar {
+  margin-top: 24px;
+  text-transform: none;
+  letter-spacing: normal;
+}

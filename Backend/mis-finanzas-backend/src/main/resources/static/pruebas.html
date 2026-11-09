@@ -472,17 +472,17 @@ async function suite() {
     // ---------------------------------------------------------------
 
     await prueba("Registrar usuario 1", "POST", "/api/usuarios",
-        { body: { nombre: "Prueba", apellidos: "Uno", nombreUsuario: U1, correo: U1 + "@pruebas.test", password: PASS } }, 201,
+        { body: { nombre: "Prueba", apellidos: "Uno", nombreUsuario: U1, correo: U1 + "@pruebas.test", password: PASS, aceptaTerminos: true } }, 201,
         d => cumple(d.nombreUsuario === U1 && !("password" in d), "La respuesta no debe incluir la contraseña"));
 
     await prueba("Registrar el mismo usuario otra vez", "POST", "/api/usuarios",
-        { body: { nombre: "Prueba", apellidos: "Uno", nombreUsuario: U1, correo: "otro_" + U1 + "@pruebas.test", password: PASS } }, 409);
+        { body: { nombre: "Prueba", apellidos: "Uno", nombreUsuario: U1, correo: "otro_" + U1 + "@pruebas.test", password: PASS, aceptaTerminos: true } }, 409);
 
     await prueba("Registrar con datos inválidos", "POST", "/api/usuarios",
         { body: { nombre: "", apellidos: "x", nombreUsuario: "ab", correo: "no-es-correo", password: "123" } }, 400);
 
     await prueba("Registrar usuario 2", "POST", "/api/usuarios",
-        { body: { nombre: "Prueba", apellidos: "Dos", nombreUsuario: U2, correo: U2 + "@pruebas.test", password: PASS } }, 201);
+        { body: { nombre: "Prueba", apellidos: "Dos", nombreUsuario: U2, correo: U2 + "@pruebas.test", password: PASS, aceptaTerminos: true } }, 201);
 
     await prueba("Login con contraseña incorrecta", "POST", "/api/auth/login",
         { body: { nombreUsuario: U1, password: "incorrecta" } }, 401);

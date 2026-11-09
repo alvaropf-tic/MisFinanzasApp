@@ -281,7 +281,8 @@
     min-height: 52px;
     padding: 0 14px;
 
-    & + & {
+    // Separador entre filas (no "& + &": anidado en .hoja saldría ".hoja .fila + .hoja .fila")
+    & + .detalles__fila {
       border-top: 1px solid var(--borde);
     }
 
@@ -300,5 +301,62 @@
 
   .detalles__etiqueta {
     flex: 1;
+  }
+}
+
+// ---------- Modal centrado: elecciones rápidas (el "+" de Finanzas, elegir vehículo…) ----------
+
+// Tamaño ajustado al contenido en vez de pantalla completa
+ion-modal.modal-centrado {
+  --width: min(340px, calc(100% - 32px));
+  --height: auto;
+  --border-radius: var(--mf-radio);
+
+  .ion-page {
+    position: relative;
+    display: block;
+    contain: content;
+  }
+}
+
+.eleccion {
+  padding: 20px var(--mf-espacio) 8px;
+  text-align: center;
+
+  h2 {
+    margin: 0 0 16px;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+}
+
+.eleccion__opciones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.eleccion__opcion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 8px;
+  border: 1px solid var(--ion-color-step-200, rgba(127, 127, 127, 0.3));
+  border-radius: var(--mf-radio);
+  background: transparent;
+  color: var(--ion-text-color);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  ion-icon {
+    font-size: 36px;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background: var(--ion-color-step-50, rgba(127, 127, 127, 0.08));
   }
 }

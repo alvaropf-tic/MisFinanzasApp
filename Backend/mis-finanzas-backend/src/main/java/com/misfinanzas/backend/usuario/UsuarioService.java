@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class UsuarioService {
 
+    // Cambiarla al modificar los textos de términos o privacidad (Frontend: pages/legal)
+    public static final String VERSION_TERMINOS = "2026-11";
+
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -41,6 +44,10 @@ public class UsuarioService {
         usuario.setPassword(passwordEncoder.encode(registroDTO.getPassword()));
 
         usuario.setRol(Rol.USER);
+
+        // Solo llega aquí si aceptó (@AssertTrue en el DTO): se guarda cuándo y qué versión
+        usuario.setTerminosAceptadosEn(java.time.LocalDateTime.now());
+        usuario.setVersionTerminos(VERSION_TERMINOS);
 
         Usuario usuarioGuardado = usuarioRepository.save(usuario);
 

@@ -13,14 +13,14 @@ import {
   NavController,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { logOutOutline, personCircleOutline, walletOutline } from 'ionicons/icons';
+import { logOutOutline, personCircleOutline, settingsOutline, statsChartOutline, walletOutline } from 'ionicons/icons';
 
 import { AuthService } from '../../core/auth.service';
 import { UsuarioService } from '../../services/usuario.service';
 import { iniciales } from '../iniciales';
 
 /**
- * Cabecera de las pestañas: logo, título y avatar con el menú de usuario (Perfil y Cerrar sesión).
+ * Cabecera de las pestañas: logo, título centrado (en Inicio, el nombre de la app) y avatar con el menú de usuario (Estadísticas, Perfil y Cerrar sesión).
  * Los botones marcados con `cabeceraAccion` se colocan a la izquierda del avatar.
  */
 @Component({
@@ -48,7 +48,7 @@ export class CabeceraComponent implements OnInit {
   readonly iniciales = computed(() => iniciales(this.perfil(), this.auth.nombreUsuario()));
 
   constructor() {
-    addIcons({ walletOutline, personCircleOutline, logOutOutline });
+    addIcons({ walletOutline, personCircleOutline, settingsOutline, statsChartOutline, logOutOutline });
   }
 
   ngOnInit(): void {
@@ -63,9 +63,10 @@ export class CabeceraComponent implements OnInit {
     this.menuAbierto.set(true);
   }
 
-  async irAPerfil(): Promise<void> {
+  /** Opciones del menú que abren una pantalla (Estadísticas, Perfil). */
+  async irA(ruta: string): Promise<void> {
     await this.menu().dismiss();
-    await this.navController.navigateForward('/perfil');
+    await this.navController.navigateForward(ruta);
   }
 
   async cerrarSesion(): Promise<void> {

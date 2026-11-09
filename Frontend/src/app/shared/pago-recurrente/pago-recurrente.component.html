@@ -11,4 +11,4 @@
     }
   </span>
 </div>
-<span class="pago__importe">−{{ recurrente().importe | currency: 'EUR' }}</span>
+<span class="pago__importe">{{ recurrente().tipo === 'gasto' ? '−' : '+' }}{{ recurrente().importe | currency }}</span>

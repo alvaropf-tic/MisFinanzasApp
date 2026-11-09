@@ -1,0 +1,85 @@
+<app-cabecera-pantalla [titulo]="titulo()" volverA="/registro"></app-cabecera-pantalla>
+
+<ion-content>
+  <article class="legal">
+    <p class="legal__fecha">Última actualización: {{ actualizado }}</p>
+
+    @if (documento() === 'privacidad') {
+    <p>
+      Mis Finanzas es una app para llevar tus gastos, ingresos y vehículos. Esta política explica qué datos guarda, para
+      qué y qué puedes hacer con ellos, conforme al Reglamento General de Protección de Datos (RGPD).
+    </p>
+
+    <h2>Qué datos se guardan</h2>
+    <ul>
+      <li>
+        <strong>Cuenta:</strong> nombre, apellidos, nombre de usuario, correo y contraseña (cifrada, nunca en claro).
+      </li>
+      <li>
+        <strong>Lo que apuntas:</strong> gastos, ingresos, categorías, presupuestos, pagos y cobros recurrentes y los
+        datos de tus vehículos.
+      </li>
+      <li>
+        <strong>Fotos de tickets:</strong> las que escaneas se guardan con su gasto para que puedas verlas después.
+      </li>
+      <li><strong>En tu dispositivo:</strong> la sesión y tus preferencias (tema, color y moneda).</li>
+    </ul>
+
+    <h2>Para qué se usan</h2>
+    <p>
+      Solo para que la app funcione: mostrarte tus cuentas, calcular resúmenes y estadísticas y leer tus tickets. No se
+      venden ni se usan para publicidad.
+    </p>
+
+    <h2>Lectura de tickets con IA</h2>
+    <p>
+      Cuando escaneas un ticket, la foto se envía a <strong>Groq</strong>, un servicio externo de inteligencia
+      artificial, para leer el comercio, la fecha y el importe. Groq puede tratar los datos fuera de la Unión Europea.
+      Los tickets pueden contener datos personales (nombre, DNI, dirección, últimos números de la tarjeta): si no
+      quieres enviarlos, no uses el escáner o recorta la foto antes. Lo que se lee solo rellena el formulario: tú
+      decides si se guarda.
+    </p>
+
+    <h2>Cuánto tiempo se guardan</h2>
+    <p>Mientras tengas la cuenta. Al borrar un gasto con ticket se borra también su foto.</p>
+
+    <h2>Tus derechos</h2>
+    <p>
+      Puedes ver y corregir tus datos desde la app (Perfil) y pedir su copia, su borrado o que dejen de tratarse
+      escribiendo a <a href="mailto:alvaropf.tic2021@gmail.com">alvaropf.tic2021@gmail.com</a>. También puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es).
+    </p>
+
+    <h2>Seguridad</h2>
+    <p>
+      Las contraseñas se guardan cifradas, cada usuario solo ve sus propios datos y las peticiones a la API van con un
+      token de sesión.
+    </p>
+    } @else {
+    <p>Al crear una cuenta en Mis Finanzas aceptas estas condiciones.</p>
+
+    <h2>El servicio</h2>
+    <p>
+      Mis Finanzas te ayuda a llevar tus finanzas personales. Las cifras, resúmenes, previsiones y lecturas de tickets
+      son orientativas: no son asesoramiento financiero, fiscal ni legal.
+    </p>
+
+    <h2>Tu cuenta</h2>
+    <ul>
+      <li>Eres responsable de lo que apuntas y de guardar tu contraseña.</li>
+      <li>La cuenta es personal: no la uses para datos de otras personas sin su permiso.</li>
+    </ul>
+
+    <h2>Lectura de tickets con IA</h2>
+    <p>
+      El escáner usa un servicio de IA externo (Groq) y puede equivocarse: revisa siempre los datos antes de guardar. Al
+      usarlo aceptas que la foto se envíe a ese servicio, como explica la política de privacidad.
+    </p>
+
+    <h2>Uso correcto</h2>
+    <p>No intentes acceder a datos de otros usuarios, saturar el servicio ni usarlo para fines ilegales.</p>
+
+    <h2>Cambios</h2>
+    <p>Si estas condiciones cambian, la app te avisará. Seguir usándola supone aceptar la nueva versión.</p>
+    }
+  </article>
+</ion-content>

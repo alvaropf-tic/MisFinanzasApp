@@ -1,0 +1,11 @@
+<ion-header [class.ion-no-border]="sinBorde()">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="volverA()" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title class="cabecera__titulo">{{ titulo() }}</ion-title>
+    <ion-buttons slot="end">
+      <ng-content select="[cabeceraAccion]"></ng-content>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>

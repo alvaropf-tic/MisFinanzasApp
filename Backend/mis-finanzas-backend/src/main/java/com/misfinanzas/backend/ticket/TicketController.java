@@ -1,6 +1,9 @@
 package com.misfinanzas.backend.ticket;
 
 import com.misfinanzas.backend.gasto.model.dto.GastoResponseDTO;
+import com.misfinanzas.backend.ia.LectorTicketsService;
+import com.misfinanzas.backend.ia.model.dto.LecturaTicketDTO;
+import com.misfinanzas.backend.ticket.model.dto.GastoConTicketDTO;
 import com.misfinanzas.backend.ticket.model.dto.TicketConversionDTO;
 import com.misfinanzas.backend.ticket.model.dto.TicketImagenDTO;
 import com.misfinanzas.backend.ticket.model.dto.TicketRegistroDTO;
@@ -21,9 +24,30 @@ import java.util.List;
 public class TicketController {
 
     private final TicketService ticketService;
+    private final LectorTicketsService lectorTicketsService;
 
-    public TicketController(TicketService ticketService) {
+    public TicketController(TicketService ticketService, LectorTicketsService lectorTicketsService) {
         this.ticketService = ticketService;
+        this.lectorTicketsService = lectorTicketsService;
+    }
+
+    // Lee la foto con la IA y devuelve los datos para rellenar el gasto (no guarda nada).
+    // multipart/form-data con el campo "imagen"
+    @PostMapping(value = "/leer", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<LecturaTicketDTO> leerTicket(@RequestParam("imagen") MultipartFile imagen, Authentication authentication) {
+
+        Usuario usuario = (Usuario) authentication.getPrincipal();
+
+        return ResponseEntity.ok(lectorTicketsService.leer(imagen, usuario));
+    }
+
+    // Guarda el gasto revisado con su ticket y la foto. multipart: "datos" (JSON) e "imagen"
+    @PostMapping(value = "/gasto", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<GastoResponseDTO> crearGastoConTicket(@Valid @RequestPart("datos") GastoConTicketDTO datos, @RequestPart("imagen") MultipartFile imagen, Authentication authentication) {
+
+        Usuario usuario = (Usuario) authentication.getPrincipal();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(ticketService.crearGastoConTicket(datos, imagen, usuario));
     }
 
     @PostMapping
@@ -32,6 +56,16 @@ public class TicketController {
         Usuario usuario = (Usuario) authentication.getPrincipal();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(ticketService.crearTicket(registroDTO, usuario));
+    }
+
+    // Guarda la foto del ticket dentro de un gasto ya creado (p. ej. el de un registro de vehículo escaneado).
+    // multipart: "imagen" y, opcional, "comercio"
+    @PostMapping(value = "/gasto/{gastoId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<GastoResponseDTO> adjuntarAGasto(@PathVariable Long gastoId, @RequestParam("imagen") MultipartFile imagen, @RequestParam(value = "comercio", required = false) String comercio, Authentication authentication) {
+
+        Usuario usuario = (Usuario) authentication.getPrincipal();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(ticketService.adjuntarAGasto(gastoId, comercio, imagen, usuario));
     }
 
     @GetMapping

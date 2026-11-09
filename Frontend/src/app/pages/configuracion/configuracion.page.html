@@ -1,0 +1,84 @@
+<app-cabecera-pantalla titulo="Configuración"></app-cabecera-pantalla>
+
+<ion-content>
+  <div class="configuracion">
+    <section class="tarjeta">
+      <h2>Tema</h2>
+      <div class="temas" role="radiogroup" aria-label="Tema">
+        @for (t of temas; track t.valor) {
+        <button
+          type="button"
+          class="tema"
+          role="radio"
+          [class.tema--activo]="apariencia.tema() === t.valor"
+          [attr.aria-checked]="apariencia.tema() === t.valor"
+          (click)="apariencia.cambiarTema(t.valor)"
+        >
+          <ion-icon [name]="t.icono" aria-hidden="true"></ion-icon>
+          <span>{{ t.nombre }}</span>
+        </button>
+        }
+      </div>
+      <p class="ayuda">Automático sigue el modo claro u oscuro del móvil.</p>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Color</h2>
+      <div class="colores" role="radiogroup" aria-label="Color de la app">
+        @for (a of acentos; track a.valor) {
+        <button
+          type="button"
+          class="color"
+          role="radio"
+          [class.color--activo]="apariencia.acento() === a.valor"
+          [attr.aria-checked]="apariencia.acento() === a.valor"
+          (click)="apariencia.cambiarAcento(a.valor)"
+        >
+          <span class="color__muestra" [style.background]="a.muestra">
+            @if (apariencia.acento() === a.valor) {
+            <ion-icon name="checkmark" aria-hidden="true"></ion-icon>
+            }
+          </span>
+          <span>{{ a.nombre }}</span>
+        </button>
+        }
+      </div>
+      <p class="ayuda">Se usa en la cabecera, los botones y los gráficos. Gastos e ingresos siguen en rojo y verde.</p>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Moneda</h2>
+      <ion-list lines="none" class="lista">
+        <ion-item>
+          <ion-icon slot="start" name="cash-outline" aria-hidden="true"></ion-icon>
+          <ion-select
+            label="Moneda"
+            interface="action-sheet"
+            cancelText="Cancelar"
+            [value]="moneda"
+            (ionChange)="elegirMoneda($event.detail.value)"
+          >
+            @for (m of monedas; track m.codigo) {
+            <ion-select-option [value]="m.codigo">{{ m.nombre }} ({{ m.simbolo }})</ion-select-option>
+            }
+          </ion-select>
+        </ion-item>
+      </ion-list>
+      <p class="ayuda">Solo cambia cómo se muestran los importes: no se convierte ninguna cantidad.</p>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Legal</h2>
+      <ion-list lines="none" class="lista">
+        <ion-item button routerLink="/privacidad">
+          <ion-icon slot="start" name="shield-checkmark-outline" aria-hidden="true"></ion-icon>
+          <ion-label>Política de privacidad</ion-label>
+        </ion-item>
+        <ion-item button routerLink="/terminos">
+          <ion-icon slot="start" name="document-text-outline" aria-hidden="true"></ion-icon>
+          <ion-label>Términos de uso</ion-label>
+        </ion-item>
+      </ion-list>
+    </section>
+  </div>
+</ion-content>

@@ -82,8 +82,8 @@ Las tareas de interfaz dependen del frontend, que todavía no se ha empezado.
 
 - ✅ Crear repositorio GitHub.
 - ✅ Crear documentación.
-- ⏳ Configurar Angular.
-- ⏳ Configurar Ionic.
+- ✅ Configurar Angular.
+- ✅ Configurar Ionic.
 - ✅ Crear proyecto Spring Boot.
 - ✅ Configurar la base de datos (H2 en lugar de SQLite).
 - ✅ Definir arquitectura.
@@ -95,9 +95,9 @@ Las tareas de interfaz dependen del frontend, que todavía no se ha empezado.
 
 - ✅ Login (JWT).
 - ✅ Registro.
-- ⏳ Recordarme (el token dura 24 h; falta guardarlo en la app).
+- ✅ Recordarme (la sesión se guarda en el dispositivo hasta que caduca el token, 24 h).
 - ⏳ Onboarding inicial.
-- ⏳ Configuración básica.
+- ✅ Configuración básica.
 - ✅ Gestión del perfil y cambio de contraseña.
 
 ---
@@ -123,7 +123,7 @@ Es el núcleo principal de la aplicación.
 - ✅ Presupuesto mensual.
 - 🟡 Barra de progreso (el backend da los porcentajes).
 - ✅ Gasto previsto (incluye los recurrentes pendientes del mes).
-- ⏳ Objetivos de ahorro.
+- ✅ Objetivos de ahorro: meta, fecha límite opcional (con lo que hay que apartar al mes), aportaciones y retiradas. Tarjeta en Inicio y pantallas de lista y detalle.
 - ✅ Evolución mensual.
 
 ---
@@ -131,7 +131,7 @@ Es el núcleo principal de la aplicación.
 ## Fase 5 — Recurrentes
 
 - ✅ Gastos recurrentes (se generan solos cada día y al arrancar).
-- ⏳ Ingresos recurrentes.
+- ✅ Ingresos recurrentes (nómina…): mismo funcionamiento que los gastos recurrentes.
 - ❌ Notificaciones (módulo eliminado; se replanteará con el calendario).
 - ❌ Configuración de avisos.
 
@@ -139,14 +139,11 @@ Es el núcleo principal de la aplicación.
 
 ## Fase 6 — Calendario
 
-- ⏳ Vista mensual.
+- ✅ Vista mensual (gastos, ingresos y pagos y cobros previstos de los recurrentes por día).
 - ⏳ Vista agenda.
-- ⏳ Eventos.
-- ⏳ Recordatorios.
-- ⏳ Suscripciones.
-- ⏳ Nómina.
-- ⏳ ITV.
-- ⏳ Seguros.
+- ✅ Recordatorios (una vez, cada mes o cada año): seguros, revisiones, eventos…
+- ✅ Suscripciones y nómina (pagos y cobros recurrentes previstos).
+- ✅ ITV: próxima ITV estimada de cada vehículo.
 
 ---
 
@@ -157,8 +154,9 @@ Es el núcleo principal de la aplicación.
 - ✅ Mantenimientos.
 - ✅ Cambios de aceite, neumáticos e ITV (no previstos al inicio).
 - ✅ Historial de cada tipo de registro.
-- 🟡 Estadísticas (consumo real y coste por kilómetro de cada repostaje).
-- 🟡 Coste por kilómetro (por repostaje; falta el total del vehículo).
+- ✅ Estadísticas de combustible (consumo real de lleno a lleno, consumo medio, precio medio del litro).
+- ✅ Coste por kilómetro (por repostaje y total del vehículo).
+- ✅ Km del vehículo calculados con el trip de cada repostaje.
 - ⏳ Registro mensual de kilómetros.
 - ⏳ Recordatorios de mantenimiento.
 - ⏳ Buscador de gasolineras.
@@ -169,26 +167,26 @@ Es el núcleo principal de la aplicación.
 
 ### Chat
 
-- ⏳ Chat financiero.
+- ✅ Chat financiero (Groq, `openai/gpt-oss-120b`, plan gratuito con cupo propio): responde con un resumen de los últimos tres meses, pagos y cobros fijos y objetivos.
 - ⏳ Memoria financiera.
 - ⏳ Consejos.
 
 ### OCR
 
-- 🟡 Escaneo de tickets (ya se suben con imagen y se convierten en gasto a mano; falta la lectura automática).
-- ⏳ Extracción automática.
-- ⏳ Clasificación.
+- ✅ Escaneo de tickets: desde la pestaña IA o el «+» de Finanzas, la IA (Groq, plan gratuito) lee la foto y rellena el gasto; el ticket con su foto queda dentro del gasto. Los de vehículo (ITV, repostaje, aceite, neumáticos, mantenimiento) se apuntan como registro del vehículo, que se reconoce por la matrícula.
+- ✅ Extracción automática (comercio, fecha, total, método de pago y categoría sugerida).
+- ✅ Clasificación (compra, repostaje, ITV, aceite, neumáticos o mantenimiento).
 
 ### Automatización
 
 - ⏳ Sugerencia de etiquetas.
-- ⏳ Sugerencia de categorías.
+- ✅ Sugerencia de categorías (al escanear un ticket).
 
 ---
 
 ## Fase 9 — Estadísticas
 
-- 🟡 Gráficas (datos por categoría, por método de pago y evolución).
+- ✅ Gráficas (gastos e ingresos por categoría, gastos por método de pago y evolución de 12 meses).
 - ⏳ Comparativas.
 - ✅ Evolución.
 - ✅ Resumen mensual (ingresos, gastos, presupuesto, previsión y saldo).
@@ -198,8 +196,9 @@ Es el núcleo principal de la aplicación.
 
 ## Fase 10 — Configuración
 
-- ⏳ Tema.
-- ⏳ Moneda.
+- ✅ Tema: claro, oscuro o automático, y color de acento (6 colores). Se guarda en el dispositivo.
+- ✅ Moneda: euro por defecto, se puede cambiar en Configuración (solo cambia cómo se muestran los importes).
+- ✅ Términos de uso y política de privacidad: casilla obligatoria al crear la cuenta (incluye el aviso de la IA de los tickets).
 - ⏳ API Key IA.
 - ⏳ Notificaciones.
 - ⏳ Gestión de tickets.
@@ -382,9 +381,8 @@ Toda nueva funcionalidad deberá actualizar la documentación correspondiente an
 
 - **Documentación**: terminada y actualizada a lo implementado (versión 1.1).
 - **Backend V0**: la mayor parte hecho y probado. Funcionan usuarios, gastos, ingresos, categorías, presupuestos, recurrentes, resumen, estadísticas, vehículos con sus cinco tipos de registro y tickets con imagen. Ha pasado una revisión completa de errores, seguridad y configuración.
-- **Frontend**: en desarrollo. Hechos el acceso (login y registro), la navegación por pestañas, Inicio (saldo, presupuesto, próximos pagos y últimos movimientos), Finanzas (gastos e ingresos con filtros), pagos recurrentes (sección en Finanzas y pantalla de administración) y el perfil.
-- **Pendiente del frontend**: objetivo de ahorro en Inicio (espera a que el backend tenga objetivos).
-- **Pendiente del backend**: configuración, etiquetas, objetivos, ingresos recurrentes, calendario, IA, copias de seguridad y Docker.
+- **Frontend**: en desarrollo. Hechos el acceso (login y registro), la navegación por pestañas, Inicio (saldo, presupuesto, próximos pagos y cobros y últimos movimientos), Finanzas (gastos e ingresos con filtros), pagos y cobros recurrentes (sección en Finanzas y pantalla de administración), Vehículos (lista, detalle con historial de todos los registros, repostajes, aceite, neumáticos, mantenimiento e ITV), Estadísticas, Calendario (vista mensual, recordatorios y próxima ITV), objetivos de ahorro, Configuración (tema, color, moneda y textos legales), la pestaña IA con el escáner de tickets (la IA rellena el gasto) y el chat sobre tus finanzas y el perfil (con edición de datos, cambio de contraseña y borrado de la cuenta).
+- **Pendiente del backend**: etiquetas, copias de seguridad y Docker.
 
 ---
 

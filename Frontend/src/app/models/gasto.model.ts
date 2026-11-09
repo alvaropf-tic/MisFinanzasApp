@@ -19,6 +19,11 @@ export interface Gasto {
   categoriaId: number;
   categoriaNombre: string;
   origen: OrigenGasto;
+  /** Ticket guardado con el gasto (su foto); null si no tiene. */
+  ticketId: number | null;
+  /** Gastos de vehículo: vehículo y registro (repostaje, ITV…) que lo crearon. */
+  vehiculoId: number | null;
+  registroId: number | null;
 }
 
 export interface GastoRegistro {

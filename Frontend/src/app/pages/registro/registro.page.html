@@ -1,11 +1,4 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/login" text=""></ion-back-button>
-    </ion-buttons>
-    <ion-title>Crear cuenta</ion-title>
-  </ion-toolbar>
-</ion-header>
+<app-cabecera-pantalla titulo="Crear cuenta" volverA="/login"></app-cabecera-pantalla>
 
 <ion-content class="ion-padding">
   <div class="pantalla-acceso">
@@ -65,6 +58,19 @@
       >
         <ion-input-password-toggle slot="end"></ion-input-password-toggle>
       </ion-input>
+
+      <!-- Obligatorio: la casilla va sin texto propio para que los enlaces no la marquen al tocarlos -->
+      <div class="aceptacion" [class.aceptacion--error]="terminosSinAceptar()">
+        <ion-checkbox formControlName="aceptaTerminos" aria-labelledby="texto-aceptacion"></ion-checkbox>
+        <p id="texto-aceptacion">
+          He leído y acepto los <a routerLink="/terminos">términos de uso</a> y la
+          <a routerLink="/privacidad">política de privacidad</a>. Entiendo que las fotos de tickets que escanee se
+          envían a un servicio de IA externo para leerlas.
+        </p>
+      </div>
+      @if (terminosSinAceptar()) {
+      <p class="aceptacion__error" role="alert">Para usar la app tienes que aceptar los términos y la privacidad.</p>
+      }
 
       <ion-button type="submit" expand="block" [disabled]="enviando()">
         @if (enviando()) {

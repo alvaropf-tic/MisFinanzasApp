@@ -1,7 +1,7 @@
 import { registerLocaleData } from '@angular/common';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import localeEs from '@angular/common/locales/es';
-import { LOCALE_ID, inject, provideAppInitializer } from '@angular/core';
+import { DEFAULT_CURRENCY_CODE, LOCALE_ID, inject, provideAppInitializer } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import {
   RouteReuseStrategy,
@@ -15,7 +15,9 @@ import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular';
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
 import { authInterceptor } from './app/core/auth.interceptor';
+import { AparienciaService } from './app/core/apariencia.service';
 import { AuthService } from './app/core/auth.service';
+import { monedaActual } from './app/core/moneda';
 
 registerLocaleData(localeEs);
 
@@ -23,10 +25,14 @@ bootstrapApplication(AppComponent, {
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     { provide: LOCALE_ID, useValue: 'es-ES' },
+    // Moneda elegida en Configuración (euro por defecto): la usa el CurrencyPipe sin código
+    { provide: DEFAULT_CURRENCY_CODE, useFactory: monedaActual },
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules), withComponentInputBinding()),
     provideHttpClient(withInterceptors([authInterceptor])),
     // La sesión guardada se recupera antes de la primera navegación para que los guards la vean
     provideAppInitializer(() => inject(AuthService).restaurar()),
+    // Tema y color elegidos en Configuración
+    provideAppInitializer(() => inject(AparienciaService).iniciar()),
   ],
 });

@@ -1,0 +1,114 @@
+.detalle {
+  --superficie: var(--ion-color-step-50, rgba(127, 127, 127, 0.08));
+  --borde: var(--ion-color-step-150, rgba(127, 127, 127, 0.25));
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--mf-espacio) var(--mf-espacio) 32px;
+}
+
+.tarjeta {
+  padding: 12px 16px;
+  border: 1px solid var(--borde);
+  border-radius: 20px;
+  background: var(--superficie);
+
+  h2 {
+    margin: 4px 0 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--ion-color-medium);
+  }
+}
+
+.detalle__falta {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
+
+  strong {
+    color: var(--ion-text-color);
+  }
+}
+
+.detalle__botones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+
+  ion-button {
+    margin: 0;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+}
+
+.detalle__vacio {
+  margin: 4px 0 8px;
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
+}
+
+.aportacion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+
+  & + .aportacion {
+    border-top: 1px solid var(--borde);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 2px;
+    border-radius: 12px;
+  }
+}
+
+.aportacion__texto {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+
+  strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    font-size: 0.8rem;
+    color: var(--ion-color-medium);
+  }
+}
+
+.aportacion__importe {
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--ion-color-success-shade);
+}
+
+.aportacion__importe--retirada {
+  color: var(--ion-color-danger);
+}
+
+.aportacion__borrar {
+  flex-shrink: 0;
+  font-size: 18px;
+  color: var(--ion-color-medium);
+}

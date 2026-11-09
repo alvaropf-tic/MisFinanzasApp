@@ -1,0 +1,88 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.objetivo__icono {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: rgba(var(--ion-color-primary-rgb), 0.12);
+  color: var(--ion-color-primary);
+  font-size: 20px;
+}
+
+.objetivo__cuerpo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.objetivo__fila {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+
+  strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.objetivo__fila--pie {
+  font-size: 0.78rem;
+  color: var(--ion-color-medium);
+
+  span:last-child {
+    text-align: end;
+  }
+}
+
+.objetivo__porcentaje {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ion-color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.objetivo__barra {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(127, 127, 127, 0.18);
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--ion-color-primary);
+    transition: width 0.3s ease;
+  }
+}
+
+// Conseguido: en verde
+:host(.completado) {
+  .objetivo__icono {
+    background: rgba(var(--ion-color-success-rgb), 0.15);
+    color: var(--ion-color-success-shade);
+  }
+
+  .objetivo__porcentaje {
+    color: var(--ion-color-success-shade);
+  }
+
+  .objetivo__barra span {
+    background: var(--ion-color-success);
+  }
+}

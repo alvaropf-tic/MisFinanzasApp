@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  // Cambiar por la IP o el dominio del servidor al desplegar
-  apiUrl: 'http://localhost:8090/api',
+  // En el homelab la web y la API van por el mismo Nginx: /api se reenvía al backend (sin CORS)
+  apiUrl: '/api',
 };

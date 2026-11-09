@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
+@EntityListeners(com.misfinanzas.backend.ticket.TicketArchivoListener.class)
 @Table(name = "tickets")
 @Getter
 @Setter

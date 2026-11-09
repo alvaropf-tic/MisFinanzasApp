@@ -1,0 +1,259 @@
+.detalle {
+  --superficie: var(--ion-color-step-50, rgba(127, 127, 127, 0.08));
+  --borde: var(--ion-color-step-150, rgba(127, 127, 127, 0.25));
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 640px;
+  margin: 0 auto;
+  // Hueco abajo para el botón flotante
+  padding: var(--mf-espacio) var(--mf-espacio) 96px;
+}
+
+.detalle__km {
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, var(--ion-color-primary), rgba(var(--ion-color-primary-rgb), 0.7));
+  color: var(--ion-color-primary-contrast);
+
+  span {
+    font-size: 0.85rem;
+    opacity: 0.85;
+  }
+
+  strong {
+    font-size: 2.1rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+}
+
+.detalle__inactivo {
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.detalle__cifras {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 14px;
+    border: 1px solid var(--borde);
+    border-radius: 16px;
+    background: var(--superficie);
+  }
+
+  span {
+    font-size: 0.75rem;
+    color: var(--ion-color-medium);
+  }
+
+  strong {
+    font-size: 1.25rem;
+  }
+}
+
+.tarjeta {
+  padding: 12px 16px 6px;
+  border: 1px solid var(--borde);
+  border-radius: 20px;
+  background: var(--superficie);
+
+  h2 {
+    margin: 4px 0 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--ion-color-medium);
+  }
+}
+
+.tarjeta__vacio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 10px;
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
+
+  ion-icon {
+    font-size: 20px;
+  }
+}
+
+// Color de cada tipo de registro: fecha del historial e icono del "+"
+.historial__fecha {
+  --color-tipo: var(--ion-color-primary);
+  --color-tipo-rgb: var(--ion-color-primary-rgb);
+}
+
+.historial__fecha--repostaje,
+.detalle__icono--repostaje {
+  --color-tipo: var(--ion-color-warning-shade);
+  --color-tipo-rgb: var(--ion-color-warning-rgb);
+}
+
+.historial__fecha--aceite,
+.detalle__icono--aceite {
+  --color-tipo: var(--ion-color-tertiary);
+  --color-tipo-rgb: var(--ion-color-tertiary-rgb);
+}
+
+.historial__fecha--neumatico,
+.detalle__icono--neumatico {
+  --color-tipo: var(--ion-color-medium-shade);
+  --color-tipo-rgb: var(--ion-color-medium-rgb);
+}
+
+.historial__fecha--mantenimiento,
+.detalle__icono--mantenimiento {
+  --color-tipo: var(--ion-color-danger);
+  --color-tipo-rgb: var(--ion-color-danger-rgb);
+}
+
+.historial__fecha--itv,
+.detalle__icono--itv {
+  --color-tipo: var(--ion-color-success-shade);
+  --color-tipo-rgb: var(--ion-color-success-rgb);
+}
+
+// ---------- Filtros del historial ----------
+
+.historial__filtros {
+  display: flex;
+  gap: 6px;
+  margin: 2px 0 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.historial__filtro {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+
+  ion-icon {
+    font-size: 1em;
+  }
+}
+
+.historial__filtro--activo {
+  border-color: var(--ion-color-primary);
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+  font-weight: 600;
+}
+
+// ---------- Filas del historial (cada una es un botón para editarla) ----------
+
+.historial__fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  & + & {
+    border-top: 1px solid var(--borde);
+  }
+}
+
+.historial__fecha {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: rgba(var(--color-tipo-rgb), 0.15);
+  color: var(--color-tipo);
+  line-height: 1.1;
+
+  strong {
+    font-size: 1.05rem;
+  }
+
+  span {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+  }
+}
+
+.historial__texto {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+
+  strong {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    ion-icon {
+      flex-shrink: 0;
+      color: var(--ion-color-medium);
+    }
+  }
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    color: var(--ion-color-medium);
+  }
+}
+
+.historial__importe {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+// ---------- Opciones del "+" (cinco tipos en rejilla) ----------
+
+.detalle__opciones {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+
+  .eleccion__opcion {
+    padding: 14px 4px;
+    font-size: 0.8rem;
+
+    ion-icon {
+      font-size: 28px;
+      color: var(--color-tipo, var(--ion-color-primary));
+    }
+  }
+}

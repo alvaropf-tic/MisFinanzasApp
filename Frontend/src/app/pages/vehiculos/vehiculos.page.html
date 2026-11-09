@@ -1,0 +1,120 @@
+<app-cabecera titulo="Vehículos">
+  <ion-button cabeceraAccion (click)="nuevoVehiculo()" aria-label="Añadir vehículo">
+    <ion-icon slot="icon-only" name="add"></ion-icon>
+  </ion-button>
+</app-cabecera>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refrescar($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  @if (cargandoInicial()) {
+  <app-empty-state>
+    <ion-spinner name="crescent"></ion-spinner>
+  </app-empty-state>
+  } @else if (errorCarga()) {
+  <app-empty-state icono="cloud-offline-outline" titulo="No se han podido cargar los vehículos">
+    <ion-button fill="outline" (click)="cargar()">Reintentar</ion-button>
+  </app-empty-state>
+  } @else if (fichas().length === 0) {
+  <app-empty-state
+    icono="car-sport-outline"
+    titulo="Aún no tienes vehículos"
+    mensaje="Añade tu coche o tu moto para llevar repostajes, consumo y mantenimiento."
+  >
+    <ion-button shape="round" (click)="nuevoVehiculo()">
+      <ion-icon slot="start" name="add" aria-hidden="true"></ion-icon>
+      Añadir vehículo
+    </ion-button>
+  </app-empty-state>
+  } @else {
+  <div class="vehiculos">
+    @for (ficha of activos(); track ficha.vehiculo.id) {
+    <ng-container [ngTemplateOutlet]="tarjeta" [ngTemplateOutletContext]="{ $implicit: ficha }"></ng-container>
+    } @if (inactivos().length > 0) {
+    <h2 class="vehiculos__seccion">Inactivos</h2>
+    @for (ficha of inactivos(); track ficha.vehiculo.id) {
+    <ng-container [ngTemplateOutlet]="tarjeta" [ngTemplateOutletContext]="{ $implicit: ficha }"></ng-container>
+    } }
+  </div>
+  } @if (activos().length > 0) {
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button color="warning" (click)="repostar()" aria-label="Nuevo repostaje">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  }
+</ion-content>
+
+<!-- Con varios vehículos activos, el "+" pregunta para cuál es el repostaje -->
+<ion-modal class="modal-centrado" [isOpen]="eligiendoVehiculo()" (didDismiss)="eligiendoVehiculo.set(false)">
+  <ng-template>
+    <div class="eleccion">
+      <h2>¿Qué vehículo has repostado?</h2>
+      <div class="eleccion__lista">
+        @for (ficha of activos(); track ficha.vehiculo.id) {
+        <button type="button" class="eleccion__vehiculo" (click)="elegirVehiculo(ficha)">
+          <span class="eleccion__icono" aria-hidden="true">
+            <ion-icon name="car-sport-outline"></ion-icon>
+          </span>
+          <span class="eleccion__texto">
+            <strong>{{ ficha.vehiculo.nombre }}</strong>
+            @if (subtitulo(ficha.vehiculo); as sub) {
+            <span>{{ sub }}</span>
+            }
+          </span>
+        </button>
+        }
+      </div>
+      <ion-button fill="clear" color="medium" expand="block" (click)="eligiendoVehiculo.set(false)"
+        >Cancelar</ion-button
+      >
+    </div>
+  </ng-template>
+</ion-modal>
+
+<ng-template #tarjeta let-ficha>
+  <a
+    class="vehiculo"
+    [class.vehiculo--inactivo]="!ficha.vehiculo.activo"
+    [routerLink]="['/vehiculos', ficha.vehiculo.id]"
+  >
+    <header class="vehiculo__cabecera">
+      <span class="vehiculo__icono" aria-hidden="true">
+        <ion-icon name="car-sport-outline"></ion-icon>
+      </span>
+      <div class="vehiculo__nombre">
+        <strong>{{ ficha.vehiculo.nombre }}</strong>
+        @if (subtitulo(ficha.vehiculo); as sub) {
+        <span>{{ sub }}</span>
+        }
+      </div>
+      <ion-icon class="vehiculo__ir" name="chevron-forward-outline" aria-hidden="true"></ion-icon>
+    </header>
+
+    @if (ficha.resumen; as r) {
+    <p class="vehiculo__km">
+      <ion-icon name="speedometer-outline" aria-hidden="true"></ion-icon>
+      {{ r.kilometrosActuales | number: '1.0-0' }} km
+    </p>
+    <div class="vehiculo__datos">
+      <div>
+        <span>Consumo medio</span>
+        <strong>{{ r.consumoMedio !== null ? (r.consumoMedio | number: '1.1-1') + ' l/100' : '—' }}</strong>
+      </div>
+      <div>
+        <span>Este año</span>
+        <strong>{{ r.gastadoAnio | currency }}</strong>
+      </div>
+      <div>
+        <span>Última ITV</span>
+        <strong>{{ itv(r) }}</strong>
+        @if (r.ultimaItvFecha) {
+        <span>{{ fechaCorta(r.ultimaItvFecha) }}</span>
+        }
+      </div>
+    </div>
+    }
+  </a>
+</ng-template>

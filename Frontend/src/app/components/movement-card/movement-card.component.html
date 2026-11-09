@@ -1,4 +1,4 @@
-<ion-item lines="full">
+<ion-item lines="full" [button]="pulsable()" [detail]="false">
   <ion-icon
     slot="start"
     [name]="icono()"
@@ -19,6 +19,6 @@
         [title]="o.etiqueta"
       ></ion-icon>
     }
-    {{ esIngreso() ? '+' : '−' }}{{ movimiento().importe | currency: 'EUR' }}
+    {{ esIngreso() ? '+' : '−' }}{{ movimiento().importe | currency }}
   </ion-note>
 </ion-item>

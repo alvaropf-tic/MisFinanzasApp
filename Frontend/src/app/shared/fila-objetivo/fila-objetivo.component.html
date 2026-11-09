@@ -1,0 +1,23 @@
+<span class="objetivo__icono" aria-hidden="true">
+  <ion-icon [name]="objetivo().completado ? 'checkmark-circle' : objetivo().icono || 'wallet-outline'"></ion-icon>
+</span>
+<div class="objetivo__cuerpo">
+  <div class="objetivo__fila">
+    <strong>{{ objetivo().nombre }}</strong>
+    <span class="objetivo__porcentaje">{{ objetivo().porcentaje }} %</span>
+  </div>
+  <div
+    class="objetivo__barra"
+    role="progressbar"
+    [attr.aria-valuenow]="ancho()"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    [attr.aria-label]="'Progreso de ' + objetivo().nombre"
+  >
+    <span [style.width.%]="ancho()"></span>
+  </div>
+  <div class="objetivo__fila objetivo__fila--pie">
+    <span>{{ objetivo().ahorrado | currency }} de {{ objetivo().importeObjetivo | currency }}</span>
+    <span>{{ detalle() }}</span>
+  </div>
+</div>

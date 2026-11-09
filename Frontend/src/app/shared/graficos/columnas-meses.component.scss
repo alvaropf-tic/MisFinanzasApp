@@ -1,0 +1,91 @@
+// Una columna por mes: la elegida en el acento y el resto en gris (énfasis). Cada columna entera es el área
+// de toque, más grande que la barra.
+.columnas {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  gap: 2px;
+  // Hueco arriba para el importe sobre la columna más alta
+  padding-top: 22px;
+}
+
+.columna {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus-visible {
+    outline: 2px solid var(--mf-grafico-acento);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  &:hover .columna__barra {
+    filter: brightness(1.2);
+  }
+}
+
+.columna__zona {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  height: 120px;
+  // Línea base fina y discreta
+  border-bottom: 1px solid var(--ion-color-step-150, rgba(127, 127, 127, 0.25));
+}
+
+.columna__barra {
+  width: min(18px, 70%);
+  min-height: 2px;
+  border-radius: 4px 4px 0 0;
+  background: var(--mf-grafico-atenuado);
+  transition:
+    height 0.4s ease,
+    filter 0.15s ease;
+}
+
+.columna--elegida .columna__barra {
+  background: var(--mf-grafico-acento);
+}
+
+.columna__valor {
+  position: absolute;
+  left: 50%;
+  margin-bottom: 4px;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.columna__mes {
+  font-size: 0.7rem;
+  color: var(--ion-color-medium);
+}
+
+.columna--elegida .columna__mes {
+  font-weight: 700;
+  color: var(--ion-text-color);
+}
+
+.solo-lectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

@@ -19,7 +19,16 @@
     <!-- add to homescreen for ios -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-  </head>
+    <!-- Tema y color guardados (AparienciaService): se ponen antes de pintar para que no se vea un destello -->
+  <script>
+    try {
+      var a = JSON.parse(localStorage.getItem('mf.apariencia') || '{}');
+      var oscuro = a.tema === 'oscuro' || (a.tema !== 'claro' && matchMedia('(prefers-color-scheme: dark)').matches);
+      if (oscuro) document.documentElement.classList.add('ion-palette-dark');
+      if (a.acento && a.acento !== 'azul') document.documentElement.classList.add('acento-' + a.acento);
+    } catch (e) {}
+  </script>
+</head>
 
   <body>
     <app-root></app-root>

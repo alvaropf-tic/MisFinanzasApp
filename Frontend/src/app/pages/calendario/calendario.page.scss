@@ -1,0 +1,366 @@
+.calendario {
+  --superficie: var(--ion-color-step-50, rgba(127, 127, 127, 0.08));
+  --borde: var(--ion-color-step-150, rgba(127, 127, 127, 0.25));
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: var(--mf-ancho);
+  margin: 0 auto;
+  padding: 8px var(--mf-espacio) 32px;
+  transition: opacity 0.2s ease;
+}
+
+// Mientras llega otro mes se atenúa el anterior en vez de vaciar la pantalla
+.calendario--cargando {
+  opacity: 0.55;
+}
+
+.mes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+}
+
+.tarjeta {
+  padding: 12px;
+  border: 1px solid var(--borde);
+  border-radius: 20px;
+  background: var(--superficie);
+
+  h3 {
+    margin: 4px 4px 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--ion-color-medium);
+  }
+}
+
+// ---------- Rejilla del mes ----------
+
+.rejilla__semana {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.rejilla__semana--cabecera {
+  margin-bottom: 4px;
+
+  span {
+    padding: 4px 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--ion-color-medium);
+  }
+}
+
+.dia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  padding: 6px 0 4px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:hover {
+    background: rgba(127, 127, 127, 0.1);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: -2px;
+  }
+}
+
+.dia__numero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+// Días de relleno de otros meses: atenuados
+.dia--fuera {
+  opacity: 0.35;
+}
+
+.dia--hoy .dia__numero {
+  box-shadow: inset 0 0 0 2px var(--ion-color-primary);
+  color: var(--ion-color-primary);
+  font-weight: 700;
+}
+
+.dia--elegido .dia__numero {
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+  font-weight: 700;
+}
+
+.dia__puntos {
+  display: flex;
+  gap: 3px;
+  height: 6px;
+}
+
+// Gasto rojo e ingreso verde, como en el resto de la app; previsto en anillo ámbar (aún no ha pasado)
+.punto {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.punto--gasto {
+  background: var(--ion-color-danger);
+}
+
+.punto--ingreso {
+  background: var(--ion-color-success);
+}
+
+.punto--previsto {
+  box-shadow: inset 0 0 0 1.5px var(--ion-color-warning);
+}
+
+// Recordatorios e ITV
+.punto--aviso {
+  background: var(--ion-color-tertiary);
+}
+
+.leyenda {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 10px;
+  font-size: 0.75rem;
+  color: var(--ion-color-medium);
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .punto {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+// ---------- Totales del mes ----------
+
+.totales {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--borde);
+    border-radius: 14px;
+    background: var(--superficie);
+  }
+
+  span {
+    font-size: 0.75rem;
+    color: var(--ion-color-medium);
+  }
+
+  strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.95rem;
+  }
+}
+
+// ---------- Día elegido ----------
+
+.tarjeta--dia {
+  --ion-item-background: transparent;
+
+  ion-list {
+    padding: 0;
+    background: transparent;
+  }
+}
+
+.tarjeta__vacio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 4px 8px;
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
+
+  ion-icon {
+    font-size: 20px;
+  }
+}
+
+.previsto {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 4px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.previsto__icono {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(var(--ion-color-warning-rgb), 0.15);
+  color: var(--ion-color-warning-shade);
+  font-size: 18px;
+}
+
+.previsto__texto {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+
+  strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    font-size: 0.8rem;
+    color: var(--ion-color-medium);
+  }
+}
+
+.previsto__importe {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+// Recordatorio o ITV: color terciario
+.previsto--aviso .previsto__icono {
+  background: rgba(var(--ion-color-tertiary-rgb), 0.15);
+  color: var(--ion-color-tertiary);
+}
+
+// Cobro previsto (genera un ingreso): en verde
+.previsto--ingreso {
+  .previsto__icono {
+    background: rgba(var(--ion-color-success-rgb), 0.15);
+    color: var(--ion-color-success-shade);
+  }
+
+  .previsto__importe {
+    color: var(--ion-color-success-shade);
+  }
+}
+
+// ---------- Añadir en el día elegido ----------
+
+.dia-panel__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+
+  h3 {
+    margin: 4px;
+  }
+}
+
+.dia-panel__anadir {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px 6px 10px;
+  border: none;
+  border-radius: 999px;
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  ion-icon {
+    font-size: 18px;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 2px;
+  }
+}
+
+// Las cuatro opciones del modal en dos filas
+.calendario__opciones {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+
+  .eleccion__opcion {
+    padding: 14px 4px;
+    font-size: 0.8rem;
+    text-align: center;
+  }
+}
+
+// Escritorio: el mes a la izquierda y el día elegido a la derecha
+@media (min-width: 992px) {
+  .calendario {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+    column-gap: 20px;
+  }
+
+  .calendario > * {
+    grid-column: 1;
+  }
+
+  .calendario > .tarjeta--dia {
+    position: sticky;
+    top: 8px;
+    grid-column: 2;
+    grid-row: 1 / span 10;
+  }
+}

@@ -1,0 +1,77 @@
+# Mis Finanzas en el homelab (Raspberry Pi 4)
+#
+# Estructura en la Pi:
+#   /opt/homelab/stacks/misfinanzas/
+#   ├── docker-compose.yml   (este archivo, copiado de deploy/homelab/)
+#   ├── .env                 (secretos: copiar de .env.example y rellenar; nunca a git)
+#   ├── backup.sh
+#   ├── app/                 (clon del repositorio)
+#   └── data/
+#       ├── postgres/        (base de datos)
+#       └── tickets/         (fotos de los tickets)
+#
+# Solo se publica la web (puerto 8095 de la Pi); la base de datos y el backend quedan en la red interna.
+# Acceso: http://finanzas.alvaro-homelab (NPM + Tailscale) o http://192.168.68.58:8095 en casa.
+
+name: misfinanzas
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: misfinanzas-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: misfinanzas
+      POSTGRES_USER: misfinanzas
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Falta DB_PASSWORD en .env}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U misfinanzas -d misfinanzas"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    mem_limit: 256m
+    networks: [interna]
+
+  backend:
+    build: ./app/Backend/mis-finanzas-backend
+    image: misfinanzas-backend:latest
+    container_name: misfinanzas-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/misfinanzas
+      DB_USER: misfinanzas
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?Falta JWT_SECRET en .env}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      # La web llega por el mismo Nginx (sin CORS); esto es para la futura app Android
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost,https://localhost,capacitor://localhost}
+      TZ: Europe/Madrid
+    volumes:
+      - ./data/tickets:/app/data/tickets
+    mem_limit: 640m
+    networks: [interna]
+    # Para que Prometheus lea las métricas (puerto 8091, sin publicar): descomentar y poner el nombre real
+    # de la red del stack de monitorización (docker network ls). Ver deploy/homelab/README.md
+    # networks: [interna, monitoring]
+
+  web:
+    build: ./app/Frontend
+    image: misfinanzas-web:latest
+    container_name: misfinanzas-web
+    restart: unless-stopped
+    depends_on: [backend]
+    ports:
+      - "8095:80"
+    mem_limit: 64m
+    networks: [interna]
+
+networks:
+  interna:
+  # monitoring:
+  #   external: true
+  #   name: monitoring_default

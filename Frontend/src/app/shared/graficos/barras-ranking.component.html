@@ -1,0 +1,14 @@
+<ul class="ranking" [attr.aria-label]="titulo() || null">
+  @for (fila of filas(); track fila.etiqueta) {
+    <li class="ranking__fila" [title]="fila.etiqueta + ': ' + (fila.valor | currency) + ' (' + fila.porcentaje + ' %)'">
+      <div class="ranking__textos">
+        <span class="ranking__etiqueta">{{ fila.etiqueta }}</span>
+        <span class="ranking__valor">
+          {{ fila.valor | currency }}
+          <span class="ranking__porcentaje">{{ fila.porcentaje }} %</span>
+        </span>
+      </div>
+      <div class="ranking__barra" [style.width.%]="fila.ancho" aria-hidden="true"></div>
+    </li>
+  }
+</ul>

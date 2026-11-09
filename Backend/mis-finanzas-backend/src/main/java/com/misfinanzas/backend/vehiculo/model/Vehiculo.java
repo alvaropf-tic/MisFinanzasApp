@@ -34,6 +34,11 @@ public class Vehiculo {
     @Column(name = "anio")
     private Integer anio;
 
+    // Km del cuentakilómetros al darlo de alta. Los km actuales se calculan sumando los trips de los repostajes.
+    // null en vehículos creados antes de existir el campo (cuenta como 0).
+    @Column(name = "kilometros_iniciales")
+    private Integer kilometrosIniciales;
+
     @Column(nullable = false)
     private boolean activo;
 

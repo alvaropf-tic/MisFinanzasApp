@@ -7,12 +7,12 @@
   </ion-button>
 </app-cabecera>
 
-<ion-content>
+<ion-content class="contenido-centrado">
   <ion-refresher slot="fixed" (ionRefresh)="refrescar($event)">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
-  <!-- Pagos recurrentes del mes: resumen, administrar y añadir -->
+  <!-- Pagos y cobros recurrentes del mes: lo pendiente, administrar y añadir -->
   @if (seccionRecurrentes(); as r) {
   <section class="recurrentes">
     <header class="recurrentes__cabecera">
@@ -20,8 +20,8 @@
         <ion-icon name="repeat-outline"></ion-icon>
       </span>
       <div class="recurrentes__titulo">
-        <strong>Pagos recurrentes</strong>
-        <span>{{ r.activos }} {{ r.activos === 1 ? 'activo' : 'activos' }}</span>
+        <strong>Recurrentes</strong>
+        <span>{{ r.activos }}</span>
       </div>
       <ion-button fill="clear" size="small" routerLink="/recurrentes">Administrar</ion-button>
       <ion-button
@@ -29,26 +29,26 @@
         shape="round"
         size="small"
         (click)="nuevoRecurrente()"
-        aria-label="Nuevo pago recurrente"
+        aria-label="Nuevo pago o cobro recurrente"
       >
         <ion-icon slot="icon-only" name="add"></ion-icon>
       </ion-button>
     </header>
 
-    @if (r.activos > 0 || r.total > 0) {
+    @if (r.cifras.length > 0) {
     <div class="recurrentes__cifras">
-      <div>
-        <span>Este mes</span>
-        <strong>{{ r.total | currency: 'EUR' }}</strong>
+      @for (c of r.cifras; track c.clase) {
+      <div [class]="'recurrentes__cifra--' + c.clase">
+        <span>{{ c.etiqueta }}</span>
+        <strong>{{ c.signo }}{{ c.resumen.pendiente | currency }}</strong>
+        <small>de {{ c.resumen.total | currency }} este mes</small>
       </div>
-      <div>
-        <span>Pendiente de pago</span>
-        <strong>{{ r.pendiente | currency: 'EUR' }}</strong>
-      </div>
+      }
     </div>
-    <p class="recurrentes__proximo">{{ proximoCobro() }}</p>
-    } @else {
-    <p class="recurrentes__vacio">Apunta suscripciones, alquiler o cuotas y se registrarán solos cada periodo.</p>
+    @if (r.proximo) {
+    <p class="recurrentes__proximo">{{ r.proximo }}</p>
+    } } @else {
+    <p class="recurrentes__vacio">Apunta suscripciones, alquiler o tu nómina y se registrarán solos cada periodo.</p>
     }
   </section>
   } @if (lista.cargandoInicial()) {
@@ -77,7 +77,7 @@
   </div>
   <ion-list>
     @for (movimiento of lista.elementos(); track clave(movimiento)) {
-    <app-movement-card [movimiento]="movimiento"></app-movement-card>
+    <app-movement-card [movimiento]="movimiento" [pulsable]="true" (click)="editar(movimiento)"></app-movement-card>
     }
   </ion-list>
   <ion-infinite-scroll [disabled]="!lista.hayMas()" (ionInfinite)="cargarMas($event)">
@@ -97,7 +97,7 @@
   <ng-template>
     <div class="eleccion">
       <h2>¿Qué quieres registrar?</h2>
-      <div class="eleccion__opciones">
+      <div class="eleccion__opciones finanzas__opciones">
         <button type="button" class="eleccion__opcion" (click)="elegir('gasto')">
           <ion-icon name="trending-down-outline" color="danger" aria-hidden="true"></ion-icon>
           <span>Gasto</span>
@@ -105,6 +105,10 @@
         <button type="button" class="eleccion__opcion" (click)="elegir('ingreso')">
           <ion-icon name="trending-up-outline" color="success" aria-hidden="true"></ion-icon>
           <span>Ingreso</span>
+        </button>
+        <button type="button" class="eleccion__opcion" (click)="escanear()">
+          <ion-icon name="scan-outline" color="tertiary" aria-hidden="true"></ion-icon>
+          <span>Ticket</span>
         </button>
       </div>
       <ion-button fill="clear" color="medium" expand="block" (click)="eligiendoTipo.set(false)">Cancelar</ion-button>

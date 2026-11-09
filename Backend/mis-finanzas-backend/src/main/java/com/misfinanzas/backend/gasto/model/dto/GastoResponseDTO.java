@@ -24,4 +24,11 @@ public class GastoResponseDTO {
     private Long categoriaId;
     private String categoriaNombre;
     private OrigenGasto origen;
+
+    // Ticket guardado con el gasto (su foto: GET /api/tickets/{ticketId}/imagen); null si no tiene
+    private Long ticketId;
+
+    // En los gastos de vehículo: el vehículo y el registro (repostaje, ITV...) que lo crearon; null en el resto
+    private Long vehiculoId;
+    private Long registroId;
 }

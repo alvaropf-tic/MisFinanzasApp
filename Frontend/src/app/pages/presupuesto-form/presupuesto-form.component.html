@@ -22,7 +22,7 @@
         placeholder="0,00"
         aria-label="Presupuesto en euros"
       />
-      <span class="hoja__moneda" aria-hidden="true">€</span>
+      <span class="hoja__moneda" aria-hidden="true">{{ simboloMoneda }}</span>
     </label>
     @if (importeInvalido()) {
       <p class="hoja__error hoja__error--centrado">Introduce un presupuesto mayor que 0</p>

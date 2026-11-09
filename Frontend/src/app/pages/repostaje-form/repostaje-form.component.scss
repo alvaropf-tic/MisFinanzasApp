@@ -1,0 +1,45 @@
+// Combustible: acento ámbar (estilo común en theme/hojas.scss)
+:host {
+  --acento: var(--ion-color-warning);
+  --acento-rgb: var(--ion-color-warning-rgb);
+  --acento-contraste: var(--ion-color-warning-contrast);
+}
+
+// Números a la derecha de cada fila, con su unidad
+.repostaje__numero {
+  flex: 0 0 96px;
+  text-align: end;
+  --padding-end: 4px;
+}
+
+.repostaje__unidad {
+  flex-shrink: 0;
+  min-width: 36px;
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+}
+
+.detalles__hueco {
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.detalles__fila ion-toggle {
+  flex: 1;
+}
+
+.repostaje__consumo {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
+
+  strong {
+    color: var(--ion-text-color);
+  }
+}
+
+.repostaje__eliminar {
+  margin-top: 24px;
+  text-transform: none;
+  letter-spacing: normal;
+}

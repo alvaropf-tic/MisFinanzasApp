@@ -1,0 +1,35 @@
+// Vehículos: acento principal de la app (estilo común en theme/hojas.scss)
+:host {
+  --acento: var(--ion-color-primary);
+  --acento-rgb: var(--ion-color-primary-rgb);
+  --acento-contraste: var(--ion-color-primary-contrast);
+}
+
+.vehiculo__explicacion {
+  margin: 16px 0 0;
+  text-align: center;
+  color: var(--ion-color-medium);
+}
+
+.vehiculo__nota {
+  text-align: center;
+}
+
+// Marca y modelo comparten fila
+.detalles__fila ion-input + ion-input {
+  border-inline-start: 1px solid var(--borde);
+  padding-inline-start: 12px;
+}
+
+.vehiculo__acciones {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 28px;
+
+  ion-button {
+    margin: 0;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+}

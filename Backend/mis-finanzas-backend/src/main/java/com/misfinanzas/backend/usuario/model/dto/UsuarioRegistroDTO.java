@@ -1,5 +1,6 @@
 package com.misfinanzas.backend.usuario.model.dto;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -32,4 +33,8 @@ public class UsuarioRegistroDTO {
     @NotBlank(message = "La contraseña es obligatoria")
     @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
     private String password;
+
+    // Términos de uso y política de privacidad (incluye que las fotos de tickets las lee una IA externa)
+    @AssertTrue(message = "Debes aceptar los términos de uso y la política de privacidad")
+    private boolean aceptaTerminos;
 }

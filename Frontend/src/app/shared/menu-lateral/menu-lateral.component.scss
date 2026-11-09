@@ -1,0 +1,107 @@
+:host {
+  display: none;
+}
+
+// Solo en escritorio: columna fija a la izquierda (el contenido se desplaza con --mf-lateral en global.scss)
+@media (min-width: 992px) {
+  :host {
+    display: block;
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 10;
+    width: var(--mf-lateral);
+  }
+}
+
+.lateral {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px 12px;
+  overflow-y: auto;
+  border-right: 1px solid var(--ion-color-step-150, rgba(127, 127, 127, 0.25));
+  background: var(--ion-color-step-50, var(--ion-background-color));
+}
+
+.lateral__marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px 20px;
+  font-size: 1.1rem;
+}
+
+.lateral__logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+  font-size: 20px;
+}
+
+.lateral__titulo {
+  margin: 18px 12px 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--ion-color-medium);
+}
+
+.lateral__grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lateral__grupo--pie {
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.lateral__enlace {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ion-text-color);
+  font: inherit;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+
+  ion-icon {
+    font-size: 20px;
+    color: var(--ion-color-medium);
+  }
+
+  &:hover {
+    background: rgba(var(--ion-color-primary-rgb), 0.08);
+  }
+}
+
+.lateral__enlace--activo {
+  background: rgba(var(--ion-color-primary-rgb), 0.14);
+  color: var(--ion-color-primary);
+  font-weight: 600;
+
+  ion-icon {
+    color: var(--ion-color-primary);
+  }
+}
+
+.lateral__enlace--salir,
+.lateral__enlace--salir ion-icon {
+  color: var(--ion-color-danger);
+}

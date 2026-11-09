@@ -1,0 +1,63 @@
+<app-cabecera-pantalla titulo="Objetivos de ahorro">
+  <ion-button cabeceraAccion (click)="nuevo()" aria-label="Nuevo objetivo">
+    <ion-icon slot="icon-only" name="add"></ion-icon>
+  </ion-button>
+</app-cabecera-pantalla>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refrescar($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  @if (cargandoInicial()) {
+  <app-empty-state>
+    <ion-spinner name="crescent"></ion-spinner>
+  </app-empty-state>
+  } @else if (errorCarga()) {
+  <app-empty-state icono="cloud-offline-outline" titulo="No se han podido cargar los objetivos">
+    <ion-button fill="outline" (click)="cargar()">Reintentar</ion-button>
+  </app-empty-state>
+  } @else if (objetivos().length === 0) {
+  <app-empty-state
+    icono="trophy-outline"
+    titulo="Aún no tienes objetivos"
+    mensaje="Ponte una meta (unas vacaciones, un colchón, un coche) y ve apartando dinero para ella."
+  >
+    <ion-button shape="round" (click)="nuevo()">
+      <ion-icon slot="start" name="add" aria-hidden="true"></ion-icon>
+      Crear objetivo
+    </ion-button>
+  </app-empty-state>
+  } @else {
+  <div class="objetivos">
+    <section class="resumen">
+      <div>
+        <span>Ahorrado en total</span>
+        <strong>{{ totalAhorrado() | currency }}</strong>
+      </div>
+      @if (alMes() > 0) {
+      <div>
+        <span>Para ir al día, este mes</span>
+        <strong>{{ alMes() | currency }}</strong>
+      </div>
+      }
+    </section>
+
+    @if (enCurso().length > 0) {
+    <section class="tarjeta">
+      <h2>En curso</h2>
+      @for (o of enCurso(); track o.id) {
+      <a class="fila" [routerLink]="['/objetivos', o.id]"><app-fila-objetivo [objetivo]="o"></app-fila-objetivo></a>
+      }
+    </section>
+    } @if (conseguidos().length > 0) {
+    <section class="tarjeta">
+      <h2>Conseguidos</h2>
+      @for (o of conseguidos(); track o.id) {
+      <a class="fila" [routerLink]="['/objetivos', o.id]"><app-fila-objetivo [objetivo]="o"></app-fila-objetivo></a>
+      }
+    </section>
+    }
+  </div>
+  }
+</ion-content>

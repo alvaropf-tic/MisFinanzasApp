@@ -1,11 +1,4 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/inicio" text=""></ion-back-button>
-    </ion-buttons>
-    <ion-title>Perfil</ion-title>
-  </ion-toolbar>
-</ion-header>
+<app-cabecera-pantalla titulo="Perfil" [sinBorde]="true"></app-cabecera-pantalla>
 
 <ion-content>
   @if (cargando()) {
@@ -17,37 +10,69 @@
     <ion-button fill="outline" (click)="cargar()">Reintentar</ion-button>
   </app-empty-state>
   } @else if (usuario(); as u) {
-  <div class="perfil__cabecera">
-    <span class="perfil__avatar" aria-hidden="true">{{ iniciales() }}</span>
+  <section class="presentacion">
+    <span class="presentacion__avatar" aria-hidden="true">{{ iniciales() }}</span>
     <h2>{{ u.nombre }} {{ u.apellidos }}</h2>
-    <p>&#64;{{ u.nombreUsuario }}</p>
-  </div>
+    <p class="presentacion__usuario">&#64;{{ u.nombreUsuario }}</p>
+    <p class="presentacion__correo">
+      <ion-icon name="mail-outline" aria-hidden="true"></ion-icon>
+      {{ u.correo }}
+    </p>
+    <button type="button" class="presentacion__editar" (click)="editar()">
+      <ion-icon name="create-outline" aria-hidden="true"></ion-icon>
+      Editar perfil
+    </button>
+  </section>
 
-  <ion-list lines="full">
-    <ion-item>
-      <ion-label>
-        <p>Nombre</p>
-        <h3>{{ u.nombre }}</h3>
-      </ion-label>
-    </ion-item>
-    <ion-item>
-      <ion-label>
-        <p>Apellidos</p>
-        <h3>{{ u.apellidos }}</h3>
-      </ion-label>
-    </ion-item>
-    <ion-item>
-      <ion-label>
-        <p>Nombre de usuario</p>
-        <h3>{{ u.nombreUsuario }}</h3>
-      </ion-label>
-    </ion-item>
-    <ion-item>
-      <ion-label>
-        <p>Correo electrónico</p>
-        <h3>{{ u.correo }}</h3>
-      </ion-label>
-    </ion-item>
-  </ion-list>
+  <div class="perfil">
+    <section class="tarjeta">
+      <h3>Datos de la cuenta</h3>
+      <div class="dato">
+        <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
+        <div>
+          <span>Nombre</span>
+          <strong>{{ u.nombre }} {{ u.apellidos }}</strong>
+        </div>
+      </div>
+      <div class="dato">
+        <ion-icon name="at-outline" aria-hidden="true"></ion-icon>
+        <div>
+          <span>Nombre de usuario</span>
+          <strong>{{ u.nombreUsuario }}</strong>
+        </div>
+      </div>
+      <div class="dato">
+        <ion-icon name="mail-outline" aria-hidden="true"></ion-icon>
+        <div>
+          <span>Correo electrónico</span>
+          <strong>{{ u.correo }}</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="tarjeta">
+      <h3>Seguridad</h3>
+      <button type="button" class="dato dato--accion" (click)="cambiarPassword()">
+        <ion-icon name="lock-closed-outline" aria-hidden="true"></ion-icon>
+        <div>
+          <strong>Cambiar contraseña</strong>
+          <span>Te pediremos la actual</span>
+        </div>
+        <ion-icon class="dato__ir" name="chevron-forward-outline" aria-hidden="true"></ion-icon>
+      </button>
+    </section>
+
+    <section class="tarjeta">
+      <h3>Zona peligrosa</h3>
+      <button type="button" class="dato dato--accion dato--peligro" (click)="eliminarCuenta()">
+        <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
+        <div>
+          <strong>Eliminar cuenta</strong>
+          <span>Borra tu cuenta y todos tus datos para siempre</span>
+        </div>
+        <ion-icon class="dato__ir" name="chevron-forward-outline" aria-hidden="true"></ion-icon>
+      </button>
+    </section>
+  </div>
   }
 </ion-content>

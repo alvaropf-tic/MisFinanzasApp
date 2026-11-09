@@ -156,7 +156,9 @@ public class AceiteService {
                 aceite.getVehiculo().getId(),
                 gasto.map(g -> g.getCategoria().getId()).orElse(null),
                 gasto.map(g -> g.getCategoria().getNombre()).orElse(null),
-                gasto.map(Gasto::getMetodoPago).orElse(null)
+                gasto.map(Gasto::getMetodoPago).orElse(null),
+                gasto.map(Gasto::getId).orElse(null),
+                gasto.map(g -> g.getTicket() != null ? g.getTicket().getId() : null).orElse(null)
         );
     }
 }

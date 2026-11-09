@@ -1,8 +1,62 @@
-// Un pago recurrente es un gasto: mismo acento rojo (estilo común en theme/hojas.scss)
+// Un pago recurrente genera gastos (acento rojo); un cobro, ingresos (verde). Estilo común en theme/hojas.scss
 :host {
   --acento: var(--ion-color-danger);
   --acento-rgb: var(--ion-color-danger-rgb);
   --acento-contraste: var(--ion-color-danger-contrast);
+}
+
+:host(.hoja--ingreso) {
+  --acento: var(--ion-color-success);
+  --acento-rgb: var(--ion-color-success-rgb);
+  --acento-contraste: var(--ion-color-success-contrast);
+}
+
+// Pago / Cobro en uno nuevo: dos mitades, la elegida con el color de su tipo
+.recurrente__tipos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-top: 12px;
+  padding: 4px;
+  border-radius: 14px;
+  background: rgba(127, 127, 127, 0.12);
+}
+
+.recurrente__tipo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ion-color-medium);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+
+  ion-icon {
+    font-size: 18px;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--acento);
+    outline-offset: 2px;
+  }
+}
+
+.recurrente__tipo--activo.recurrente__tipo--gasto {
+  background: var(--ion-color-danger);
+  color: var(--ion-color-danger-contrast);
+}
+
+.recurrente__tipo--activo.recurrente__tipo--ingreso {
+  background: var(--ion-color-success);
+  color: var(--ion-color-success-contrast);
 }
 
 .recurrente__pausado {

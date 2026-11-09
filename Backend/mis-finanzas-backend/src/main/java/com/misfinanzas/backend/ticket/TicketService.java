@@ -7,6 +7,7 @@ import com.misfinanzas.backend.gasto.GastoService;
 import com.misfinanzas.backend.gasto.model.Gasto;
 import com.misfinanzas.backend.gasto.model.dto.GastoResponseDTO;
 import com.misfinanzas.backend.ticket.model.Ticket;
+import com.misfinanzas.backend.ticket.model.dto.GastoConTicketDTO;
 import com.misfinanzas.backend.ticket.model.dto.TicketConversionDTO;
 import com.misfinanzas.backend.ticket.model.dto.TicketImagenDTO;
 import com.misfinanzas.backend.ticket.model.dto.TicketRegistroDTO;
@@ -107,6 +108,82 @@ public class TicketService {
     }
 
     // ==========================================
+    // GASTO ESCANEADO
+    // ==========================================
+
+    // El gasto se guarda con los datos del formulario (ya revisados) y el ticket con su foto dentro
+    @Transactional
+    public GastoResponseDTO crearGastoConTicket(GastoConTicketDTO datos, MultipartFile imagen, Usuario usuario) {
+
+        String nombreArchivo = guardarArchivo(imagen);
+
+        try {
+            Ticket ticket = new Ticket();
+
+            ticket.setFecha(datos.getFecha().toLocalDate());
+            ticket.setComercio(comercioDe(datos));
+            ticket.setImporte(datos.getImporte());
+            ticket.setDescripcion(datos.getDescripcion());
+            ticket.setRutaImagen(nombreArchivo);
+            ticket.setUsuario(usuario);
+
+            GastoResponseDTO gasto = gastoService.crearGastoConTicket(datos, ticketRepository.save(ticket), usuario);
+
+            meterRegistry.counter("misfinanzas.tickets.convertidos").increment();
+
+            return gasto;
+
+        } catch (RuntimeException e) {
+            // Sin gasto no se queda una foto suelta en disco
+            borrarArchivo(nombreArchivo);
+            throw e;
+        }
+    }
+
+    private String comercioDe(GastoConTicketDTO datos) {
+
+        String comercio = datos.getComercio() != null && !datos.getComercio().isBlank() ? datos.getComercio().trim()
+                : datos.getDescripcion() != null && !datos.getDescripcion().isBlank() ? datos.getDescripcion().trim()
+                : "Ticket";
+
+        return comercio.length() > 100 ? comercio.substring(0, 100) : comercio;
+    }
+
+    // Ticket de un registro de vehículo (u otro gasto ya creado): la foto se guarda dentro de ese gasto
+    @Transactional
+    public GastoResponseDTO adjuntarAGasto(Long gastoId, String comercio, MultipartFile imagen, Usuario usuario) {
+
+        Gasto gasto = gastoRepository.findByIdAndUsuarioId(gastoId, usuario.getId()).orElseThrow(() -> new RecursoNoEncontradoException("Gasto no encontrado"));
+
+        if (gasto.getTicket() != null) {
+            throw new ConflictoException("Este gasto ya tiene un ticket");
+        }
+
+        String nombreArchivo = guardarArchivo(imagen);
+
+        try {
+            Ticket ticket = new Ticket();
+
+            String nombre = comercio != null && !comercio.isBlank() ? comercio.trim() : gasto.getDescripcion() != null ? gasto.getDescripcion() : "Ticket";
+
+            ticket.setFecha(gasto.getFecha().toLocalDate());
+            ticket.setComercio(nombre.length() > 100 ? nombre.substring(0, 100) : nombre);
+            ticket.setImporte(gasto.getImporte());
+            ticket.setRutaImagen(nombreArchivo);
+            ticket.setUsuario(usuario);
+
+            gasto.setTicket(ticketRepository.save(ticket));
+            gastoRepository.save(gasto);
+
+            return gastoService.obtenerGasto(gasto.getId(), usuario);
+
+        } catch (RuntimeException e) {
+            borrarArchivo(nombreArchivo);
+            throw e;
+        }
+    }
+
+    // ==========================================
     // IMAGEN DEL TICKET
     // ==========================================
 
@@ -115,22 +192,7 @@ public class TicketService {
 
         Ticket ticket = obtenerTicketDelUsuario(id, usuario);
 
-        if (imagen == null || imagen.isEmpty()) {
-            throw new IllegalArgumentException("La imagen está vacía");
-        }
-
-        // El tipo se comprueba por el contenido del archivo, no por lo que diga el cliente
-        FormatoImagen formato = detectarFormato(imagen);
-
-        // Nombre aleatorio: nunca se usa el nombre que manda el cliente
-        String nombreArchivo = UUID.randomUUID() + "." + formato.extension;
-
-        try {
-            Files.createDirectories(directorioImagenes);
-            imagen.transferTo(directorioImagenes.resolve(nombreArchivo));
-        } catch (IOException e) {
-            throw new UncheckedIOException("No se pudo guardar la imagen del ticket", e);
-        }
+        String nombreArchivo = guardarArchivo(imagen);
 
         String imagenAnterior = ticket.getRutaImagen();
 
@@ -206,6 +268,29 @@ public class TicketService {
     private Ticket obtenerTicketDelUsuario(Long id, Usuario usuario) {
 
         return ticketRepository.findByIdAndUsuarioId(id, usuario.getId()).orElseThrow(() -> new RecursoNoEncontradoException("Ticket no encontrado"));
+    }
+
+    // Comprueba la imagen y la guarda en disco con un nombre aleatorio; devuelve ese nombre
+    private String guardarArchivo(MultipartFile imagen) {
+
+        if (imagen == null || imagen.isEmpty()) {
+            throw new IllegalArgumentException("La imagen está vacía");
+        }
+
+        // El tipo se comprueba por el contenido del archivo, no por lo que diga el cliente
+        FormatoImagen formato = detectarFormato(imagen);
+
+        // Nombre aleatorio: nunca se usa el nombre que manda el cliente
+        String nombreArchivo = UUID.randomUUID() + "." + formato.extension;
+
+        try {
+            Files.createDirectories(directorioImagenes);
+            imagen.transferTo(directorioImagenes.resolve(nombreArchivo));
+        } catch (IOException e) {
+            throw new UncheckedIOException("No se pudo guardar la imagen del ticket", e);
+        }
+
+        return nombreArchivo;
     }
 
     // Evita que un nombre manipulado en la base de datos salga del directorio de imágenes

@@ -1,0 +1,264 @@
+<ion-content>
+  <form id="form-registro-vehiculo" class="hoja" [formGroup]="formulario" (ngSubmit)="guardar()">
+    <header class="hoja__cabecera">
+      <span class="hoja__insignia" aria-hidden="true">
+        <ion-icon [name]="textos.icono"></ion-icon>
+      </span>
+      <h1>{{ registro ? textos.editar : textos.nombre }}</h1>
+      <ion-button fill="clear" color="medium" class="hoja__cerrar" (click)="cancelar()" aria-label="Cerrar">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </header>
+
+    <!-- Ticket: el recién escaneado (con el aviso y la opción de gasto normal) o el guardado con el registro -->
+    @if (ticket) {
+      <app-foto-ticket
+        [foto]="ticket.foto"
+        [mensaje]="ticket.mensaje"
+        accion="Guardar como gasto normal"
+        (accionPulsada)="comoGastoNormal()"
+      ></app-foto-ticket>
+    } @else if (registro?.ticketId) {
+      <app-foto-ticket [ticketId]="registro!.ticketId"></app-foto-ticket>
+    }
+
+    <label class="hoja__importe" [class.hoja__importe--error]="invalido('precio')">
+      <span class="hoja__signo" aria-hidden="true">−</span>
+      <input
+        formControlName="precio"
+        type="number"
+        inputmode="decimal"
+        min="0"
+        step="0.01"
+        placeholder="0,00"
+        aria-label="Precio en euros"
+      />
+      <span class="hoja__moneda" aria-hidden="true">{{ simboloMoneda }}</span>
+    </label>
+    @if (invalido('precio')) {
+      <p class="hoja__error hoja__error--centrado">Indica el precio (puede ser 0)</p>
+    }
+
+    @switch (tipo) {
+      @case ('mantenimiento') {
+        <section class="hoja__seccion">
+          <h2>Tipo</h2>
+          <div class="chips" role="radiogroup" aria-label="Tipo">
+            @for (opcion of tiposMantenimiento; track opcion[0]) {
+              <button
+                type="button"
+                class="chip"
+                role="radio"
+                [class.chip--activo]="formulario.controls.tipoMantenimiento.value === opcion[0]"
+                [attr.aria-checked]="formulario.controls.tipoMantenimiento.value === opcion[0]"
+                (click)="formulario.controls.tipoMantenimiento.setValue(opcion[0])"
+              >
+                {{ opcion[1] }}
+              </button>
+            }
+          </div>
+        </section>
+        <section class="hoja__seccion">
+          <h2>Qué se hizo</h2>
+          <div class="detalles">
+            <div class="detalles__fila">
+              <ion-icon name="create-outline" aria-hidden="true"></ion-icon>
+              <ion-input
+                formControlName="titulo"
+                aria-label="Título"
+                placeholder="Revisión, embrague, frenos…"
+                [maxlength]="100"
+              ></ion-input>
+            </div>
+            <div class="detalles__fila">
+              <ion-icon name="document-text-outline" aria-hidden="true"></ion-icon>
+              <ion-input
+                formControlName="descripcion"
+                aria-label="Descripción"
+                placeholder="Detalle (opcional)"
+                [maxlength]="500"
+              ></ion-input>
+            </div>
+          </div>
+          @if (invalido('titulo')) {
+            <p class="hoja__error">Ponle un título para reconocerlo</p>
+          }
+        </section>
+      }
+      @case ('neumatico') {
+        <section class="hoja__seccion">
+          <h2>Qué neumáticos</h2>
+          <div class="chips" role="radiogroup" aria-label="Posición">
+            @for (opcion of posiciones; track opcion[0]) {
+              <button
+                type="button"
+                class="chip"
+                role="radio"
+                [class.chip--activo]="formulario.controls.posicion.value === opcion[0]"
+                [attr.aria-checked]="formulario.controls.posicion.value === opcion[0]"
+                (click)="formulario.controls.posicion.setValue(opcion[0])"
+              >
+                {{ opcion[1] }}
+              </button>
+            }
+          </div>
+        </section>
+      }
+      @case ('itv') {
+        <section class="hoja__seccion">
+          <h2>Resultado</h2>
+          <div class="chips" role="radiogroup" aria-label="Resultado">
+            @for (opcion of resultadosItv; track opcion[0]) {
+              <button
+                type="button"
+                class="chip"
+                role="radio"
+                [class.chip--activo]="formulario.controls.resultado.value === opcion[0]"
+                [attr.aria-checked]="formulario.controls.resultado.value === opcion[0]"
+                (click)="formulario.controls.resultado.setValue(opcion[0])"
+              >
+                {{ opcion[1] }}
+              </button>
+            }
+          </div>
+        </section>
+      }
+    }
+
+    <section class="hoja__seccion">
+      <h2>Kilómetros</h2>
+      <div class="detalles">
+        <div class="detalles__fila">
+          <ion-icon name="speedometer-outline" aria-hidden="true"></ion-icon>
+          <span class="detalles__etiqueta">Km del coche</span>
+          <ion-input
+            class="registro__numero"
+            formControlName="kilometros"
+            type="number"
+            inputmode="numeric"
+            step="1"
+            placeholder="0"
+            aria-label="Kilómetros del vehículo"
+          ></ion-input>
+          <span class="registro__unidad">km</span>
+        </div>
+      </div>
+      @if (invalido('kilometros')) {
+        <p class="hoja__error">Indica los km del coche</p>
+      } @else if (!registro && kilometrosActuales !== null) {
+        <p class="hoja__ayuda">
+          Propuestos con los km actuales del coche (≈ {{ kilometrosActuales | number: '1.0-0' }}). Corrígelos si no
+          cuadran.
+        </p>
+      }
+    </section>
+
+    <section class="hoja__seccion">
+      <h2>Categoría del gasto</h2>
+      @if (cargandoCategorias()) {
+        <ion-spinner name="dots"></ion-spinner>
+      } @else {
+        <div class="chips" role="radiogroup" aria-label="Categoría">
+          @for (categoria of categorias(); track categoria.id) {
+            <button
+              type="button"
+              class="chip"
+              role="radio"
+              [class.chip--activo]="formulario.controls.categoriaId.value === categoria.id"
+              [attr.aria-checked]="formulario.controls.categoriaId.value === categoria.id"
+              (click)="elegirCategoria(categoria.id)"
+            >
+              {{ categoria.nombre }}
+            </button>
+          }
+          <button type="button" class="chip chip--nueva" (click)="nuevaCategoria()">
+            <ion-icon name="add-outline" aria-hidden="true"></ion-icon>
+            Nueva
+          </button>
+        </div>
+        @if (invalido('categoriaId')) {
+          <p class="hoja__error">Elige una categoría</p>
+        }
+      }
+    </section>
+
+    <section class="hoja__seccion">
+      <h2>Método de pago</h2>
+      <div class="metodos" role="radiogroup" aria-label="Método de pago">
+        @for (metodo of metodos; track metodo.valor) {
+          <button
+            type="button"
+            class="metodo"
+            role="radio"
+            [class.metodo--activo]="formulario.controls.metodoPago.value === metodo.valor"
+            [attr.aria-checked]="formulario.controls.metodoPago.value === metodo.valor"
+            (click)="formulario.controls.metodoPago.setValue(metodo.valor)"
+          >
+            <ion-icon [name]="iconosMetodo[metodo.valor]" aria-hidden="true"></ion-icon>
+            <span>{{ metodo.etiqueta }}</span>
+          </button>
+        }
+      </div>
+    </section>
+
+    <section class="hoja__seccion">
+      <h2>Detalles</h2>
+      <div class="detalles">
+        <div class="detalles__fila">
+          <ion-icon name="calendar-outline" aria-hidden="true"></ion-icon>
+          <span class="detalles__etiqueta">Fecha</span>
+          <ion-datetime-button datetime="fecha-registro-vehiculo"></ion-datetime-button>
+        </div>
+        <div class="detalles__fila">
+          <ion-icon name="create-outline" aria-hidden="true"></ion-icon>
+          <ion-input
+            formControlName="notas"
+            aria-label="Notas"
+            placeholder="Notas (taller, marca…)"
+            [maxlength]="500"
+          ></ion-input>
+        </div>
+      </div>
+    </section>
+
+    <ion-modal [keepContentsMounted]="true">
+      <ng-template>
+        <ion-datetime
+          id="fecha-registro-vehiculo"
+          formControlName="fecha"
+          presentation="date"
+          locale="es-ES"
+          [firstDayOfWeek]="1"
+          [showDefaultButtons]="true"
+          doneText="Aceptar"
+          cancelText="Cancelar"
+        ></ion-datetime>
+      </ng-template>
+    </ion-modal>
+
+    @if (registro) {
+      <ion-button
+        class="registro__eliminar"
+        fill="clear"
+        color="danger"
+        expand="block"
+        [disabled]="enviando()"
+        (click)="eliminar()"
+      >
+        <ion-icon slot="start" name="trash-outline" aria-hidden="true"></ion-icon>
+        Eliminar registro
+      </ion-button>
+    }
+  </form>
+</ion-content>
+
+<ion-footer class="hoja__pie">
+  <ion-button type="submit" form="form-registro-vehiculo" expand="block" [disabled]="enviando()">
+    @if (enviando()) {
+      <ion-spinner name="crescent"></ion-spinner>
+    } @else {
+      <ion-icon slot="start" name="checkmark-outline" aria-hidden="true"></ion-icon>
+      {{ textoGuardar() }}
+    }
+  </ion-button>
+</ion-footer>

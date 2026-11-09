@@ -15,6 +15,8 @@ export interface Ingreso {
   metodoIngreso: MetodoIngreso;
   categoriaIngresoId: number;
   categoriaIngresoNombre: string;
+  /** true si lo generó un cobro recurrente (nómina…). */
+  recurrente: boolean;
 }
 
 export interface IngresoRegistro {

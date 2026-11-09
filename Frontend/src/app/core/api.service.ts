@@ -32,6 +32,11 @@ export class ApiService {
     return this.http.patch<T>(this.url(ruta), cuerpo);
   }
 
+  /** Archivo binario (p. ej. la imagen de un ticket), con el token como cualquier otra petición. */
+  getBlob(ruta: string): Observable<Blob> {
+    return this.http.get(this.url(ruta), { responseType: 'blob' });
+  }
+
   delete(ruta: string): Observable<void> {
     return this.http.delete<void>(this.url(ruta));
   }

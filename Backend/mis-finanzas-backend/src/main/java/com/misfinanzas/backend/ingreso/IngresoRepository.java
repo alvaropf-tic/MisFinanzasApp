@@ -2,9 +2,11 @@ package com.misfinanzas.backend.ingreso;
 
 import com.misfinanzas.backend.ingreso.model.Ingreso;
 import com.misfinanzas.backend.ingreso.model.MetodoIngreso;
+import com.misfinanzas.backend.ingresoRecurrente.model.IngresoRecurrente;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -31,6 +33,21 @@ public interface IngresoRepository extends JpaRepository<Ingreso, Long> {
     Optional<Ingreso> findByIdAndUsuarioId(Long id, Long usuarioId);
 
     boolean existsByCategoriaIngresoId(Long categoriaIngresoId);
+
+    // Ingresos ya cobrados de un recurrente que se va a borrar: se conservan, pero sin el enlace
+    @Modifying
+    @Query("UPDATE Ingreso i SET i.ingresoRecurrente = NULL WHERE i.ingresoRecurrente = :recurrente")
+    void desvincularDeRecurrente(@Param("recurrente") IngresoRecurrente recurrente);
+
+    @Query("""
+    SELECT COALESCE(SUM(i.importe), 0)
+    FROM Ingreso i
+    WHERE i.usuario.id = :usuarioId
+      AND i.ingresoRecurrente IS NOT NULL
+      AND i.fecha >= :inicio
+      AND i.fecha < :fin
+    """)
+    BigDecimal sumarIngresosRecurrentesEntreFechas(@Param("usuarioId") Long usuarioId, @Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);
 
     @Query("""
     SELECT COALESCE(SUM(i.importe), 0)

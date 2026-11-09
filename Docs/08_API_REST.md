@@ -136,15 +136,18 @@ Orden: fecha descendente. Todos los filtros son opcionales y se pueden combinar.
 
 | Método | Ruta | Cuerpo | Respuesta |
 |---|---|---|---|
-| POST | `/api/usuarios` | UsuarioRegistro | 201 Usuario · 400 · 409 usuario o correo repetido |
+| POST | `/api/usuarios` | UsuarioRegistro | 201 Usuario · 400 (también si `aceptaTerminos` no es true) · 409 usuario o correo repetido |
 | POST | `/api/auth/login` | Login | 200 LoginRespuesta · 401 |
 | GET | `/api/usuarios/me` | — | 200 Usuario |
 | PUT | `/api/usuarios/me` | UsuarioActualizar | 200 Usuario · 409 correo de otro usuario |
 | PUT | `/api/usuarios/me/password` | CambioPassword | 204 · 400 contraseña actual incorrecta o igual a la nueva |
+| POST | `/api/usuarios/me/eliminar` | `{ "password": "..." }` | 204 borra la cuenta y **todos** sus datos (también las fotos de tickets) · 400 contraseña incorrecta |
 
 ```json
 // UsuarioRegistro
-{ "nombre": "Ana", "apellidos": "Pérez", "nombreUsuario": "ana", "correo": "ana@correo.com", "password": "12345678" }
+{ "nombre": "Ana", "apellidos": "Pérez", "nombreUsuario": "ana", "correo": "ana@correo.com", "password": "12345678", "aceptaTerminos": true }
+// aceptaTerminos es obligatorio (términos de uso y privacidad, con el aviso de la IA de los tickets).
+// Se guarda cuándo se aceptó y la versión (UsuarioService.VERSION_TERMINOS).
 
 // Login
 { "nombreUsuario": "ana", "password": "12345678" }
@@ -180,7 +183,7 @@ Respuesta: `{ "id": 1, "nombre": "Comida" }`. Nombre de 2 a 50 caracteres.
 
 ## Categorías de ingreso
 
-Igual que las de gasto, en `/api/categorias-ingreso`. Al borrar, 409 si tiene ingresos.
+Igual que las de gasto, en `/api/categorias-ingreso`. Al borrar, 409 si tiene ingresos o ingresos recurrentes.
 
 ---
 
@@ -231,8 +234,10 @@ Filtros: `desde`, `hasta`, `categoriaIngresoId`, `metodoIngreso`, `texto`, `page
 
 // Ingreso
 { "id": 3, "importe": 1500.00, "fecha": "2026-11-01T09:00:00", "descripcion": "Nómina", "metodoIngreso": "TRANSFERENCIA",
-  "categoriaIngresoId": 1, "categoriaIngresoNombre": "Nómina" }
+  "categoriaIngresoId": 1, "categoriaIngresoNombre": "Nómina", "recurrente": false }
 ```
+
+`recurrente`: true si lo generó un ingreso recurrente.
 
 `metodoIngreso`: EFECTIVO, TRANSFERENCIA o BIZUM.
 
@@ -296,6 +301,79 @@ La respuesta añade `id`, `activo` y `categoriaNombre`. `periodicidad`: SEMANAL,
 
 ---
 
+## Ingresos recurrentes
+
+Mismas rutas, reglas y respuestas que los gastos recurrentes, pero generan ingresos.
+
+| Método | Ruta | Cuerpo | Respuesta |
+|---|---|---|---|
+| GET | `/api/ingresos-recurrentes` | — | 200 lista |
+| GET | `/api/ingresos-recurrentes/resumen/{anio}/{mes}` | — | 200 resumen del mes · 400 mes/año fuera de rango |
+| POST | `/api/ingresos-recurrentes` | IngresoRecurrenteRegistro | 201 · 400 fechas incoherentes |
+| GET | `/api/ingresos-recurrentes/{id}` | — | 200 |
+| PUT | `/api/ingresos-recurrentes/{id}` | IngresoRecurrenteRegistro | 200 |
+| PATCH | `/api/ingresos-recurrentes/{id}/estado` | — | 200 (alterna activo / pausado) |
+| DELETE | `/api/ingresos-recurrentes/{id}` | — | 204 |
+
+```json
+// IngresoRecurrenteRegistro
+{ "importe": 1500, "descripcion": "Nómina", "metodoIngreso": "TRANSFERENCIA", "periodicidad": "MENSUAL",
+  "fechaInicio": "2026-11-28", "proximaFecha": "2026-11-28", "fechaFin": null, "categoriaIngresoId": 1 }
+```
+
+La respuesta añade `id`, `activo` y `categoriaIngresoNombre`. Cada ingreso generado llega con `recurrente: true`; al borrar el recurrente se conserva con `recurrente: false`. El resumen tiene los mismos campos (`cobrado` son los ingresos ya generados).
+
+---
+
+## Objetivos de ahorro
+
+| Método | Ruta | Cuerpo | Respuesta |
+|---|---|---|---|
+| GET | `/api/objetivos` | — | 200 lista (más reciente primero) |
+| POST | `/api/objetivos` | ObjetivoRegistro | 201 Objetivo |
+| GET | `/api/objetivos/{id}` | — | 200 Objetivo |
+| PUT | `/api/objetivos/{id}` | ObjetivoRegistro | 200 |
+| DELETE | `/api/objetivos/{id}` | — | 204 (borra también sus aportaciones) |
+| POST | `/api/objetivos/{id}/aportaciones` | AportacionRegistro | 201 Objetivo · 400 importe 0 o retirada mayor que lo ahorrado |
+| DELETE | `/api/objetivos/{id}/aportaciones/{aportacionId}` | — | 200 Objetivo · 400 si lo ahorrado quedaría en negativo |
+
+```json
+// ObjetivoRegistro (fechaLimite e icono opcionales)
+{ "nombre": "Vacaciones", "importeObjetivo": 1200, "fechaLimite": "2027-04-30", "icono": "airplane-outline" }
+
+// AportacionRegistro: importe positivo = aportar, negativo = retirar
+{ "importe": 300, "fecha": "2026-11-01", "nota": "Paga extra" }
+
+// Objetivo
+{ "id": 1, "nombre": "Vacaciones", "importeObjetivo": 1200.00, "fechaLimite": "2027-04-30", "icono": "airplane-outline",
+  "creadoEn": "2026-11-09", "ahorrado": 300.00, "restante": 900.00, "porcentaje": 25, "completado": false,
+  "ahorroMensualNecesario": 150.00, "mesesRestantes": 6,
+  "aportaciones": [ { "id": 1, "importe": 300.00, "fecha": "2026-11-01", "nota": "Paga extra" } ] }
+```
+
+- Las aportaciones no son gastos: no cambian el saldo ni el presupuesto.
+- `mesesRestantes` cuenta el mes actual; `ahorroMensualNecesario` es null sin fecha límite, completado o con la fecha pasada.
+
+---
+
+## Recordatorios
+
+| Método | Ruta | Cuerpo | Respuesta |
+|---|---|---|---|
+| GET | `/api/recordatorios` | — | 200 lista por fecha |
+| POST | `/api/recordatorios` | Recordatorio | 201 |
+| PUT | `/api/recordatorios/{id}` | Recordatorio | 200 |
+| DELETE | `/api/recordatorios/{id}` | — | 204 |
+
+```json
+// Recordatorio (repeticion: NINGUNA, MENSUAL o ANUAL; la respuesta añade id)
+{ "titulo": "Seguro del coche", "fecha": "2026-11-20", "nota": null, "repeticion": "ANUAL" }
+```
+
+El calendario calcula en el cliente en qué días caen los que se repiten (mismo día de cada mes o año).
+
+---
+
 ## Resumen y estadísticas
 
 | Método | Ruta | Respuesta |
@@ -327,14 +405,23 @@ Errores: 400 si el mes no está entre 1 y 12, el año entre 2000 y 2100, o el in
 | GET | `/api/vehiculos/{id}` | — | 200 |
 | PUT | `/api/vehiculos/{id}` | VehiculoRegistro | 200 |
 | PATCH | `/api/vehiculos/{id}/estado` | — | 200 (alterna activo / inactivo) |
+| GET | `/api/vehiculos/{id}/resumen` | — | 200 km actuales, consumo medio, costes, gasto del año y última ITV |
 | DELETE | `/api/vehiculos/{id}` | — | 204 · 409 si tiene registros (desactívalo) |
 
 ```json
-// VehiculoRegistro (solo el nombre es obligatorio)
-{ "nombre": "Mi coche", "marca": "Seat", "modelo": "Ibiza", "matricula": "1234ABC", "anio": 2018 }
+// VehiculoRegistro (obligatorios: nombre y kilometrosIniciales, los km del cuentakilómetros al darlo de alta)
+{ "nombre": "Mi coche", "marca": "Seat", "modelo": "Ibiza", "matricula": "1234ABC", "anio": 2018, "kilometrosIniciales": 50000 }
+
+// Resumen del vehículo: GET /api/vehiculos/{id}/resumen
+{ "vehiculoId": 1, "kilometrosActuales": 51234, "repostajes": 12, "consumoMedio": 6.12, "costePorKilometro": 0.094,
+  "precioMedioLitro": 1.512, "gastadoAnio": 845.30, "ultimoRepostajeFecha": "2026-11-03",
+  "ultimaItvFecha": "2026-03-12", "ultimaItvResultado": "FAVORABLE", "proximaItvFecha": "2028-03-12" }
+// proximaItvFecha (estimada, reglas de España): desfavorable o negativa, +2 meses; hasta 10 años de antigüedad, +2 años;
+// después, +1 año; sin ITV, 1 de enero del año de fabricación + 4. null si falta el año y no hay ITV
 ```
 
-La respuesta añade `id` y `activo`.
+La respuesta del vehículo añade `id` y `activo`. En el resumen, consumo y costes son null sin datos suficientes;
+`gastadoAnio` suma todos los registros del vehículo del año actual.
 
 ### Registros del vehículo
 
@@ -350,14 +437,26 @@ Los cinco submódulos tienen las mismas cinco operaciones:
 
 `<registro>` es `repostajes`, `aceites`, `neumaticos`, `mantenimientos` o `itv`.
 
+**Cómo se cuentan los km y el consumo** (pensado para apuntar solo el *trip*):
+
+- Al dar de alta el vehículo se indican los km del cuentakilómetros (`kilometrosIniciales`).
+- En cada repostaje se apunta `kilometrosRecorridos`: los km hechos con el depósito anterior (el *trip*).
+- `kilometros` de cada repostaje lo calcula el backend: km iniciales + suma de los trips, en orden de fecha.
+  Si un repostaje trae `cuentakilometros` (lectura real), la cuenta continúa desde ese valor. Se recalcula
+  todo el vehículo al crear, editar o borrar un repostaje o al cambiar los km iniciales.
+- **Consumo real solo de lleno a lleno**: en un repostaje con `lleno`, litros e importe del tramo son los suyos
+  más los de los parciales desde el lleno anterior; los km del tramo, la suma de sus trips. Los parciales no
+  tienen consumo propio. `consumoReal` = litros × 100 / km; `costePorKilometro` = importe / km.
+- `precioLitro` se guarda tal como se escribe (el del surtidor); si no llega, precioTotal / litros.
+
 Todos los cuerpos llevan `categoriaId` y `metodoPago` (para el gasto) y aceptan `notas`. Todas las respuestas incluyen `id`, `vehiculoId`, `categoriaId`, `categoriaNombre` y `metodoPago`.
 
 ```json
-// repostajes
-{ "fecha": "2026-11-03", "litros": 40, "precioTotal": 60, "kilometros": 50000,
-  "consumoOrdenador": 5.8, "velocidadMedia": 62, "categoriaId": 2, "metodoPago": "TARJETA" }
-// La respuesta añade: precioLitro, kilometrosRecorridos, consumoReal, costePorKilometro
-// (los tres últimos se calculan con el repostaje anterior; null si es el primero)
+// repostajes (hace falta kilometrosRecorridos —el trip— o cuentakilometros; precioLitro y lleno son opcionales)
+{ "fecha": "2026-11-03", "litros": 40.03, "precioTotal": 60, "precioLitro": 1.499, "kilometrosRecorridos": 612,
+  "lleno": true, "cuentakilometros": null, "consumoOrdenador": 5.8, "velocidadMedia": 62, "categoriaId": 2, "metodoPago": "TARJETA" }
+// La respuesta añade: kilometros (cuentakilómetros calculado), kilometrosTramo, consumoReal y costePorKilometro
+// (estos tres solo en los llenos, de lleno a lleno; null en los parciales)
 
 // aceites
 { "fecha": "2026-11-03", "kilometros": 50000, "precio": 80, "categoriaId": 2, "metodoPago": "TARJETA" }
@@ -377,12 +476,28 @@ Todos los cuerpos llevan `categoriaId` y `metodoPago` (para el gasto) y aceptan 
 
 ## Tickets
 
+La app crea los tickets **escaneando**: la IA lee la foto (`/leer`), rellena el gasto y, al guardarlo (`/gasto`),
+el ticket con su foto queda dentro del gasto. El resto de rutas son de la versión anterior y siguen disponibles.
+
 | Método | Ruta | Cuerpo | Respuesta |
 |---|---|---|---|
+| POST | `/api/tickets/leer` | multipart, campo `imagen` | 200 LecturaTicket (no guarda nada) · 503 IA sin configurar · 429 límite gratuito agotado · 502 Groq no responde |
+| POST | `/api/tickets/gasto` | multipart: `datos` (JSON GastoConTicket) e `imagen` | 201 Gasto con `ticketId` · 400 imagen no válida |
+| POST | `/api/tickets/gasto/{gastoId}` | multipart: `imagen` y `comercio` (opcional) | 201 Gasto · 409 ya tiene ticket. Guarda la foto en un gasto ya creado (el de un registro de vehículo escaneado) |
 | GET | `/api/tickets` | — | 200 lista, más reciente primero |
 | POST | `/api/tickets` | TicketRegistro | 201 |
 | GET | `/api/tickets/{id}` | — | 200 |
 | PUT | `/api/tickets/{id}` | TicketRegistro | 200 |
+
+### Chat con la IA
+
+| Método | Ruta | Cuerpo | Respuesta |
+|---|---|---|---|
+| POST | `/api/ia/chat` | `{ pregunta (máx. 500), historial: [{ rol: user/assistant, texto }], moneda }` | 200 `{ respuesta }` · 400 pregunta vacía · 503 IA sin configurar · 429 límite gratuito agotado · 502 Groq no responde |
+
+La conversación no se guarda: la app manda los últimos mensajes y el backend solo usa los 6 últimos. Como contexto
+se manda un resumen compacto (totales y categorías de los últimos tres meses, presupuesto, pagos y cobros fijos y
+objetivos), nunca los movimientos uno a uno, para gastar pocos tokens.
 | DELETE | `/api/tickets/{id}` | — | 204 (borra la imagen; el gasto se conserva) |
 | POST | `/api/tickets/{id}/imagen` | multipart, campo `imagen` | 200 Ticket · 400 formato no permitido · 413 más de 5 MB · 415 no es multipart |
 | GET | `/api/tickets/{id}/imagen` | — | 200 la imagen (`image/jpeg`, `image/png` o `image/webp`) · 404 sin imagen |
@@ -399,7 +514,24 @@ Todos los cuerpos llevan `categoriaId` y `metodoPago` (para el gasto) y aceptan 
 
 // TicketConversion (si no se envía descripción se usa el comercio)
 { "categoriaId": 1, "metodoPago": "TARJETA", "descripcion": null }
+
+// LecturaTicket: cada campo es null si la IA no lo ha podido leer. categoriaId es siempre una de las del usuario
+// (la más parecida). tipo: COMPRA, REPOSTAJE, ITV, ACEITE, NEUMATICOS o MANTENIMIENTO (sin vehículos, siempre COMPRA).
+// vehiculoId: el vehículo cuya matrícula sale en el ticket (admite letras cambiadas de orden). litros y precioLitro, solo en repostajes
+{ "comercio": "ITV DE SIERO", "fecha": "2026-10-19", "importe": 45.32, "metodoPago": "TARJETA", "categoriaId": 4,
+  "tipo": "ITV", "vehiculoId": 1, "litros": null, "precioLitro": null }
+
+// GastoConTicket (parte "datos", con Content-Type application/json): un GastoRegistro más el comercio
+{ "importe": 23.45, "fecha": "2026-11-08T13:20:00", "descripcion": "Mercadona", "metodoPago": "TARJETA",
+  "categoriaId": 2, "comercio": "Mercadona" }
 ```
+
+Lectura con IA:
+
+- Usa un modelo de visión de **Groq** del plan gratuito (`app.ia.groq.modelo`, por defecto `qwen/qwen3.8-27b`, sin razonamiento). Se manda una sola foto (la app la reduce a 1600 px) y se pide un JSON corto.
+- La clave **no va en el repositorio**: variable de entorno `GROQ_API_KEY` o el archivo `secretos.properties` (junto al `pom.xml`, en `.gitignore`) con `app.ia.groq.api-key=...`.
+- Al borrar un gasto con ticket (también al borrar el registro de vehículo que lo creó) se borran el ticket y su foto. Los gastos llevan `ticketId` para pedir la foto con `GET /api/tickets/{ticketId}/imagen`.
+- Los registros de vehículo (repostaje, aceite, neumáticos, mantenimiento, ITV) llevan `gastoId` y `ticketId`. La app, con un ticket de vehículo, crea el registro y después guarda la foto con `POST /api/tickets/gasto/{gastoId}`.
 
 Notas para el frontend:
 
@@ -437,12 +569,9 @@ Solo en el perfil de desarrollo:
 
 Endpoints del diseño inicial que todavía no existen:
 
-- Borrar la cuenta (`DELETE /api/usuarios/me`).
 - Configuración.
 - Etiquetas.
-- Ingresos recurrentes.
 - Objetivos.
-- Recordatorios y calendario.
 - IA: chat, OCR de tickets, resúmenes.
 - Copias de seguridad.
 - Estadísticas de vehículos.

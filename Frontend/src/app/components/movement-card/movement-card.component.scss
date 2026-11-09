@@ -16,3 +16,8 @@
   font-size: 1.05em;
   color: var(--ion-color-medium);
 }
+
+// Hecho con IA: estrellitas en el color de la IA
+.movimiento__origen[name='sparkles'] {
+  color: var(--ion-color-tertiary);
+}

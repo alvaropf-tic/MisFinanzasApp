@@ -1,5 +1,10 @@
 # Despliegue e Infraestructura
 
+> **Despliegue actual (noviembre 2026):** homelab en Raspberry Pi 4 con Docker Compose (PostgreSQL 16, backend
+> Spring Boot y web servida por Nginx, que reenvía `/api` al backend). Acceso privado por Tailscale en
+> `http://finanzas.alvaro-homelab`. Archivos y guía paso a paso en `deploy/homelab/` (README, docker-compose,
+> `.env.example`, `backup.sh` y `deploy.sh`).
+
 > Documento: 10_Despliegue.md
 >
 > Versión: 1.1

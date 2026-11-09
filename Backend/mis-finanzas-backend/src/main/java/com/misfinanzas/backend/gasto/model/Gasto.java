@@ -73,7 +73,8 @@ public class Gasto {
     @JoinColumn(name = "itv_id", unique = true)
     private ITV itv;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    // Al borrar el gasto (también desde un registro de vehículo) se borra su ticket; la foto la borra TicketArchivoListener
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "ticket_id", unique = true)
     private Ticket ticket;
 

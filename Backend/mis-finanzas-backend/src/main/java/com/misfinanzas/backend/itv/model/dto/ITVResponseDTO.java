@@ -36,4 +36,8 @@ public class ITVResponseDTO {
     private String categoriaNombre;
 
     private MetodoPago metodoPago;
+
+    // Gasto que crea el registro y ticket (foto) guardado con él; ticketId es null si no tiene
+    private Long gastoId;
+    private Long ticketId;
 }

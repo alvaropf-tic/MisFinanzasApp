@@ -1,0 +1,9 @@
+// Igual que la cabecera de las pestañas: título centrado en toda la barra y en negrita
+.cabecera__titulo {
+  position: absolute;
+  inset: 0;
+  padding-inline: 96px;
+  text-align: center;
+  font-weight: 700;
+  pointer-events: none;
+}

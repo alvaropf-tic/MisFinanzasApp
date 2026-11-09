@@ -47,6 +47,24 @@ public class GastoService {
         return convertirAResponseDTO(gastoGuardado);
     }
 
+    // Lo usa TicketService al guardar un gasto escaneado: los datos son los del formulario y el ticket guarda la foto
+    public GastoResponseDTO crearGastoConTicket(GastoRegistroDTO registroDTO, Ticket ticket, Usuario usuario) {
+
+        Categoria categoria = obtenerCategoriaDelUsuario(registroDTO.getCategoriaId(), usuario);
+
+        Gasto gasto = new Gasto();
+
+        gasto.setImporte(registroDTO.getImporte());
+        gasto.setFecha(registroDTO.getFecha());
+        gasto.setDescripcion(registroDTO.getDescripcion());
+        gasto.setMetodoPago(registroDTO.getMetodoPago());
+        gasto.setUsuario(usuario);
+        gasto.setCategoria(categoria);
+        gasto.setTicket(ticket);
+
+        return convertirAResponseDTO(gastoRepository.save(gasto));
+    }
+
     // Lo usa TicketService al convertir un ticket: importe y fecha salen del ticket
     public GastoResponseDTO crearGastoDesdeTicket(Ticket ticket, Long categoriaId, MetodoPago metodoPago, String descripcion, Usuario usuario) {
 
@@ -133,6 +151,7 @@ public class GastoService {
 
         comprobarGastoManual(gasto);
 
+        // Su ticket y la foto, si los tiene, se borran con él (cascada en Gasto.ticket)
         gastoRepository.delete(gasto);
     }
 
@@ -171,7 +190,32 @@ public class GastoService {
                 gasto.getMetodoPago(),
                 gasto.getCategoria().getId(),
                 gasto.getCategoria().getNombre(),
-                OrigenGasto.de(gasto)
+                OrigenGasto.de(gasto),
+                gasto.getTicket() != null ? gasto.getTicket().getId() : null,
+                vehiculoDe(gasto),
+                registroDe(gasto)
         );
+    }
+
+    private Long vehiculoDe(Gasto gasto) {
+
+        if (gasto.getRepostaje() != null) return gasto.getRepostaje().getVehiculo().getId();
+        if (gasto.getAceite() != null) return gasto.getAceite().getVehiculo().getId();
+        if (gasto.getNeumatico() != null) return gasto.getNeumatico().getVehiculo().getId();
+        if (gasto.getMantenimiento() != null) return gasto.getMantenimiento().getVehiculo().getId();
+        if (gasto.getItv() != null) return gasto.getItv().getVehiculo().getId();
+
+        return null;
+    }
+
+    private Long registroDe(Gasto gasto) {
+
+        if (gasto.getRepostaje() != null) return gasto.getRepostaje().getId();
+        if (gasto.getAceite() != null) return gasto.getAceite().getId();
+        if (gasto.getNeumatico() != null) return gasto.getNeumatico().getId();
+        if (gasto.getMantenimiento() != null) return gasto.getMantenimiento().getId();
+        if (gasto.getItv() != null) return gasto.getItv().getId();
+
+        return null;
     }
 }

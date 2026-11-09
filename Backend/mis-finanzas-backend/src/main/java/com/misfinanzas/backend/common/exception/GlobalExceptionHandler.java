@@ -47,6 +47,12 @@ public class GlobalExceptionHandler {
         return construirRespuesta(HttpStatus.UNAUTHORIZED, ex.getMessage(), request);
     }
 
+    @ExceptionHandler(ServicioExternoException.class)
+    public ResponseEntity<ErrorResponse> manejarServicioExterno(ServicioExternoException ex, HttpServletRequest request) {
+
+        return construirRespuesta(ex.getEstado(), ex.getMessage(), request);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> manejarIllegalArgumentException(IllegalArgumentException ex, HttpServletRequest request) {
 

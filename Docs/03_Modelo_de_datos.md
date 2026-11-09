@@ -50,7 +50,7 @@ El detalle físico (tablas, columnas y tipos) está en `05_Diseño_Base_Datos.md
 |---|---|
 | Una única entidad `Movimiento` con tipo GASTO / INGRESO | Dos entidades separadas: **Gasto** e **Ingreso**, cada una con sus propias categorías |
 | Identificadores UUID | Identificadores `Long` autoincrementales |
-| `Recurrente` para gastos e ingresos | Solo **GastoRecurrente**. Los ingresos recurrentes quedan pendientes |
+| `Recurrente` para gastos e ingresos | Dos entidades separadas, **GastoRecurrente** e **IngresoRecurrente**, con el mismo funcionamiento |
 | Recurrentes con notificaciones | Sin notificaciones (módulo eliminado) |
 | Vehículo con Repostaje y Mantenimiento | Vehículo con **Repostaje, Aceite, Neumático, Mantenimiento e ITV** |
 | Ticket asociado a un Movimiento con OCR | Ticket independiente con imagen, que se puede **convertir en un Gasto**. OCR pendiente |
@@ -159,6 +159,27 @@ Gasto periódico (suscripciones, seguros, cuotas…). Un proceso automático gen
 
 ---
 
+## IngresoRecurrente
+
+Ingreso periódico (nómina, alquiler cobrado, pensión…). Igual que GastoRecurrente, pero genera Ingresos.
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| id | Long | |
+| importe | Decimal (10,2) | |
+| descripcion | String (255) | Obligatoria |
+| metodoIngreso | MetodoIngreso | |
+| periodicidad | Periodicidad | La misma que la de los gastos recurrentes |
+| fechaInicio | Fecha | |
+| proximaFecha | Fecha | Siguiente vez que se generará el ingreso |
+| fechaFin | Fecha | Opcional |
+| activo | Boolean | Se puede pausar y reanudar |
+| categoriaIngreso | CategoríaIngreso | |
+
+Cada Ingreso generado guarda el recurrente que lo creó (`ingresoRecurrente`, opcional).
+
+---
+
 ## Presupuesto
 
 Límite de gasto de un mes concreto.
@@ -190,6 +211,7 @@ Cada usuario puede registrar **hasta cinco** vehículos.
 | modelo | String (50) |
 | matricula | String (20) |
 | anio | Integer |
+| kilometrosIniciales | Integer, obligatorio al crearlo (km del cuentakilómetros al darlo de alta) |
 | activo | Boolean |
 
 ---
@@ -205,14 +227,17 @@ Los cinco tipos de registro comparten la misma idea: **cada registro crea su Gas
 | fecha | Fecha | |
 | litros | Decimal (10,2) | |
 | precioTotal | Decimal (10,2) | |
-| precioLitro | Decimal (10,3) | Calculado: precioTotal / litros |
-| kilometros | Integer | Cuentakilómetros |
+| precioLitro | Decimal (10,3) | El del surtidor; si no se indica, precioTotal / litros |
+| kilometrosRecorridos | Integer | Trip: km hechos con el depósito anterior |
+| cuentakilometros | Integer | Opcional: lectura real que corrige la cuenta |
+| lleno | Boolean | Si se llenó el depósito (por defecto sí) |
+| kilometros | Integer | Cuentakilómetros calculado: iniciales + trips (o la última lectura) |
 | consumoOrdenador | Decimal | Opcional, el que marca el coche |
 | velocidadMedia | Decimal | Opcional |
 | metodoPago | MetodoPago | También se guarda aquí, además de en el gasto |
 | notas | String (500) | |
 
-En la respuesta se calculan, comparando con el repostaje anterior: **kilometrosRecorridos**, **consumoReal** (l/100 km) y **costePorKilometro**.
+En los repostajes llenos se calculan, de lleno a lleno (sumando los parciales de en medio): **kilometrosTramo**, **consumoReal** (l/100 km) y **costePorKilometro**. El resumen del vehículo da el consumo medio y el coste por km de todos los tramos.
 
 ### Aceite
 
@@ -273,6 +298,7 @@ Usuario
 ├── Gastos (1:N)
 ├── Ingresos (1:N)
 ├── Gastos recurrentes (1:N)
+├── Ingresos recurrentes (1:N)
 ├── Presupuestos (1:N, uno por mes)
 ├── Vehículos (1:N, máximo 5)
 └── Tickets (1:N)
@@ -320,7 +346,7 @@ Todos los gastos consumen presupuesto, se paguen como se paguen. La filosofía o
 ## Categorías
 
 - El nombre no se puede repetir dentro del mismo usuario (409).
-- **No se pueden borrar si tienen gastos, recurrentes o ingresos asociados** (409).
+- **No se pueden borrar si tienen gastos, ingresos o recurrentes asociados** (409). Vale para las de gasto y las de ingreso.
 
 ## Vehículos
 
@@ -337,7 +363,9 @@ Todos los gastos consumen presupuesto, se paguen como se paguen. La filosofía o
 - Todos los cálculos mensuales usan el intervalo `[día 1 a las 00:00, día 1 del mes siguiente a las 00:00)`, así un movimiento del día 1 a medianoche nunca cuenta en dos meses.
 - Los filtros `desde` / `hasta` de los listados incluyen los dos días completos.
 
-## Gastos recurrentes
+## Gastos e ingresos recurrentes
+
+Las reglas son las mismas para los dos (los de ingresos generan ingresos en vez de gastos).
 
 - `fechaFin` no puede ser anterior a `fechaInicio`, ni `proximaFecha` anterior a `fechaInicio` (400).
 - Los mensuales, trimestrales, semestrales y anuales **respetan el día de `fechaInicio`**: uno del día 31 se cobra el 28/29 en febrero y vuelve al 31 en los meses que lo tienen.
@@ -367,9 +395,7 @@ Del diseño inicial siguen pendientes:
 |---|---|
 | Configuración | Moneda, idioma, tema, conservación de tickets, proveedor y API Key de IA |
 | Etiqueta | Clasificación secundaria de gastos (relación N:M) |
-| IngresoRecurrente | Nómina y otros ingresos periódicos |
 | Objetivo | Metas de ahorro |
-| Recordatorio | Eventos del calendario (seguros, revisiones…) |
 | Conversación IA / Mensaje IA | Chat con la IA |
 | Datos de OCR del Ticket | fechaOCR, procesado |
 

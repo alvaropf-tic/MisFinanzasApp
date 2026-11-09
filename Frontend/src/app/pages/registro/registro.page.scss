@@ -1,0 +1,36 @@
+// Casilla de términos y privacidad (obligatoria)
+.aceptacion {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--ion-color-step-150, rgba(127, 127, 127, 0.25));
+  border-radius: 12px;
+
+  ion-checkbox {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: var(--ion-color-medium);
+  }
+
+  a {
+    color: var(--ion-color-primary);
+    font-weight: 600;
+  }
+}
+
+.aceptacion--error {
+  border-color: var(--ion-color-danger);
+}
+
+.aceptacion__error {
+  margin: -4px 0 0;
+  font-size: 0.8rem;
+  color: var(--ion-color-danger);
+}

@@ -16,8 +16,9 @@ import type { Observable } from 'rxjs';
 import { AvisoService } from '../../core/aviso.service';
 import type { Presupuesto } from '../../models/presupuesto.model';
 import { PresupuestoService } from '../../services/presupuesto.service';
+import { monedaActual, simboloMoneda } from '../../core/moneda';
 
-const FORMATO_EUROS = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
+const FORMATO_EUROS = new Intl.NumberFormat('es-ES', { style: 'currency', currency: monedaActual() });
 
 /**
  * Hoja para definir, cambiar o quitar el presupuesto de un mes. Con `presupuesto` edita; sin él, crea.
@@ -30,6 +31,9 @@ const FORMATO_EUROS = new Intl.NumberFormat('es-ES', { style: 'currency', curren
   imports: [ReactiveFormsModule, IonContent, IonFooter, IonButton, IonIcon, IonSpinner],
 })
 export class PresupuestoFormComponent implements OnInit {
+  /** Símbolo de la moneda elegida para el campo de importe. */
+  readonly simboloMoneda = simboloMoneda();
+
   private readonly presupuestoService = inject(PresupuestoService);
   private readonly avisos = inject(AvisoService);
   private readonly modalController = inject(ModalController);

@@ -1,0 +1,104 @@
+<ion-content>
+  <form id="form-recordatorio" class="hoja" [formGroup]="formulario" (ngSubmit)="guardar()">
+    <header class="hoja__cabecera">
+      <span class="hoja__insignia" aria-hidden="true">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </span>
+      <h1>{{ recordatorio ? 'Editar recordatorio' : 'Nuevo recordatorio' }}</h1>
+      <ion-button fill="clear" color="medium" class="hoja__cerrar" (click)="cancelar()" aria-label="Cerrar">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </header>
+
+    <section class="hoja__seccion">
+      <h2>Qué</h2>
+      <div class="detalles">
+        <div class="detalles__fila">
+          <ion-icon name="text-outline" aria-hidden="true"></ion-icon>
+          <ion-input
+            formControlName="titulo"
+            aria-label="Título"
+            placeholder="Seguro del coche, revisión, renovar el DNI…"
+            [maxlength]="100"
+          ></ion-input>
+        </div>
+        <div class="detalles__fila">
+          <ion-icon name="create-outline" aria-hidden="true"></ion-icon>
+          <ion-input
+            formControlName="nota"
+            aria-label="Nota"
+            placeholder="Nota (opcional)"
+            [maxlength]="255"
+          ></ion-input>
+        </div>
+      </div>
+      @if (tituloInvalido()) {
+        <p class="hoja__error">Ponle un título</p>
+      }
+    </section>
+
+    <section class="hoja__seccion">
+      <h2>Cuándo</h2>
+      <div class="detalles">
+        <div class="detalles__fila">
+          <ion-icon name="calendar-outline" aria-hidden="true"></ion-icon>
+          <span class="detalles__etiqueta">Fecha</span>
+          <ion-datetime-button datetime="fecha-recordatorio"></ion-datetime-button>
+        </div>
+      </div>
+    </section>
+
+    <section class="hoja__seccion">
+      <h2>Se repite</h2>
+      <div class="chips" role="radiogroup" aria-label="Repetición">
+        @for (r of repeticiones; track r.valor) {
+          <button
+            type="button"
+            class="chip"
+            role="radio"
+            [class.chip--activo]="formulario.controls.repeticion.value === r.valor"
+            [attr.aria-checked]="formulario.controls.repeticion.value === r.valor"
+            (click)="formulario.controls.repeticion.setValue(r.valor)"
+          >
+            {{ r.nombre }}
+          </button>
+        }
+      </div>
+    </section>
+
+    <ion-modal [keepContentsMounted]="true">
+      <ng-template>
+        <ion-datetime
+          id="fecha-recordatorio"
+          formControlName="fecha"
+          presentation="date"
+          locale="es-ES"
+          [firstDayOfWeek]="1"
+          [showDefaultButtons]="true"
+          doneText="Aceptar"
+          cancelText="Cancelar"
+        ></ion-datetime>
+      </ng-template>
+    </ion-modal>
+
+    @if (recordatorio) {
+      <div class="recordatorio__acciones">
+        <ion-button fill="clear" color="danger" [disabled]="enviando()" (click)="eliminar()">
+          <ion-icon slot="start" name="trash-outline" aria-hidden="true"></ion-icon>
+          Eliminar recordatorio
+        </ion-button>
+      </div>
+    }
+  </form>
+</ion-content>
+
+<ion-footer class="hoja__pie">
+  <ion-button type="submit" form="form-recordatorio" expand="block" color="tertiary" [disabled]="enviando()">
+    @if (enviando()) {
+      <ion-spinner name="crescent"></ion-spinner>
+    } @else {
+      <ion-icon slot="start" name="checkmark-outline" aria-hidden="true"></ion-icon>
+      Guardar
+    }
+  </ion-button>
+</ion-footer>

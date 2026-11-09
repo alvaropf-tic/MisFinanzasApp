@@ -2,6 +2,7 @@ package com.misfinanzas.backend.usuario;
 
 import com.misfinanzas.backend.usuario.model.Usuario;
 import com.misfinanzas.backend.usuario.model.dto.CambioPasswordDTO;
+import com.misfinanzas.backend.usuario.model.dto.EliminarCuentaDTO;
 import com.misfinanzas.backend.usuario.model.dto.UsuarioActualizarDTO;
 import com.misfinanzas.backend.usuario.model.dto.UsuarioRegistroDTO;
 import com.misfinanzas.backend.usuario.model.dto.UsuarioResponseDTO;
@@ -22,7 +23,10 @@ public class UsuarioController {
 
     private final UsuarioService usuarioService;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    private final CuentaService cuentaService;
+
+    public UsuarioController(UsuarioService usuarioService, CuentaService cuentaService) {
+        this.cuentaService = cuentaService;
         this.usuarioService = usuarioService;
     }
 
@@ -55,6 +59,15 @@ public class UsuarioController {
         Usuario usuario = (Usuario) authentication.getPrincipal();
 
         usuarioService.cambiarPassword(cambioPasswordDTO, usuario);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    // Borra la cuenta y todos sus datos (gastos, vehículos, fotos de tickets...). 400 si la contraseña no es correcta
+    @PostMapping("/me/eliminar")
+    public ResponseEntity<Void> eliminarCuenta(@Valid @RequestBody EliminarCuentaDTO dto, Authentication authentication) {
+
+        cuentaService.eliminarCuenta(dto.getPassword(), (Usuario) authentication.getPrincipal());
 
         return ResponseEntity.noContent().build();
     }

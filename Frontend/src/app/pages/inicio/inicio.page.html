@@ -1,4 +1,4 @@
-<app-cabecera titulo="Inicio"></app-cabecera>
+<app-cabecera titulo="Mis Finanzas"></app-cabecera>
 
 <ion-content>
   <ion-refresher slot="fixed" (ionRefresh)="refrescar($event)">
@@ -17,9 +17,15 @@
   <div class="inicio">
     <!-- Saldo del mes -->
     <section class="saldo">
-      <p class="saldo__mes">{{ nombreMes() }}</p>
+      <div class="saldo__arriba">
+        <p class="saldo__mes">{{ nombreMes() }}</p>
+        <a class="saldo__enlace" routerLink="/estadisticas">
+          <ion-icon name="stats-chart-outline" aria-hidden="true"></ion-icon>
+          Estadísticas
+        </a>
+      </div>
       <p class="saldo__etiqueta">Saldo del mes</p>
-      <p class="saldo__importe">{{ r.saldo > 0 ? '+' : '' }}{{ r.saldo | currency: 'EUR' }}</p>
+      <p class="saldo__importe">{{ r.saldo > 0 ? '+' : '' }}{{ r.saldo | currency }}</p>
       <div class="saldo__totales">
         <div class="saldo__total">
           <span class="saldo__icono saldo__icono--ingreso" aria-hidden="true">
@@ -27,7 +33,7 @@
           </span>
           <div>
             <span class="saldo__total-etiqueta">Ingresos</span>
-            <strong>{{ r.ingresos | currency: 'EUR' }}</strong>
+            <strong>{{ r.ingresos | currency }}</strong>
           </div>
         </div>
         <div class="saldo__total">
@@ -36,11 +42,21 @@
           </span>
           <div>
             <span class="saldo__total-etiqueta">Gastos</span>
-            <strong>{{ r.gastos | currency: 'EUR' }}</strong>
+            <strong>{{ r.gastos | currency }}</strong>
           </div>
         </div>
       </div>
     </section>
+
+    <!-- Atajo al escáner de tickets: la IA rellena el gasto con la foto -->
+    <button type="button" class="escaner" (click)="escanearTicket()">
+      <span class="escaner__icono" aria-hidden="true"><ion-icon name="scan-outline"></ion-icon></span>
+      <span class="escaner__texto">
+        <strong>Escanear un ticket</strong>
+        <span>Haz una foto y la IA te deja el gasto rellenado</span>
+      </span>
+      <ion-icon class="escaner__camara" name="camera-outline" aria-hidden="true"></ion-icon>
+    </button>
 
     <!-- Presupuesto -->
     <section class="tarjeta">
@@ -56,8 +72,8 @@
 
       @if (presupuesto(); as p) {
       <p class="presupuesto__cifras">
-        <strong>{{ p.gastado | currency: 'EUR' }}</strong>
-        <span> de {{ p.importe | currency: 'EUR' }}</span>
+        <strong>{{ p.gastado | currency }}</strong>
+        <span> de {{ p.importe | currency }}</span>
       </p>
       <div
         [class]="'barra barra--' + estado()"
@@ -86,10 +102,31 @@
       }
     </section>
 
-    <!-- Próximos pagos (gastos recurrentes activos) -->
+    <!-- Objetivos de ahorro (los que están en curso; si no hay, invitación a crear uno) -->
     <section class="tarjeta">
       <header class="tarjeta__cabecera">
-        <h2>Próximos pagos</h2>
+        <h2>Objetivos de ahorro</h2>
+        <ion-button fill="clear" size="small" routerLink="/objetivos">
+          {{ objetivos().length > 0 ? 'Ver todos' : 'Crear' }}
+          <ion-icon slot="end" name="chevron-forward-outline" aria-hidden="true"></ion-icon>
+        </ion-button>
+      </header>
+      @for (o of objetivos(); track o.id) {
+      <a class="inicio__objetivo" [routerLink]="['/objetivos', o.id]"
+        ><app-fila-objetivo [objetivo]="o"></app-fila-objetivo
+      ></a>
+      } @empty {
+      <p class="tarjeta__vacio">
+        <ion-icon name="trophy-outline" aria-hidden="true"></ion-icon>
+        Ponte una meta y ve apartando dinero para ella.
+      </p>
+      }
+    </section>
+
+    <!-- Próximos pagos y cobros (recurrentes activos) -->
+    <section class="tarjeta">
+      <header class="tarjeta__cabecera">
+        <h2>Próximos pagos y cobros</h2>
         <ion-button fill="clear" size="small" routerLink="/recurrentes">
           Ver todos
           <ion-icon slot="end" name="chevron-forward-outline" aria-hidden="true"></ion-icon>
@@ -100,7 +137,7 @@
       } @empty {
       <p class="tarjeta__vacio">
         <ion-icon name="repeat-outline" aria-hidden="true"></ion-icon>
-        No tienes pagos recurrentes activos.
+        No tienes pagos ni cobros recurrentes activos.
       </p>
       }
     </section>

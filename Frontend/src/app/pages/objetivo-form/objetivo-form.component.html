@@ -1,0 +1,121 @@
+<ion-content>
+  <form id="form-objetivo" class="hoja" [formGroup]="formulario" (ngSubmit)="guardar()">
+    <header class="hoja__cabecera">
+      <span class="hoja__insignia" aria-hidden="true">
+        <ion-icon [name]="formulario.controls.icono.value"></ion-icon>
+      </span>
+      <h1>{{ objetivo ? 'Editar objetivo' : 'Nuevo objetivo' }}</h1>
+      <ion-button fill="clear" color="medium" class="hoja__cerrar" (click)="cancelar()" aria-label="Cerrar">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </header>
+
+    <label class="hoja__importe" [class.hoja__importe--error]="invalido('importeObjetivo')">
+      <input
+        formControlName="importeObjetivo"
+        type="number"
+        inputmode="decimal"
+        min="0.01"
+        step="0.01"
+        placeholder="0,00"
+        aria-label="Cuánto quieres ahorrar"
+      />
+      <span class="hoja__moneda" aria-hidden="true">{{ simboloMoneda }}</span>
+    </label>
+    @if (invalido('importeObjetivo')) {
+      <p class="hoja__error hoja__error--centrado">Indica cuánto quieres ahorrar</p>
+    }
+
+    <section class="hoja__seccion">
+      <h2>Nombre</h2>
+      <div class="detalles">
+        <div class="detalles__fila">
+          <ion-icon name="create-outline" aria-hidden="true"></ion-icon>
+          <ion-input
+            formControlName="nombre"
+            aria-label="Nombre del objetivo"
+            placeholder="Vacaciones, colchón, coche nuevo…"
+            [maxlength]="100"
+          ></ion-input>
+        </div>
+      </div>
+      @if (invalido('nombre')) {
+        <p class="hoja__error">Ponle un nombre</p>
+      }
+    </section>
+
+    <section class="hoja__seccion">
+      <h2>Icono</h2>
+      <div class="iconos" role="radiogroup" aria-label="Icono">
+        @for (i of iconos; track i.icono) {
+          <button
+            type="button"
+            class="icono"
+            role="radio"
+            [class.icono--activo]="formulario.controls.icono.value === i.icono"
+            [attr.aria-checked]="formulario.controls.icono.value === i.icono"
+            [attr.aria-label]="i.nombre"
+            [title]="i.nombre"
+            (click)="formulario.controls.icono.setValue(i.icono)"
+          >
+            <ion-icon [name]="i.icono" aria-hidden="true"></ion-icon>
+          </button>
+        }
+      </div>
+    </section>
+
+    <section class="hoja__seccion">
+      <h2>Fecha límite</h2>
+      <div class="detalles">
+        <div class="detalles__fila">
+          <ion-icon name="flag-outline" aria-hidden="true"></ion-icon>
+          <ion-toggle formControlName="conFecha" justify="space-between">Quiero conseguirlo para una fecha</ion-toggle>
+        </div>
+        @if (formulario.controls.conFecha.value) {
+          <div class="detalles__fila">
+            <ion-icon name="calendar-outline" aria-hidden="true"></ion-icon>
+            <span class="detalles__etiqueta">Fecha</span>
+            <ion-datetime-button datetime="fecha-objetivo"></ion-datetime-button>
+          </div>
+        }
+      </div>
+      <p class="hoja__ayuda">Con fecha, la app te dice cuánto apartar cada mes para llegar a tiempo.</p>
+    </section>
+
+    <ion-modal [keepContentsMounted]="true">
+      <ng-template>
+        <ion-datetime
+          id="fecha-objetivo"
+          formControlName="fechaLimite"
+          presentation="date"
+          locale="es-ES"
+          [min]="manana"
+          [firstDayOfWeek]="1"
+          [showDefaultButtons]="true"
+          doneText="Aceptar"
+          cancelText="Cancelar"
+        ></ion-datetime>
+      </ng-template>
+    </ion-modal>
+
+    @if (objetivo) {
+      <div class="objetivo__acciones">
+        <ion-button fill="clear" color="danger" [disabled]="enviando()" (click)="eliminar()">
+          <ion-icon slot="start" name="trash-outline" aria-hidden="true"></ion-icon>
+          Eliminar objetivo
+        </ion-button>
+      </div>
+    }
+  </form>
+</ion-content>
+
+<ion-footer class="hoja__pie">
+  <ion-button type="submit" form="form-objetivo" expand="block" [disabled]="enviando()">
+    @if (enviando()) {
+      <ion-spinner name="crescent"></ion-spinner>
+    } @else {
+      <ion-icon slot="start" name="checkmark-outline" aria-hidden="true"></ion-icon>
+      Guardar
+    }
+  </ion-button>
+</ion-footer>

@@ -1,0 +1,52 @@
+<app-cabecera-pantalla [titulo]="objetivo()?.nombre ?? 'Objetivo'" volverA="/objetivos">
+  <ion-button cabeceraAccion (click)="editar()" [disabled]="!objetivo()" aria-label="Editar objetivo">
+    <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+  </ion-button>
+</app-cabecera-pantalla>
+
+<ion-content>
+  @if (cargando()) {
+  <app-empty-state><ion-spinner name="crescent"></ion-spinner></app-empty-state>
+  } @else if (error()) {
+  <app-empty-state icono="cloud-offline-outline" titulo="No se ha podido cargar el objetivo">
+    <ion-button fill="outline" (click)="cargar()">Reintentar</ion-button>
+  </app-empty-state>
+  } @else if (objetivo(); as o) {
+  <div class="detalle">
+    <section class="tarjeta">
+      <app-fila-objetivo [objetivo]="o"></app-fila-objetivo>
+      @if (!o.completado) {
+      <p class="detalle__falta">Te faltan <strong>{{ o.restante | currency }}</strong></p>
+      }
+      <div class="detalle__botones">
+        <ion-button color="success" shape="round" (click)="mover('aportar')">
+          <ion-icon slot="start" name="add" aria-hidden="true"></ion-icon>
+          Aportar
+        </ion-button>
+        <ion-button color="danger" fill="outline" shape="round" [disabled]="o.ahorrado <= 0" (click)="mover('retirar')">
+          <ion-icon slot="start" name="remove" aria-hidden="true"></ion-icon>
+          Retirar
+        </ion-button>
+      </div>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Historial</h2>
+      @for (a of o.aportaciones; track a.id) {
+      <button type="button" class="aportacion" (click)="borrarAportacion(a)">
+        <span class="aportacion__texto">
+          <strong>{{ a.nota || (a.importe > 0 ? 'Aportación' : 'Retirada') }}</strong>
+          <span>{{ a.fecha | date: 'd MMM y' }}</span>
+        </span>
+        <span class="aportacion__importe" [class.aportacion__importe--retirada]="a.importe < 0">
+          {{ a.importe > 0 ? '+' : '−' }}{{ (a.importe < 0 ? -a.importe : a.importe) | currency }}
+        </span>
+        <ion-icon name="trash-outline" class="aportacion__borrar" aria-label="Borrar"></ion-icon>
+      </button>
+      } @empty {
+      <p class="detalle__vacio">Aún no has apartado nada. Empieza con «Aportar».</p>
+      }
+    </section>
+  </div>
+  }
+</ion-content>

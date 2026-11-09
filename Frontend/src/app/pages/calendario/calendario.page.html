@@ -1,0 +1,170 @@
+<app-cabecera titulo="Calendario">
+  <ion-button cabeceraAccion (click)="irAHoy()" aria-label="Ir a hoy">
+    <ion-icon slot="icon-only" name="today-outline"></ion-icon>
+  </ion-button>
+</app-cabecera>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refrescar($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  @if (cargandoInicial()) {
+  <app-empty-state>
+    <ion-spinner name="crescent"></ion-spinner>
+  </app-empty-state>
+  } @else if (errorCarga()) {
+  <app-empty-state icono="cloud-offline-outline" titulo="No se ha podido cargar el calendario">
+    <ion-button fill="outline" (click)="cargar()">Reintentar</ion-button>
+  </app-empty-state>
+  } @else {
+  <div class="calendario" [class.calendario--cargando]="cargando()">
+    <div class="mes">
+      <ion-button fill="clear" (click)="cambiarMes(-1)" aria-label="Mes anterior">
+        <ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon>
+      </ion-button>
+      <h2>{{ nombreMes() }}</h2>
+      <ion-button fill="clear" (click)="cambiarMes(1)" aria-label="Mes siguiente">
+        <ion-icon slot="icon-only" name="chevron-forward-outline"></ion-icon>
+      </ion-button>
+    </div>
+
+    <section class="tarjeta rejilla">
+      <div class="rejilla__semana rejilla__semana--cabecera" aria-hidden="true">
+        @for (d of diasSemana; track $index) {
+        <span>{{ d }}</span>
+        }
+      </div>
+      @for (semana of semanas(); track semana[0].fecha) {
+      <div class="rejilla__semana">
+        @for (dia of semana; track dia.fecha) {
+        <button
+          type="button"
+          class="dia"
+          [class.dia--fuera]="!dia.delMes"
+          [class.dia--hoy]="dia.fecha === hoy()"
+          [class.dia--elegido]="dia.fecha === seleccionado()"
+          [attr.aria-pressed]="dia.fecha === seleccionado()"
+          [attr.aria-label]="etiquetaDia(dia)"
+          (click)="elegir(dia)"
+        >
+          <span class="dia__numero">{{ dia.numero }}</span>
+          <span class="dia__puntos" aria-hidden="true">
+            @if (dia.gastos) {
+            <i class="punto punto--gasto"></i>
+            } @if (dia.ingresos) {
+            <i class="punto punto--ingreso"></i>
+            } @if (dia.previstos) {
+            <i class="punto punto--previsto"></i>
+            } @if (dia.avisos) {
+            <i class="punto punto--aviso"></i>
+            }
+          </span>
+        </button>
+        }
+      </div>
+      }
+
+      <div class="leyenda">
+        <span><i class="punto punto--gasto"></i>Gastos</span>
+        <span><i class="punto punto--ingreso"></i>Ingresos</span>
+        <span><i class="punto punto--previsto"></i>Previstos</span>
+        <span><i class="punto punto--aviso"></i>Avisos</span>
+      </div>
+    </section>
+
+    <section class="totales">
+      <div>
+        <span>Gastos</span>
+        <strong>{{ totales().gastos | currency }}</strong>
+      </div>
+      <div>
+        <span>Ingresos</span>
+        <strong>{{ totales().ingresos | currency }}</strong>
+      </div>
+      <div>
+        <span>Previsto</span>
+        <strong>{{ totales().previsto | currency }}</strong>
+      </div>
+    </section>
+
+    <section class="tarjeta tarjeta--dia">
+      <header class="dia-panel__cabecera">
+        <h3>{{ nombreDia() }}</h3>
+        <button type="button" class="dia-panel__anadir" (click)="eligiendoTipo.set(true)">
+          <ion-icon name="add" aria-hidden="true"></ion-icon>
+          Añadir
+        </button>
+      </header>
+      @if (delDia().movimientos.length === 0 && delDia().previstos.length === 0 && delDia().avisos.length === 0) {
+      <p class="tarjeta__vacio">
+        <ion-icon name="calendar-clear-outline" aria-hidden="true"></ion-icon>
+        Nada este día.
+      </p>
+      } @for (a of delDia().avisos; track a.clave) {
+      <button type="button" class="previsto previsto--aviso" (click)="abrirAviso(a)">
+        <span class="previsto__icono" aria-hidden="true">
+          <ion-icon [name]="a.vehiculoId !== null ? 'car-sport-outline' : 'notifications-outline'"></ion-icon>
+        </span>
+        <span class="previsto__texto">
+          <strong>{{ a.titulo }}</strong>
+          <span>{{ a.subtitulo }}</span>
+        </span>
+      </button>
+      } @for (p of delDia().previstos; track p.clave) {
+      <button
+        type="button"
+        class="previsto"
+        [class.previsto--ingreso]="p.recurrente.tipo === 'ingreso'"
+        (click)="abrirPrevisto(p)"
+      >
+        <span class="previsto__icono" aria-hidden="true">
+          <ion-icon name="repeat-outline"></ion-icon>
+        </span>
+        <span class="previsto__texto">
+          <strong>{{ p.recurrente.descripcion }}</strong>
+          <span>Previsto · {{ p.recurrente.categoriaNombre }}</span>
+        </span>
+        <span class="previsto__importe"
+          >{{ p.recurrente.tipo === 'ingreso' ? '+' : '−' }}{{ p.recurrente.importe | currency }}</span
+        >
+      </button>
+      } @if (delDia().movimientos.length > 0) {
+      <ion-list lines="none">
+        @for (m of delDia().movimientos; track clave(m)) {
+        <app-movement-card [movimiento]="m" [pulsable]="true" (click)="abrirMovimiento(m)"></app-movement-card>
+        }
+      </ion-list>
+      }
+    </section>
+  </div>
+  }
+</ion-content>
+
+<!-- "Añadir" del día elegido: qué se registra (modal centrado común en theme/hojas.scss) -->
+<ion-modal class="modal-centrado" [isOpen]="eligiendoTipo()" (didDismiss)="eligiendoTipo.set(false)">
+  <ng-template>
+    <div class="eleccion">
+      <h2>Añadir el {{ nombreDiaCorto() }}</h2>
+      <div class="calendario__opciones">
+        <button type="button" class="eleccion__opcion" (click)="anadir('gasto')">
+          <ion-icon name="trending-down-outline" color="danger" aria-hidden="true"></ion-icon>
+          <span>Gasto</span>
+        </button>
+        <button type="button" class="eleccion__opcion" (click)="anadir('ingreso')">
+          <ion-icon name="trending-up-outline" color="success" aria-hidden="true"></ion-icon>
+          <span>Ingreso</span>
+        </button>
+        <button type="button" class="eleccion__opcion" (click)="anadir('recurrente')">
+          <ion-icon name="repeat-outline" color="warning" aria-hidden="true"></ion-icon>
+          <span>Recurrente</span>
+        </button>
+        <button type="button" class="eleccion__opcion" (click)="anadir('recordatorio')">
+          <ion-icon name="notifications-outline" color="tertiary" aria-hidden="true"></ion-icon>
+          <span>Recordatorio</span>
+        </button>
+      </div>
+      <ion-button fill="clear" color="medium" expand="block" (click)="eligiendoTipo.set(false)">Cancelar</ion-button>
+    </div>
+  </ng-template>
+</ion-modal>

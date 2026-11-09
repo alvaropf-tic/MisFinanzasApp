@@ -1,0 +1,60 @@
+<nav class="lateral" aria-label="Menú principal">
+  <div class="lateral__marca">
+    <span class="lateral__logo" aria-hidden="true"><ion-icon name="wallet-outline"></ion-icon></span>
+    <strong>Mis Finanzas</strong>
+  </div>
+
+  <ul class="lateral__grupo">
+    @for (e of principales; track e.ruta) {
+      <li>
+        <button
+          type="button"
+          class="lateral__enlace"
+          [class.lateral__enlace--activo]="activo(e.ruta)"
+          [attr.aria-current]="activo(e.ruta) ? 'page' : null"
+          (click)="ir(e.ruta)"
+        >
+          <ion-icon [name]="e.icono" aria-hidden="true"></ion-icon>{{ e.etiqueta }}
+        </button>
+      </li>
+    }
+  </ul>
+
+  <p class="lateral__titulo">Más</p>
+  <ul class="lateral__grupo">
+    @for (e of secundarios; track e.ruta) {
+      <li>
+        <button
+          type="button"
+          class="lateral__enlace"
+          [class.lateral__enlace--activo]="activo(e.ruta)"
+          [attr.aria-current]="activo(e.ruta) ? 'page' : null"
+          (click)="ir(e.ruta)"
+        >
+          <ion-icon [name]="e.icono" aria-hidden="true"></ion-icon>{{ e.etiqueta }}
+        </button>
+      </li>
+    }
+  </ul>
+
+  <ul class="lateral__grupo lateral__grupo--pie">
+    @for (e of cuenta; track e.ruta) {
+      <li>
+        <button
+          type="button"
+          class="lateral__enlace"
+          [class.lateral__enlace--activo]="activo(e.ruta)"
+          [attr.aria-current]="activo(e.ruta) ? 'page' : null"
+          (click)="ir(e.ruta)"
+        >
+          <ion-icon [name]="e.icono" aria-hidden="true"></ion-icon>{{ e.etiqueta }}
+        </button>
+      </li>
+    }
+    <li>
+      <button type="button" class="lateral__enlace lateral__enlace--salir" (click)="cerrarSesion()">
+        <ion-icon name="log-out-outline" aria-hidden="true"></ion-icon>Cerrar sesión
+      </button>
+    </li>
+  </ul>
+</nav>

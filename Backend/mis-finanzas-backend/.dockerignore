@@ -1,0 +1,10 @@
+target
+data
+.idea
+.mvn
+mvnw
+mvnw.cmd
+*.iml
+HELP.md
+# Nunca dentro de la imagen: la clave de Groq va por variable de entorno
+secretos.properties

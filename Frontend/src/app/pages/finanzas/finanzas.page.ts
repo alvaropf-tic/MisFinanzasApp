@@ -22,6 +22,7 @@ import {
   IonSpinner,
   IonText,
   ModalController,
+  NavController,
   type RefresherCustomEvent,
   type SegmentCustomEvent,
   type SelectCustomEvent,
@@ -32,6 +33,7 @@ import {
   cloudOfflineOutline,
   filterOutline,
   repeatOutline,
+  scanOutline,
   trendingDownOutline,
   trendingUpOutline,
   walletOutline,
@@ -41,18 +43,27 @@ import { firstValueFrom } from 'rxjs';
 import { MovementCardComponent } from '../../components/movement-card/movement-card.component';
 import { AvisoService } from '../../core/aviso.service';
 import type { Categoria } from '../../models/categoria.model';
-import type { ResumenRecurrentes } from '../../models/gasto-recurrente.model';
 import { type Movimiento, type TipoMovimiento, esGasto } from '../../models/movimiento.model';
+import type { ResumenRecurrentes, ResumenRecurrentesMes } from '../../models/recurrente.model';
 import { CategoriaIngresoService } from '../../services/categoria-ingreso.service';
 import { CategoriaService } from '../../services/categoria.service';
-import { GastoRecurrenteService } from '../../services/gasto-recurrente.service';
 import { GastoService } from '../../services/gasto.service';
 import { IngresoService } from '../../services/ingreso.service';
+import { EscanerTicketService } from '../../services/escaner-ticket.service';
+import { RecurrenteService } from '../../services/recurrente.service';
+import { RegistroGastoService } from '../../services/registro-gasto.service';
+import { TicketService } from '../../services/ticket.service';
+import { VehiculoService } from '../../services/vehiculo.service';
 import { CabeceraComponent } from '../../shared/cabecera/cabecera.component';
 import { EmptyStateComponent } from '../../shared/empty-state/empty-state.component';
 import { ListaMovimientos, type PedirPagina } from '../../shared/lista-movimientos';
-import { MovimientoFormComponent } from '../movimiento-form/movimiento-form.component';
-import { MENSAJES_RECURRENTE, abrirFormularioRecurrente } from '../recurrente-form/recurrente-form.component';
+import {
+  ORIGENES_VEHICULO,
+  abrirFormularioMovimiento,
+  mensajeMovimiento,
+} from '../movimiento-form/movimiento-form.component';
+import { abrirFormularioRecurrente, mensajeRecurrente } from '../recurrente-form/recurrente-form.component';
+import { monedaActual } from '../../core/moneda';
 
 const TAMANIO_PAGINA = 20;
 
@@ -102,7 +113,12 @@ export class FinanzasPage implements OnInit {
   private readonly categoriaIngresoService = inject(CategoriaIngresoService);
   private readonly avisos = inject(AvisoService);
   private readonly modalController = inject(ModalController);
-  private readonly recurrenteService = inject(GastoRecurrenteService);
+  private readonly navController = inject(NavController);
+  private readonly recurrenteService = inject(RecurrenteService);
+  private readonly ticketService = inject(TicketService);
+  private readonly escaner = inject(EscanerTicketService);
+  private readonly registroGasto = inject(RegistroGastoService);
+  private readonly vehiculoService = inject(VehiculoService);
 
   readonly lista = new ListaMovimientos((error) => void this.avisos.errorHttp(error));
 
@@ -163,20 +179,35 @@ export class FinanzasPage implements OnInit {
 
   readonly eligiendoTipo = signal(false);
 
-  /** Sección de pagos recurrentes del mes actual; se oculta al filtrar solo ingresos. */
-  readonly recurrentes = signal<ResumenRecurrentes | null>(null);
-  readonly seccionRecurrentes = computed(() => (this.tipo() === 'ingreso' ? null : this.recurrentes()));
-  /** "Próximo: Netflix · 15 nov · 9,99 €", o vacío si no hay activos. */
-  readonly proximoCobro = computed(() => {
+  /** Pagos y cobros recurrentes del mes actual. */
+  readonly recurrentes = signal<ResumenRecurrentesMes | null>(null);
+  /**
+   * Sección de recurrentes según el filtro de tipo: con «Gastos» solo los pagos, con «Ingresos» solo los cobros.
+   * Cada cifra es lo que falta en el mes; `proximo` es el más cercano de los que se ven.
+   */
+  readonly seccionRecurrentes = computed(() => {
     const r = this.recurrentes();
-    if (!r?.proximoDescripcion || !r.proximaFecha || r.proximoImporte === null) {
-      return '';
+    if (!r) {
+      return null;
     }
-    // La fecha llega sin hora ("2026-11-15"): se lee como fecha local para no cambiar de día
-    const [anio, mes, dia] = r.proximaFecha.split('-').map(Number);
-    const fecha = new Date(anio, mes - 1, dia).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
-    const importe = r.proximoImporte.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
-    return `Próximo: ${r.proximoDescripcion} · ${fecha} · ${importe}`;
+    const tipo = this.tipo();
+    const grupos: { resumen: ResumenRecurrentes; signo: string; etiqueta: string; clase: string }[] = [];
+    if (tipo !== 'ingreso') {
+      grupos.push({ resumen: r.pagos, signo: '−', etiqueta: 'Pagos pendientes', clase: 'gasto' });
+    }
+    if (tipo !== 'gasto') {
+      grupos.push({ resumen: r.cobros, signo: '+', etiqueta: 'Cobros pendientes', clase: 'ingreso' });
+    }
+    const activos = grupos.reduce((n, g) => n + g.resumen.activos, 0);
+    const conDatos = grupos.some((g) => g.resumen.activos > 0 || g.resumen.total > 0);
+    const proximo = grupos
+      .filter((g) => g.resumen.proximaFecha && g.resumen.proximoDescripcion && g.resumen.proximoImporte !== null)
+      .sort((a, b) => (a.resumen.proximaFecha as string).localeCompare(b.resumen.proximaFecha as string))[0];
+    return {
+      activos: `${activos} ${activos === 1 ? 'activo' : 'activos'}`,
+      cifras: conDatos ? grupos : [],
+      proximo: proximo ? this.textoProximo(proximo.resumen, proximo.signo) : '',
+    };
   });
 
   constructor() {
@@ -186,14 +217,19 @@ export class FinanzasPage implements OnInit {
       cloudOfflineOutline,
       filterOutline,
       repeatOutline,
+      scanOutline,
       trendingDownOutline,
       trendingUpOutline,
     });
 
-    // Crear, cambiar o borrar un recurrente (aquí o en Pagos recurrentes) puede apuntar gastos y cambia la sección
+    // Crear, cambiar o borrar un recurrente (aquí o en Recurrentes) puede apuntar movimientos y cambia la sección
     let primeraVez = true;
     effect(() => {
+      // Los registros de vehículos también crean y cambian gastos
       this.recurrenteService.cambios();
+      this.vehiculoService.cambios();
+      // Y los tickets que se pasan a gastos desde la pestaña IA
+      this.ticketService.cambios();
       if (primeraVez) {
         primeraVez = false;
         return;
@@ -208,10 +244,14 @@ export class FinanzasPage implements OnInit {
     void this.cargarRecurrentes();
   }
 
+  /** Con el filtro en «Ingresos» la hoja empieza como cobro; si no, como pago (en ella se puede cambiar). */
   async nuevoRecurrente(): Promise<void> {
-    const resultado = await abrirFormularioRecurrente(this.modalController);
-    if (resultado) {
-      void this.avisos.exito(MENSAJES_RECURRENTE[resultado]);
+    const cierre = await abrirFormularioRecurrente(
+      this.modalController,
+      this.tipo() === 'ingreso' ? 'ingreso' : 'gasto',
+    );
+    if (cierre) {
+      void this.avisos.exito(mensajeRecurrente(cierre));
     }
   }
 
@@ -262,23 +302,42 @@ export class FinanzasPage implements OnInit {
     return `${esGasto(movimiento) ? 'gasto' : 'ingreso'}:${movimiento.id}`;
   }
 
+  /** «Ticket» del "+": foto → la IA rellena el gasto → revisar y guardar. El selector se abre en el mismo clic. */
+  async escanear(): Promise<void> {
+    const escaneo = this.escaner.escanear();
+    this.eligiendoTipo.set(false);
+    const mensaje = await escaneo;
+    if (mensaje) {
+      void this.avisos.exito(mensaje);
+    }
+  }
+
   /** Opción elegida en el modal del "+". */
   async elegir(tipo: TipoMovimiento): Promise<void> {
     this.eligiendoTipo.set(false);
-    // Hoja que sube desde abajo, con tirador para cerrarla deslizando
-    const modal = await this.modalController.create({
-      component: MovimientoFormComponent,
-      componentProps: { tipo },
-      breakpoints: [0, 1],
-      initialBreakpoint: 1,
-      handle: true,
-    });
-    await modal.present();
-    const { role } = await modal.onWillDismiss();
-    if (role === 'creado') {
-      void this.avisos.exito(tipo === 'gasto' ? 'Gasto guardado' : 'Ingreso guardado');
-      // Desde el formulario se pueden crear categorías nuevas
-      await Promise.all([this.recargar(), this.cargarCategorias()]);
+    await this.abrirHoja(tipo, null);
+  }
+
+  /** Al tocar un movimiento se abre su hoja para editarlo o eliminarlo. */
+  async editar(movimiento: Movimiento): Promise<void> {
+    // Los gastos de vehículos se editan en su registro (repostaje, ITV…): se abre su hoja aquí mismo
+    if (esGasto(movimiento) && ORIGENES_VEHICULO.includes(movimiento.origen)) {
+      const mensaje = await this.registroGasto.abrir(movimiento);
+      if (mensaje) {
+        void this.avisos.exito(mensaje);
+        await this.recargar();
+      }
+      return;
+    }
+    await this.abrirHoja(esGasto(movimiento) ? 'gasto' : 'ingreso', movimiento);
+  }
+
+  private async abrirHoja(tipo: TipoMovimiento, movimiento: Movimiento | null): Promise<void> {
+    const resultado = await abrirFormularioMovimiento(this.modalController, tipo, movimiento);
+    if (resultado) {
+      void this.avisos.exito(mensajeMovimiento(tipo, resultado));
+      // Desde el formulario se pueden crear categorías, y un gasto de recurrente cambia la sección
+      await Promise.all([this.recargar(), this.cargarCategorias(), this.cargarRecurrentes()]);
     }
   }
 
@@ -306,6 +365,18 @@ export class FinanzasPage implements OnInit {
       );
     }
     return pedidores;
+  }
+
+  /** "Próximo: Netflix · 15 nov · −9,99 €" */
+  private textoProximo(r: ResumenRecurrentes, signo: string): string {
+    // La fecha llega sin hora ("2026-11-15"): se lee como fecha local para no cambiar de día
+    const [anio, mes, dia] = (r.proximaFecha as string).split('-').map(Number);
+    const fecha = new Date(anio, mes - 1, dia).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+    const importe = (r.proximoImporte as number).toLocaleString('es-ES', {
+      style: 'currency',
+      currency: monedaActual(),
+    });
+    return `Próximo: ${r.proximoDescripcion} · ${fecha} · ${signo}${importe}`;
   }
 
   private async cargarRecurrentes(): Promise<void> {

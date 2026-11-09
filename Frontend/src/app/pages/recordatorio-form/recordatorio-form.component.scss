@@ -1,0 +1,17 @@
+// Recordatorios: color terciario, el mismo de sus puntos en el calendario
+:host {
+  --acento: var(--ion-color-tertiary);
+  --acento-rgb: var(--ion-color-tertiary-rgb);
+  --acento-contraste: var(--ion-color-tertiary-contrast);
+}
+
+.recordatorio__acciones {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+
+  ion-button {
+    text-transform: none;
+    letter-spacing: normal;
+  }
+}

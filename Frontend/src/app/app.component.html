@@ -1,3 +1,6 @@
-<ion-app>
+<ion-app [class.con-lateral]="conLateral()">
+  @if (conLateral()) {
+    <app-menu-lateral></app-menu-lateral>
+  }
   <ion-router-outlet></ion-router-outlet>
 </ion-app>

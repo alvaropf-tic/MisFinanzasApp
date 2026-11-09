@@ -5,8 +5,98 @@
   --acento-contraste: var(--ion-color-danger-contrast);
 }
 
+.movimiento__eliminar {
+  margin-top: 24px;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
 :host(.tipo-ingreso) {
   --acento: var(--ion-color-success);
   --acento-rgb: var(--ion-color-success-rgb);
   --acento-contraste: var(--ion-color-success-contrast);
+}
+
+// ---------- Foto del ticket y lectura con IA ----------
+
+.ticket {
+  margin: 12px 0 0;
+}
+
+.ticket__imagen {
+  display: block;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+  border: none;
+  border-radius: 18px;
+  background: rgba(127, 127, 127, 0.12);
+  cursor: zoom-in;
+
+  img {
+    display: block;
+    width: 100%;
+    max-height: 180px;
+    object-fit: cover;
+    // En las fotos el ticket suele estar centrado y rodeado de mesa
+    object-position: center;
+    transition: max-height 0.2s ease;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--acento);
+    outline-offset: 2px;
+  }
+}
+
+// Al tocarla se ve entera
+.ticket--ampliada .ticket__imagen {
+  cursor: zoom-out;
+
+  img {
+    max-height: 70vh;
+    object-fit: contain;
+  }
+}
+
+.ticket__pie {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+}
+
+.lectura {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 0.85rem;
+
+  ion-icon,
+  ion-spinner {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
+}
+
+.lectura--leyendo {
+  background: rgba(var(--ion-color-primary-rgb), 0.1);
+  color: var(--ion-color-primary);
+}
+
+.lectura--leido {
+  background: rgba(var(--ion-color-tertiary-rgb), 0.12);
+  color: var(--ion-color-tertiary-shade);
+}
+
+.lectura--error {
+  background: rgba(var(--ion-color-warning-rgb), 0.15);
+  color: var(--ion-color-warning-shade);
 }

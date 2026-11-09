@@ -17,4 +17,12 @@ export class IngresoService {
   crear(datos: IngresoRegistro): Observable<Ingreso> {
     return this.api.post<Ingreso>('/ingresos', datos);
   }
+
+  actualizar(id: number, datos: IngresoRegistro): Observable<Ingreso> {
+    return this.api.put<Ingreso>(`/ingresos/${id}`, datos);
+  }
+
+  eliminar(id: number): Observable<void> {
+    return this.api.delete(`/ingresos/${id}`);
+  }
 }

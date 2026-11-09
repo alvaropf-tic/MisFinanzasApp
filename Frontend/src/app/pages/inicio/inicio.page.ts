@@ -16,34 +16,45 @@ import { addIcons } from 'ionicons';
 import {
   addOutline,
   arrowDownOutline,
+  cameraOutline,
+  scanOutline,
   arrowUpOutline,
   chevronForwardOutline,
   cloudOfflineOutline,
   createOutline,
   pieChartOutline,
   repeatOutline,
+  statsChartOutline,
+  trophyOutline,
 } from 'ionicons/icons';
 import { firstValueFrom } from 'rxjs';
 
 import { MovementCardComponent } from '../../components/movement-card/movement-card.component';
 import { AvisoService } from '../../core/aviso.service';
 import { esNoAutorizado } from '../../core/mensaje-error';
-import type { GastoRecurrente } from '../../models/gasto-recurrente.model';
 import { type Movimiento, esGasto } from '../../models/movimiento.model';
 import type { Presupuesto } from '../../models/presupuesto.model';
 import type { ResumenMensual } from '../../models/resumen.model';
-import { GastoRecurrenteService } from '../../services/gasto-recurrente.service';
 import { GastoService } from '../../services/gasto.service';
 import { IngresoService } from '../../services/ingreso.service';
 import { PresupuestoService } from '../../services/presupuesto.service';
 import { ResumenService } from '../../services/resumen.service';
+import { VehiculoService } from '../../services/vehiculo.service';
 import { CabeceraComponent } from '../../shared/cabecera/cabecera.component';
 import { EmptyStateComponent } from '../../shared/empty-state/empty-state.component';
 import { PagoRecurrenteComponent } from '../../shared/pago-recurrente/pago-recurrente.component';
+import { FilaObjetivoComponent } from '../../shared/fila-objetivo/fila-objetivo.component';
+import type { Objetivo } from '../../models/objetivo.model';
+import { ObjetivoService } from '../../services/objetivo.service';
+import type { Recurrente } from '../../models/recurrente.model';
+import { RecurrenteService } from '../../services/recurrente.service';
+import { TicketService } from '../../services/ticket.service';
+import { EscanerTicketService } from '../../services/escaner-ticket.service';
 import { PresupuestoFormComponent } from '../presupuesto-form/presupuesto-form.component';
+import { monedaActual } from '../../core/moneda';
 
 const ULTIMOS_MOVIMIENTOS = 5;
-const FORMATO_EUROS = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
+const FORMATO_EUROS = new Intl.NumberFormat('es-ES', { style: 'currency', currency: monedaActual() });
 const PROXIMOS_PAGOS = 3;
 
 /** Estado del presupuesto para el color de la barra y el mensaje. */
@@ -51,7 +62,7 @@ type EstadoPresupuesto = 'bien' | 'atencion' | 'superado';
 
 /**
  * Pestaña Inicio: lo importante del mes actual. Saldo, presupuesto con la barra de lo gastado
- * y lo previsto, próximos pagos recurrentes y últimos movimientos.
+ * y lo previsto, próximos pagos y cobros recurrentes y últimos movimientos.
  */
 @Component({
   selector: 'app-inicio',
@@ -65,6 +76,7 @@ type EstadoPresupuesto = 'bien' | 'atencion' | 'superado';
     EmptyStateComponent,
     MovementCardComponent,
     PagoRecurrenteComponent,
+    FilaObjetivoComponent,
     IonContent,
     IonRefresher,
     IonRefresherContent,
@@ -77,18 +89,24 @@ type EstadoPresupuesto = 'bien' | 'atencion' | 'superado';
 export class InicioPage implements OnInit {
   private readonly resumenService = inject(ResumenService);
   private readonly presupuestoService = inject(PresupuestoService);
-  private readonly recurrenteService = inject(GastoRecurrenteService);
+  private readonly recurrenteService = inject(RecurrenteService);
+  private readonly objetivoService = inject(ObjetivoService);
+  private readonly ticketService = inject(TicketService);
+  private readonly vehiculoService = inject(VehiculoService);
   private readonly gastoService = inject(GastoService);
   private readonly ingresoService = inject(IngresoService);
   private readonly avisos = inject(AvisoService);
   private readonly modalController = inject(ModalController);
+  private readonly escaner = inject(EscanerTicketService);
 
   readonly cargandoInicial = signal(true);
   readonly errorCarga = signal(false);
 
   readonly resumen = signal<ResumenMensual | null>(null);
   readonly presupuesto = signal<Presupuesto | null>(null);
-  readonly proximosPagos = signal<GastoRecurrente[]>([]);
+  readonly proximosPagos = signal<Recurrente[]>([]);
+  /** Objetivos en curso (los dos más avanzados). */
+  readonly objetivos = signal<Objetivo[]>([]);
   readonly ultimos = signal<Movimiento[]>([]);
 
   /** Mes mostrado (el actual), p. ej. "Noviembre 2026". */
@@ -138,18 +156,27 @@ export class InicioPage implements OnInit {
     addIcons({
       addOutline,
       arrowDownOutline,
+      cameraOutline,
+      scanOutline,
       arrowUpOutline,
       chevronForwardOutline,
       cloudOfflineOutline,
       createOutline,
       pieChartOutline,
       repeatOutline,
+      statsChartOutline,
+      trophyOutline,
     });
 
     // Al crear, cambiar o borrar un recurrente cambian los próximos pagos, la previsión y quizá los gastos
     let primeraVez = true;
     effect(() => {
+      // Los registros de vehículos también crean y cambian gastos
       this.recurrenteService.cambios();
+      this.vehiculoService.cambios();
+      // Y los tickets que se pasan a gastos desde la pestaña IA
+      this.ticketService.cambios();
+      this.objetivoService.cambios();
       if (primeraVez) {
         primeraVez = false;
         return;
@@ -172,6 +199,14 @@ export class InicioPage implements OnInit {
     }
   }
 
+  /** Mismo flujo que en la pestaña IA: foto, lectura y la hoja del gasto (o del vehículo) rellenada. */
+  async escanearTicket(): Promise<void> {
+    const mensaje = await this.escaner.escanear();
+    if (mensaje) {
+      void this.avisos.exito(mensaje);
+    }
+  }
+
   async refrescar(evento: RefresherCustomEvent): Promise<void> {
     await this.cargar();
     await evento.target.complete();
@@ -184,6 +219,17 @@ export class InicioPage implements OnInit {
     const mes = hoy.getMonth() + 1;
     this.errorCarga.set(false);
     try {
+      // Los objetivos son secundarios: si fallan, la tarjeta sale vacía y el resto de Inicio sigue
+      void firstValueFrom(this.objetivoService.listar())
+        .then((lista) =>
+          this.objetivos.set(
+            lista
+              .filter((o) => !o.completado)
+              .sort((a, b) => b.porcentaje - a.porcentaje)
+              .slice(0, 2),
+          ),
+        )
+        .catch(() => this.objetivos.set([]));
       const [resumen, presupuesto, recurrentes, gastos, ingresos] = await Promise.all([
         firstValueFrom(this.resumenService.obtener(anio, mes)),
         firstValueFrom(this.presupuestoService.obtener(anio, mes)),

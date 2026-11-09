@@ -1,0 +1,30 @@
+@if (url(); as src) {
+  <button
+    type="button"
+    class="foto"
+    [class.foto--ampliada]="ampliada()"
+    [attr.aria-label]="ampliada() ? 'Reducir la foto del ticket' : 'Ampliar la foto del ticket'"
+    (click)="ampliada.set(!ampliada())"
+  >
+    <img [src]="src" alt="Foto del ticket" />
+  </button>
+} @else if (cargando()) {
+  <div class="foto foto--cargando"><ion-spinner name="crescent"></ion-spinner></div>
+}
+@if (mensaje(); as texto) {
+  <div class="aviso" role="status">
+    <ion-icon name="sparkles-outline" aria-hidden="true"></ion-icon>
+    <span>{{ texto }}</span>
+    @if (accion(); as etiqueta) {
+      <button type="button" class="aviso__accion" (click)="accionPulsada.emit()">
+        <ion-icon name="swap-horizontal-outline" aria-hidden="true"></ion-icon>
+        {{ etiqueta }}
+      </button>
+    }
+  </div>
+} @else if (url()) {
+  <p class="pie">
+    <ion-icon name="receipt-outline" aria-hidden="true"></ion-icon>
+    Ticket guardado con este registro
+  </p>
+}

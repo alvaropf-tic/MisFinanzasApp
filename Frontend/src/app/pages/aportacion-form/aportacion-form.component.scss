@@ -1,0 +1,53 @@
+// Aportar en verde, retirar en rojo (estilo común en theme/hojas.scss)
+:host {
+  --acento: var(--ion-color-success);
+  --acento-rgb: var(--ion-color-success-rgb);
+  --acento-contraste: var(--ion-color-success-contrast);
+}
+
+:host(.retirar) {
+  --acento: var(--ion-color-danger);
+  --acento-rgb: var(--ion-color-danger-rgb);
+  --acento-contraste: var(--ion-color-danger-contrast);
+}
+
+.tipos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-top: 12px;
+  padding: 4px;
+  border-radius: 14px;
+  background: rgba(127, 127, 127, 0.12);
+}
+
+.tipo {
+  padding: 8px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ion-color-medium);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--acento);
+    outline-offset: 2px;
+  }
+}
+
+.tipo--activo.tipo--aportar {
+  background: var(--ion-color-success);
+  color: var(--ion-color-success-contrast);
+}
+
+.tipo--activo.tipo--retirar {
+  background: var(--ion-color-danger);
+  color: var(--ion-color-danger-contrast);
+}

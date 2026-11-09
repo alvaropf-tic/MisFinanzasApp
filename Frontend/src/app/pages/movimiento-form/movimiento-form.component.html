@@ -4,11 +4,44 @@
       <span class="hoja__insignia" aria-hidden="true">
         <ion-icon [name]="tipo === 'gasto' ? 'trending-down-outline' : 'trending-up-outline'"></ion-icon>
       </span>
-      <h1>{{ textos.titulo }}</h1>
+      <h1>{{ titulo }}</h1>
       <ion-button fill="clear" color="medium" class="hoja__cerrar" (click)="cancelar()" aria-label="Cerrar">
         <ion-icon slot="icon-only" name="close-outline"></ion-icon>
       </ion-button>
     </header>
+
+    <!-- Foto del ticket: la del escaneo (con el estado de la lectura) o la guardada con el gasto -->
+    @if (foto(); as src) {
+      <figure class="ticket" [class.ticket--ampliada]="fotoAmpliada()">
+        <button
+          type="button"
+          class="ticket__imagen"
+          [attr.aria-label]="fotoAmpliada() ? 'Reducir la foto del ticket' : 'Ampliar la foto del ticket'"
+          (click)="fotoAmpliada.set(!fotoAmpliada())"
+        >
+          <img [src]="src" alt="Foto del ticket" />
+        </button>
+        @if (!lectura()) {
+          <figcaption class="ticket__pie">
+            <ion-icon name="receipt-outline" aria-hidden="true"></ion-icon>
+            Ticket guardado con este gasto
+          </figcaption>
+        }
+      </figure>
+    }
+    @if (lectura(); as l) {
+      <p class="lectura" [class]="'lectura lectura--' + l.estado" role="status">
+        @if (l.estado === 'leyendo') {
+          <ion-spinner name="crescent"></ion-spinner>
+        } @else {
+          <ion-icon
+            [name]="l.estado === 'leido' ? 'sparkles-outline' : 'warning-outline'"
+            aria-hidden="true"
+          ></ion-icon>
+        }
+        {{ l.mensaje }}
+      </p>
+    }
 
     <!-- Importe: el protagonista -->
     <label class="hoja__importe" [class.hoja__importe--error]="importeInvalido()">
@@ -22,7 +55,7 @@
         placeholder="0,00"
         aria-label="Importe en euros"
       />
-      <span class="hoja__moneda" aria-hidden="true">€</span>
+      <span class="hoja__moneda" aria-hidden="true">{{ simboloMoneda }}</span>
     </label>
     @if (importeInvalido()) {
       <p class="hoja__error hoja__error--centrado">Introduce un importe mayor que 0</p>
@@ -116,6 +149,19 @@
         ></ion-datetime>
       </ng-template>
     </ion-modal>
+    @if (movimiento) {
+      <ion-button
+        class="movimiento__eliminar"
+        fill="clear"
+        color="danger"
+        expand="block"
+        [disabled]="enviando()"
+        (click)="eliminar()"
+      >
+        <ion-icon slot="start" name="trash-outline" aria-hidden="true"></ion-icon>
+        Eliminar {{ tipo === 'gasto' ? 'gasto' : 'ingreso' }}
+      </ion-button>
+    }
   </form>
 </ion-content>
 

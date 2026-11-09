@@ -3,6 +3,7 @@ package com.misfinanzas.backend.ingreso;
 import com.misfinanzas.backend.common.exception.ConflictoException;
 import com.misfinanzas.backend.common.exception.RecursoNoEncontradoException;
 import com.misfinanzas.backend.ingreso.model.CategoriaIngreso;
+import com.misfinanzas.backend.ingresoRecurrente.IngresoRecurrenteRepository;
 import com.misfinanzas.backend.ingreso.model.dto.CategoriaIngresoRegistroDTO;
 import com.misfinanzas.backend.ingreso.model.dto.CategoriaIngresoResponseDTO;
 import com.misfinanzas.backend.usuario.model.Usuario;
@@ -16,10 +17,12 @@ public class CategoriaIngresoService {
 
     private final CategoriaIngresoRepository categoriaIngresoRepository;
     private final IngresoRepository ingresoRepository;
+    private final IngresoRecurrenteRepository ingresoRecurrenteRepository;
 
-    public CategoriaIngresoService(CategoriaIngresoRepository categoriaIngresoRepository, IngresoRepository ingresoRepository) {
+    public CategoriaIngresoService(CategoriaIngresoRepository categoriaIngresoRepository, IngresoRepository ingresoRepository, IngresoRecurrenteRepository ingresoRecurrenteRepository) {
         this.categoriaIngresoRepository = categoriaIngresoRepository;
         this.ingresoRepository = ingresoRepository;
+        this.ingresoRecurrenteRepository = ingresoRecurrenteRepository;
     }
 
     @Transactional
@@ -78,6 +81,10 @@ public class CategoriaIngresoService {
 
         if (ingresoRepository.existsByCategoriaIngresoId(categoria.getId())) {
             throw new ConflictoException("No se puede eliminar la categoría porque tiene ingresos asociados");
+        }
+
+        if (ingresoRecurrenteRepository.existsByCategoriaIngresoId(categoria.getId())) {
+            throw new ConflictoException("No se puede eliminar la categoría porque la usa un ingreso recurrente");
         }
 
         categoriaIngresoRepository.delete(categoria);

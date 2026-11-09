@@ -35,8 +35,19 @@ public class Repostaje {
     @Column(nullable = false, precision = 10, scale = 3)
     private BigDecimal precioLitro;
 
+    // Cuentakilómetros en este repostaje. Lo calcula RepostajeService: km iniciales del vehículo + trips,
+    // o la lectura real si se dio. Se recalcula para todo el vehículo al cambiar cualquier repostaje.
     @Column(nullable = false)
     private Integer kilometros;
+
+    // Km hechos con el depósito anterior (el trip que se pone a cero al repostar)
+    private Integer kilometrosRecorridos;
+
+    // Lectura real del cuentakilómetros, opcional: corrige la cuenta a partir de aquí
+    private Integer cuentakilometros;
+
+    // Si se llenó el depósito. El consumo real solo se calcula de lleno a lleno. null en los antiguos (= lleno).
+    private Boolean lleno;
 
     private BigDecimal consumoOrdenador;
 

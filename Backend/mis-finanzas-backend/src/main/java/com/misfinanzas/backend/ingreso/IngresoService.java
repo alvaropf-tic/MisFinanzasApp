@@ -90,6 +90,6 @@ public class IngresoService {
 
     private IngresoResponseDTO convertirAResponseDTO(Ingreso ingreso) {
 
-        return new IngresoResponseDTO(ingreso.getId(), ingreso.getImporte(), ingreso.getFecha(), ingreso.getDescripcion(), ingreso.getMetodoIngreso(), ingreso.getCategoriaIngreso().getId(), ingreso.getCategoriaIngreso().getNombre());
+        return new IngresoResponseDTO(ingreso.getId(), ingreso.getImporte(), ingreso.getFecha(), ingreso.getDescripcion(), ingreso.getMetodoIngreso(), ingreso.getCategoriaIngreso().getId(), ingreso.getCategoriaIngreso().getNombre(), ingreso.getIngresoRecurrente() != null);
     }
 }

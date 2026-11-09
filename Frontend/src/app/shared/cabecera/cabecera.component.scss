@@ -3,6 +3,16 @@
   margin-inline-start: var(--mf-espacio);
 }
 
+// Título centrado en toda la barra, sin depender del ancho del logo o de los botones de cada lado
+.cabecera__titulo {
+  position: absolute;
+  inset: 0;
+  padding-inline: 96px;
+  text-align: center;
+  font-weight: 700;
+  pointer-events: none;
+}
+
 .cabecera__avatar {
   display: inline-flex;
   align-items: center;

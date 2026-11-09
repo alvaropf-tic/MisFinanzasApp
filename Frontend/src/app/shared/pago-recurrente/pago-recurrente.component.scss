@@ -61,3 +61,15 @@
   font-weight: 600;
   white-space: nowrap;
 }
+
+// Cobro (genera ingresos): fecha e importe en verde, como los ingresos
+:host(.ingreso) {
+  .pago__fecha {
+    background: rgba(var(--ion-color-success-rgb), 0.14);
+    color: var(--ion-color-success-shade);
+  }
+
+  .pago__importe {
+    color: var(--ion-color-success-shade);
+  }
+}

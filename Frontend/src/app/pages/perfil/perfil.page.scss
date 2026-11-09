@@ -1,31 +1,176 @@
-.perfil__cabecera {
+// ---------- Tarjeta de presentación: continúa el azul de la barra ----------
+
+// Sin la línea inferior de la barra, para que se funda con la tarjeta
+ion-toolbar {
+  --border-width: 0;
+}
+
+.presentacion {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 32px var(--mf-espacio) 16px;
+  padding: 12px var(--mf-espacio) 28px;
+  border-radius: 0 0 32px 32px;
+  background: linear-gradient(180deg, var(--ion-color-primary), rgba(var(--ion-color-primary-rgb), 0.75));
+  color: var(--ion-color-primary-contrast);
   text-align: center;
 
   h2 {
-    margin: 12px 0 2px;
-    font-size: 1.25rem;
+    margin: 14px 0 0;
+    font-size: 1.45rem;
     font-weight: 700;
+    letter-spacing: -0.3px;
   }
+}
 
-  p {
-    margin: 0;
+// Avatar blanco sobre el azul (en los dos temas: el color de contraste del azul es negro en modo oscuro
+// y quedaba como un disco negro) con un anillo translúcido alrededor
+.presentacion__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--ion-color-primary-shade);
+  font-size: 2rem;
+  font-weight: 700;
+  box-shadow:
+    0 0 0 6px rgba(var(--ion-color-primary-contrast-rgb), 0.2),
+    0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+.presentacion__usuario {
+  margin: 2px 0 0;
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
+.presentacion__correo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  margin: 12px 0 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(var(--ion-color-primary-contrast-rgb), 0.14);
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.presentacion__editar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 18px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ion-color-primary-shade);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  &:focus-visible {
+    outline: 2px solid var(--ion-color-primary-contrast);
+    outline-offset: 3px;
+  }
+}
+
+// ---------- Tarjetas de datos ----------
+
+.perfil {
+  --superficie: var(--ion-color-step-50, rgba(127, 127, 127, 0.08));
+  --borde: var(--ion-color-step-150, rgba(127, 127, 127, 0.25));
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 20px var(--mf-espacio) 32px;
+}
+
+.tarjeta {
+  padding: 14px 16px 6px;
+  border: 1px solid var(--borde);
+  border-radius: 20px;
+  background: var(--superficie);
+
+  h3 {
+    margin: 0 0 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
     color: var(--ion-color-medium);
   }
 }
 
-.perfil__avatar {
-  display: inline-flex;
+.dato {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: var(--ion-color-primary);
-  color: var(--ion-color-primary-contrast);
-  font-size: 1.75rem;
-  font-weight: 700;
+  gap: 14px;
+  width: 100%;
+  padding: 10px 0;
+
+  & + & {
+    border-top: 1px solid var(--borde);
+  }
+
+  > ion-icon {
+    flex-shrink: 0;
+    font-size: 20px;
+    color: var(--ion-color-primary);
+  }
+
+  div {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    text-align: start;
+  }
+
+  span {
+    font-size: 0.78rem;
+    color: var(--ion-color-medium);
+  }
+
+  strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+}
+
+// Fila que abre algo (Cambiar contraseña)
+.dato--accion {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dato__ir {
+  font-size: 18px;
+  color: var(--ion-color-medium) !important;
+}
+
+// Eliminar cuenta: en rojo
+.dato--peligro {
+  > ion-icon:first-child,
+  strong {
+    color: var(--ion-color-danger) !important;
+  }
 }

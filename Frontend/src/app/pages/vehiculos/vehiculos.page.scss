@@ -1,0 +1,197 @@
+.vehiculos {
+  --superficie: var(--ion-color-step-50, rgba(127, 127, 127, 0.08));
+  --borde: var(--ion-color-step-150, rgba(127, 127, 127, 0.25));
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: var(--mf-ancho);
+  margin: 0 auto;
+  // Hueco abajo para el botón flotante de repostar
+  padding: var(--mf-espacio) var(--mf-espacio) 96px;
+}
+
+.vehiculos__seccion {
+  margin: 12px 0 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--ion-color-medium);
+}
+
+// Cada tarjeta es un enlace al detalle del vehículo
+.vehiculo {
+  display: block;
+  padding: 16px;
+  border: 1px solid var(--borde);
+  border-radius: 20px;
+  background: var(--superficie);
+  color: inherit;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.15s ease;
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--ion-color-primary);
+  }
+}
+
+.vehiculo--inactivo {
+  opacity: 0.6;
+}
+
+.vehiculo__cabecera {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vehiculo__icono {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(var(--ion-color-primary-rgb), 0.15);
+  color: var(--ion-color-primary);
+  font-size: 24px;
+}
+
+.vehiculo__nombre {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+
+  strong {
+    font-size: 1.05rem;
+  }
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.85rem;
+    color: var(--ion-color-medium);
+  }
+}
+
+.vehiculo__ir {
+  color: var(--ion-color-medium);
+}
+
+.vehiculo__km {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+
+  ion-icon {
+    font-size: 22px;
+    color: var(--ion-color-medium);
+  }
+}
+
+.vehiculo__datos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: var(--ion-background-color);
+  }
+
+  span {
+    font-size: 0.7rem;
+    color: var(--ion-color-medium);
+  }
+
+  strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.95rem;
+  }
+}
+
+// ---------- Elegir vehículo para repostar (modal centrado común en theme/hojas.scss) ----------
+
+.eleccion__lista {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.eleccion__vehiculo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--ion-color-step-200, rgba(127, 127, 127, 0.3));
+  border-radius: var(--mf-radio);
+  background: transparent;
+  color: var(--ion-text-color);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--ion-color-step-50, rgba(127, 127, 127, 0.08));
+  }
+}
+
+.eleccion__icono {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: rgba(var(--ion-color-warning-rgb), 0.15);
+  color: var(--ion-color-warning-shade);
+  font-size: 20px;
+}
+
+.eleccion__texto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    color: var(--ion-color-medium);
+  }
+}
+
+// Escritorio: fichas de vehículo en rejilla
+@media (min-width: 992px) {
+  .vehiculos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    align-items: start;
+  }
+
+  .vehiculos__seccion {
+    grid-column: 1 / -1;
+  }
+}

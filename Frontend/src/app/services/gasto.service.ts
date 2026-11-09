@@ -17,4 +17,13 @@ export class GastoService {
   crear(datos: GastoRegistro): Observable<Gasto> {
     return this.api.post<Gasto>('/gastos', datos);
   }
+
+  /** 409 si el gasto lo gestiona un vehículo. */
+  actualizar(id: number, datos: GastoRegistro): Observable<Gasto> {
+    return this.api.put<Gasto>(`/gastos/${id}`, datos);
+  }
+
+  eliminar(id: number): Observable<void> {
+    return this.api.delete(`/gastos/${id}`);
+  }
 }

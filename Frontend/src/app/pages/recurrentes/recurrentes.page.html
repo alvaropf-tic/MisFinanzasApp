@@ -1,16 +1,8 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/finanzas" text=""></ion-back-button>
-    </ion-buttons>
-    <ion-title>Pagos recurrentes</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="abrir()" aria-label="Nuevo pago recurrente">
-        <ion-icon slot="icon-only" name="add"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<app-cabecera-pantalla titulo="Recurrentes" volverA="/finanzas">
+  <ion-button cabeceraAccion (click)="abrir()" aria-label="Nuevo pago o cobro recurrente">
+    <ion-icon slot="icon-only" name="add"></ion-icon>
+  </ion-button>
+</app-cabecera-pantalla>
 
 <ion-content>
   <ion-refresher slot="fixed" (ionRefresh)="refrescar($event)">
@@ -22,26 +14,32 @@
     <ion-spinner name="crescent"></ion-spinner>
   </app-empty-state>
   } @else if (errorCarga()) {
-  <app-empty-state icono="cloud-offline-outline" titulo="No se han podido cargar los pagos recurrentes">
+  <app-empty-state icono="cloud-offline-outline" titulo="No se han podido cargar los recurrentes">
     <ion-button fill="outline" (click)="cargar()">Reintentar</ion-button>
   </app-empty-state>
   } @else if (recurrentes().length === 0) {
   <app-empty-state
     icono="repeat-outline"
-    titulo="Sin pagos recurrentes"
-    mensaje="Apunta suscripciones, alquiler o cuotas y se registrarán solos cada periodo."
+    titulo="Sin pagos ni cobros recurrentes"
+    mensaje="Apunta suscripciones, alquiler o tu nómina y se registrarán solos cada periodo."
   >
     <ion-button shape="round" (click)="abrir()">
       <ion-icon slot="start" name="add" aria-hidden="true"></ion-icon>
-      Añadir pago recurrente
+      Añadir recurrente
     </ion-button>
   </app-empty-state>
   } @else {
   <div class="recurrentes">
     <section class="recurrentes__resumen">
-      <span class="recurrentes__etiqueta">Coste aproximado al mes</span>
-      <strong>{{ costeMensual() | currency: 'EUR' }}</strong>
-      <span class="recurrentes__etiqueta">{{ resumenEstados() }}</span>
+      <div class="recurrentes__cifra recurrentes__cifra--pagos">
+        <span class="recurrentes__etiqueta">Pagos al mes</span>
+        <strong>−{{ alMes().pagos | currency }}</strong>
+      </div>
+      <div class="recurrentes__cifra recurrentes__cifra--cobros">
+        <span class="recurrentes__etiqueta">Cobros al mes</span>
+        <strong>+{{ alMes().cobros | currency }}</strong>
+      </div>
+      <span class="recurrentes__etiqueta recurrentes__estados">Aproximado · {{ resumenEstados() }}</span>
     </section>
 
     @if (activos().length > 0) {
@@ -64,7 +62,7 @@
     </section>
     }
 
-    <p class="recurrentes__nota">Toca un pago para editarlo, pausarlo o eliminarlo.</p>
+    <p class="recurrentes__nota">Toca uno para editarlo, pausarlo o eliminarlo.</p>
   </div>
   }
 </ion-content>

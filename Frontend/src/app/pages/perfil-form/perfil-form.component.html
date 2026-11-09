@@ -1,0 +1,77 @@
+<ion-content>
+  <form id="form-perfil" class="hoja" [formGroup]="formulario" (ngSubmit)="guardar()">
+    <header class="hoja__cabecera">
+      <span class="hoja__insignia" aria-hidden="true">
+        <ion-icon name="person-outline"></ion-icon>
+      </span>
+      <h1>Editar perfil</h1>
+      <ion-button fill="clear" color="medium" class="hoja__cerrar" (click)="cancelar()" aria-label="Cerrar">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </header>
+
+    <div class="perfil-form__avatar">
+      <span aria-hidden="true">{{ iniciales() }}</span>
+      <p>&#64;{{ usuario?.nombreUsuario }}</p>
+      <p class="hoja__ayuda">El nombre de usuario no se puede cambiar.</p>
+    </div>
+
+    <section class="hoja__seccion">
+      <h2>Tus datos</h2>
+      <div class="detalles">
+        <div class="detalles__fila">
+          <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
+          <ion-input
+            formControlName="nombre"
+            aria-label="Nombre"
+            placeholder="Nombre"
+            autocomplete="given-name"
+            [maxlength]="50"
+          ></ion-input>
+        </div>
+        <div class="detalles__fila">
+          <span class="detalles__hueco" aria-hidden="true"></span>
+          <ion-input
+            formControlName="apellidos"
+            aria-label="Apellidos"
+            placeholder="Apellidos"
+            autocomplete="family-name"
+            [maxlength]="100"
+          ></ion-input>
+        </div>
+        <div class="detalles__fila">
+          <ion-icon name="mail-outline" aria-hidden="true"></ion-icon>
+          <ion-input
+            formControlName="correo"
+            type="email"
+            inputmode="email"
+            aria-label="Correo electrónico"
+            placeholder="Correo electrónico"
+            autocomplete="email"
+            [maxlength]="150"
+          ></ion-input>
+        </div>
+      </div>
+      @if (invalido('nombre')) {
+        <p class="hoja__error">Indica tu nombre</p>
+      }
+      @if (invalido('apellidos')) {
+        <p class="hoja__error">Indica tus apellidos</p>
+      }
+      @if (invalido('correo')) {
+        <p class="hoja__error">Introduce un correo válido</p>
+      }
+    </section>
+  </form>
+</ion-content>
+
+<ion-footer class="hoja__pie">
+  <ion-button type="submit" form="form-perfil" expand="block" [disabled]="enviando()">
+    @if (enviando()) {
+      <ion-spinner name="crescent"></ion-spinner>
+    } @else {
+      <ion-icon slot="start" name="checkmark-outline" aria-hidden="true"></ion-icon>
+      Guardar cambios
+    }
+  </ion-button>
+</ion-footer>

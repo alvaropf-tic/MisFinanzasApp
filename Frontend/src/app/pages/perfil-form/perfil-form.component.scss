@@ -1,0 +1,43 @@
+// Perfil: acento principal de la app (estilo común en theme/hojas.scss)
+:host {
+  --acento: var(--ion-color-primary);
+  --acento-rgb: var(--ion-color-primary-rgb);
+  --acento-contraste: var(--ion-color-primary-contrast);
+}
+
+// En lugar del importe grande de otras hojas, el avatar con las iniciales
+.perfil-form__avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  text-align: center;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--acento);
+    color: var(--acento-contraste);
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 8px 0 0;
+    font-weight: 600;
+  }
+
+  .hoja__ayuda {
+    margin-top: 2px;
+    font-weight: 400;
+  }
+}
+
+.detalles__hueco {
+  width: 20px;
+  flex-shrink: 0;
+}

@@ -1,0 +1,129 @@
+<app-cabecera-pantalla [titulo]="vehiculo()?.nombre ?? 'Vehículo'" volverA="/vehiculos">
+  <ion-button cabeceraAccion [disabled]="!vehiculo()" (click)="editarVehiculo()" aria-label="Editar vehículo">
+    <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+  </ion-button>
+</app-cabecera-pantalla>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refrescar($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  @if (cargandoInicial()) {
+  <app-empty-state>
+    <ion-spinner name="crescent"></ion-spinner>
+  </app-empty-state>
+  } @else if (errorCarga()) {
+  <app-empty-state icono="cloud-offline-outline" titulo="No se ha podido cargar el vehículo">
+    <ion-button fill="outline" (click)="cargar()">Reintentar</ion-button>
+  </app-empty-state>
+  } @else if (resumen(); as r) {
+  <div class="detalle">
+    <section class="detalle__km">
+      <span>Kilómetros</span>
+      <strong>{{ r.kilometrosActuales | number: '1.0-0' }} km</strong>
+      @if (!vehiculo()?.activo) {
+      <span class="detalle__inactivo">Vehículo inactivo</span>
+      }
+    </section>
+
+    <section class="detalle__cifras">
+      <div>
+        <span>Consumo medio</span>
+        <strong>{{ r.consumoMedio !== null ? (r.consumoMedio | number: '1.2-2') : '—' }}</strong>
+        <span>l/100 km</span>
+      </div>
+      <div>
+        <span>Coste por km</span>
+        <strong>{{ euros(r.costePorKilometro) }}</strong>
+        <span>combustible</span>
+      </div>
+      <div>
+        <span>Precio medio</span>
+        <strong>{{ euros(r.precioMedioLitro) }}</strong>
+        <span>por litro</span>
+      </div>
+      <div>
+        <span>Este año</span>
+        <strong>{{ r.gastadoAnio | currency }}</strong>
+        <span>en el vehículo</span>
+      </div>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Historial</h2>
+      @if (filtros().length > 1) {
+      <div class="historial__filtros" role="radiogroup" aria-label="Filtrar por tipo">
+        <button
+          type="button"
+          class="historial__filtro"
+          role="radio"
+          [class.historial__filtro--activo]="filtro() === 'todos'"
+          [attr.aria-checked]="filtro() === 'todos'"
+          (click)="filtro.set('todos')"
+        >
+          Todos
+        </button>
+        @for (opcion of filtros(); track opcion.tipo) {
+        <button
+          type="button"
+          class="historial__filtro"
+          role="radio"
+          [class.historial__filtro--activo]="filtro() === opcion.tipo"
+          [attr.aria-checked]="filtro() === opcion.tipo"
+          (click)="filtro.set(opcion.tipo)"
+        >
+          <ion-icon [name]="opcion.icono" aria-hidden="true"></ion-icon>
+          {{ opcion.nombre }}
+        </button>
+        }
+      </div>
+      } @for (elemento of historial(); track elemento.clave) {
+      <button type="button" class="historial__fila" (click)="abrir(elemento)">
+        <span [class]="'historial__fecha historial__fecha--' + elemento.tipo" aria-hidden="true">
+          <strong>{{ fecha(elemento.fecha).dia }}</strong>
+          <span>{{ fecha(elemento.fecha).mes }}</span>
+        </span>
+        <span class="historial__texto">
+          <strong>
+            <ion-icon [name]="elemento.icono" aria-hidden="true"></ion-icon>
+            {{ elemento.titulo }}
+          </strong>
+          <span>{{ elemento.detalle }}</span>
+        </span>
+        <span class="historial__importe">−{{ elemento.importe | currency }}</span>
+      </button>
+      } @empty {
+      <p class="tarjeta__vacio">
+        <ion-icon name="list-outline" aria-hidden="true"></ion-icon>
+        Aún no hay registros. Pulsa + para apuntar un repostaje, un cambio de aceite, la ITV…
+      </p>
+      }
+    </section>
+  </div>
+  }
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button [disabled]="!vehiculo()" (click)="eligiendoTipo.set(true)" aria-label="Nuevo registro">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>
+
+<!-- "+": qué se quiere registrar (modal centrado común en theme/hojas.scss) -->
+<ion-modal class="modal-centrado" [isOpen]="eligiendoTipo()" (didDismiss)="eligiendoTipo.set(false)">
+  <ng-template>
+    <div class="eleccion">
+      <h2>¿Qué quieres registrar?</h2>
+      <div class="detalle__opciones">
+        @for (opcion of tiposHistorial; track opcion.tipo) {
+        <button type="button" class="eleccion__opcion" (click)="nuevo(opcion.tipo)">
+          <ion-icon [name]="opcion.icono" [class]="'detalle__icono--' + opcion.tipo" aria-hidden="true"></ion-icon>
+          <span>{{ opcion.nombre }}</span>
+        </button>
+        }
+      </div>
+      <ion-button fill="clear" color="medium" expand="block" (click)="eligiendoTipo.set(false)">Cancelar</ion-button>
+    </div>
+  </ng-template>
+</ion-modal>

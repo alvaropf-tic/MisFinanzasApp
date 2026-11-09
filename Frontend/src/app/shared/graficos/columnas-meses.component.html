@@ -1,0 +1,40 @@
+<div class="columnas" (pointerleave)="encima.set(null)">
+  @for (c of columnas(); track c.clave) {
+    <button
+      type="button"
+      class="columna"
+      [class.columna--elegida]="c.clave === seleccionado()"
+      [attr.aria-label]="c.nombre + ': ' + (c.total | currency)"
+      [attr.aria-pressed]="c.clave === seleccionado()"
+      (pointerenter)="encima.set(c.clave)"
+      (focus)="encima.set(c.clave)"
+      (blur)="encima.set(null)"
+      (click)="elegir.emit(c)"
+    >
+      <span class="columna__zona" aria-hidden="true">
+        @if (c.clave === destacada()) {
+          <span class="columna__valor" [style.bottom.%]="c.alto">{{
+            c.total | currency: undefined : 'symbol' : '1.0-0'
+          }}</span>
+        }
+        <span class="columna__barra" [style.height.%]="c.alto"></span>
+      </span>
+      <span class="columna__mes" aria-hidden="true">{{ c.inicial }}</span>
+    </button>
+  }
+</div>
+
+<!-- Vista de tabla para lectores de pantalla: los mismos datos sin depender del gráfico -->
+<table class="solo-lectores">
+  <caption>
+    Gasto por mes
+  </caption>
+  <tbody>
+    @for (c of columnas(); track c.clave) {
+      <tr>
+        <th scope="row">{{ c.nombre }}</th>
+        <td>{{ c.total | currency }}</td>
+      </tr>
+    }
+  </tbody>
+</table>

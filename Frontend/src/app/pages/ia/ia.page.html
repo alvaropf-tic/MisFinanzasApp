@@ -1,0 +1,106 @@
+<app-cabecera titulo="IA">
+  @if (asistente.mensajes().length) {
+  <ion-button cabeceraAccion (click)="asistente.reiniciar()" aria-label="Nueva conversación">
+    <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+  </ion-button>
+  }
+</app-cabecera>
+
+<ion-content #contenido>
+  <div class="ia" [class.ia--conversando]="asistente.mensajes().length">
+    @if (!asistente.mensajes().length) {
+    <!-- Bienvenida: saludo, preguntas sugeridas y el escáner de tickets -->
+    <section class="bienvenida">
+      <div class="orbe" aria-hidden="true">
+        <ion-icon name="sparkles"></ion-icon>
+      </div>
+      <h2 class="bienvenida__saludo">Hola{{ nombre() ? ', ' + nombre() : '' }}</h2>
+      <p class="bienvenida__texto">¿Qué quieres saber de tus finanzas?</p>
+    </section>
+
+    <section class="sugerencias" aria-label="Preguntas sugeridas">
+      @for (s of sugerencias; track s.texto) {
+      <button type="button" class="sugerencia" (click)="enviar(s.texto)">
+        <span class="sugerencia__icono" aria-hidden="true"><ion-icon [name]="s.icono"></ion-icon></span>
+        <span>{{ s.texto }}</span>
+      </button>
+      }
+    </section>
+
+    <button type="button" class="escaner" (click)="escanear()">
+      <span class="escaner__icono" aria-hidden="true"><ion-icon name="scan-outline"></ion-icon></span>
+      <span class="escaner__texto">
+        <strong>Escanear un ticket</strong>
+        <span>Haz una foto y la IA te deja el gasto rellenado</span>
+      </span>
+      <ion-icon class="escaner__flecha" name="camera-outline" aria-hidden="true"></ion-icon>
+    </button>
+
+    <p class="nota">
+      <ion-icon name="lock-closed-outline" aria-hidden="true"></ion-icon>
+      La IA solo ve un resumen de tus datos y la conversación no se guarda.
+    </p>
+    } @else {
+    <!-- Conversación -->
+    <section class="chat" aria-live="polite">
+      @for (m of asistente.mensajes(); track $index) {
+      @if (m.rol === 'user') {
+      <div class="mensaje mensaje--yo">
+        <div class="burbuja burbuja--yo">{{ m.texto }}</div>
+      </div>
+      } @else {
+      <div class="mensaje">
+        <span class="avatar" [class.avatar--error]="m.error" aria-hidden="true">
+          <ion-icon [name]="m.error ? 'alert-outline' : 'sparkles'"></ion-icon>
+        </span>
+        <div class="burbuja" [class.burbuja--error]="m.error">
+          @for (p of partes(m.texto); track $index) {
+          @if (p.negrita) {<strong>{{ p.texto }}</strong>} @else {{{ p.texto }}}
+          }
+        </div>
+      </div>
+      }
+      }
+      @if (asistente.pensando()) {
+      <div class="mensaje">
+        <span class="avatar avatar--pensando" aria-hidden="true"><ion-icon name="sparkles"></ion-icon></span>
+        <div class="burbuja burbuja--pensando" aria-label="Pensando"><span></span><span></span><span></span></div>
+      </div>
+      }
+    </section>
+    }
+  </div>
+</ion-content>
+
+<ion-footer class="ion-no-border">
+  <div class="entrada">
+    <div class="entrada__caja">
+      @if (asistente.mensajes().length) {
+      <button type="button" class="entrada__camara" (click)="escanear()" aria-label="Escanear ticket">
+        <ion-icon name="camera-outline" aria-hidden="true"></ion-icon>
+      </button>
+      }
+      <input
+        #pregunta
+        class="entrada__texto"
+        type="text"
+        maxlength="500"
+        placeholder="Pregunta lo que quieras…"
+        aria-label="Pregunta para la IA"
+        enterkeyhint="send"
+        (input)="texto.set(pregunta.value)"
+        (keydown.enter)="enviar(pregunta.value); pregunta.value = ''"
+      />
+      <button
+        type="button"
+        class="entrada__enviar"
+        [disabled]="asistente.pensando() || !texto().trim()"
+        (click)="enviar(pregunta.value); pregunta.value = ''"
+        aria-label="Enviar"
+      >
+        <ion-icon name="arrow-up" aria-hidden="true"></ion-icon>
+      </button>
+    </div>
+    <p class="entrada__aviso">La IA puede equivocarse. Revisa las cifras importantes.</p>
+  </div>
+</ion-footer>

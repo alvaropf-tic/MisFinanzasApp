@@ -2,6 +2,7 @@ package com.misfinanzas.backend.repostaje.model.dto;
 
 import com.misfinanzas.backend.gasto.model.MetodoPago;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+// Hace falta el trip (kilometrosRecorridos) o la lectura del cuentakilómetros; lo normal es solo el trip.
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,8 +31,18 @@ public class RepostajeRegistroDTO {
     @DecimalMin(value = "0.01", message = "El precio total debe ser mayor que 0")
     private BigDecimal precioTotal;
 
-    @NotNull(message = "Los kilómetros son obligatorios")
-    private Integer kilometros;
+    // Opcional: el del surtidor. Si no llega se calcula como precioTotal / litros.
+    @DecimalMin(value = "0.001", message = "El precio por litro debe ser mayor que 0")
+    private BigDecimal precioLitro;
+
+    @Min(value = 1, message = "Los km recorridos deben ser mayores que 0")
+    private Integer kilometrosRecorridos;
+
+    @Min(value = 0, message = "Los kilómetros no pueden ser negativos")
+    private Integer cuentakilometros;
+
+    // Por defecto, depósito lleno
+    private Boolean lleno;
 
     private BigDecimal consumoOrdenador;
 

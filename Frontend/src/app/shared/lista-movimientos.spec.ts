@@ -16,6 +16,9 @@ const gasto = (id: number, dia: number): Gasto => ({
   categoriaId: 1,
   categoriaNombre: 'Comida',
   origen: 'MANUAL',
+  ticketId: null,
+  vehiculoId: null,
+  registroId: null,
 });
 
 const ingreso = (id: number, dia: number): Ingreso => ({
@@ -26,6 +29,7 @@ const ingreso = (id: number, dia: number): Ingreso => ({
   metodoIngreso: 'TRANSFERENCIA',
   categoriaIngresoId: 1,
   categoriaIngresoNombre: 'Nómina',
+  recurrente: false,
 });
 
 /** Simula un listado del backend: ordenado por fecha descendente y paginado. */

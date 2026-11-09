@@ -1,5 +1,7 @@
 /* Estilo común de las hojas de alta y edición (formularios que suben desde abajo) */
 @use './theme/hojas';
+/* Colores de acento que se eligen en Configuración */
+@use './theme/acentos';
 
 /*
  * App Global CSS
@@ -36,14 +38,24 @@
  */
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+/* Oscuro por clase: lo pone AparienciaService (claro, oscuro o el del sistema, según Configuración) */
+@import '@ionic/angular/css/palettes/dark.class.css';
 
 /* ---------- Mis Finanzas: estilos compartidos ---------- */
 
 :root {
   --mf-radio: 12px;
   --mf-espacio: 16px;
+
+  /* Gráficos (validados con la guía de visualización: separación con daltonismo y contraste 3:1) */
+  --mf-grafico-acento: var(--ion-color-primary); /* #0054e9 en claro */
+  --mf-grafico-atenuado: #8c919b;
+}
+
+/* Tema oscuro (clase que pone AparienciaService): mismo papel, pasos para fondo oscuro */
+html.ion-palette-dark {
+  --mf-grafico-acento: var(--ion-color-primary); /* #4d8dff en oscuro */
+  --mf-grafico-atenuado: #7b7f88;
 }
 
 ion-card {
@@ -87,4 +99,46 @@ form,
 .pantalla-acceso__pie {
   text-align: center;
   margin-top: 24px;
+}
+
+/* Botón de acción peligrosa en alertas (p. ej. eliminar la cuenta) */
+ion-alert .alert-button.alerta__peligro {
+  color: var(--ion-color-danger);
+}
+
+/*
+ * Versión de escritorio (992 px o más)
+ * ----------------------------------------------------------------------------
+ * Menú lateral fijo en lugar de la barra de pestañas y pantallas más anchas. En el móvil no cambia nada.
+ */
+:root {
+  --mf-lateral: 248px;
+  /* Ancho máximo de las pantallas con tarjetas (Inicio, Calendario…): en escritorio, dos columnas */
+  --mf-ancho: 640px;
+}
+
+@media (min-width: 992px) {
+  :root {
+    --mf-ancho: 1080px;
+  }
+
+  ion-app.con-lateral > ion-router-outlet {
+    left: var(--mf-lateral);
+    width: auto;
+  }
+
+  /* Las pestañas se eligen en el menú lateral */
+  ion-app.con-lateral ion-tab-bar {
+    display: none;
+  }
+
+  /* El menú lateral ya tiene logo: en la cabecera de las pestañas sobra */
+  ion-app.con-lateral .cabecera__logo {
+    visibility: hidden;
+  }
+
+  /* Listas a todo el ancho (Finanzas): centradas y con un ancho cómodo de leer */
+  ion-content.contenido-centrado::part(scroll) {
+    padding-inline: max(0px, calc((100% - 880px) / 2));
+  }
 }

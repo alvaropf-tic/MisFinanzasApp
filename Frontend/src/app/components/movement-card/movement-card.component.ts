@@ -9,6 +9,7 @@ import {
   phonePortraitOutline,
   receiptOutline,
   repeatOutline,
+  sparkles,
   swapHorizontalOutline,
 } from 'ionicons/icons';
 
@@ -25,6 +26,8 @@ import { ICONOS_METODO, type Movimiento, esGasto } from '../../models/movimiento
 })
 export class MovementCardComponent {
   readonly movimiento = input.required<Movimiento>();
+  /** Si se puede tocar (para editarlo): muestra el efecto de pulsación. */
+  readonly pulsable = input(false);
 
   readonly esIngreso = computed(() => !esGasto(this.movimiento()));
   readonly categoria = computed(() => {
@@ -43,7 +46,14 @@ export class MovementCardComponent {
   /** Los gastos que no se apuntaron a mano llevan un icono de su origen junto al importe. */
   readonly origen = computed(() => {
     const m = this.movimiento();
-    if (!esGasto(m) || m.origen === 'MANUAL') {
+    if (!esGasto(m)) {
+      return m.recurrente ? { icono: 'repeat-outline', etiqueta: 'Cobro recurrente' } : null;
+    }
+    // Escaneado: la IA leyó el ticket (también los de vehículo)
+    if (m.ticketId !== null) {
+      return { icono: 'sparkles', etiqueta: 'Creado con IA a partir de un ticket' };
+    }
+    if (m.origen === 'MANUAL') {
       return null;
     }
     if (m.origen === 'RECURRENTE') {
@@ -63,6 +73,7 @@ export class MovementCardComponent {
       swapHorizontalOutline,
       receiptOutline,
       repeatOutline,
+      sparkles,
       carOutline,
     });
   }

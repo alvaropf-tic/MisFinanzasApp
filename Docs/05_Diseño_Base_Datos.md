@@ -134,6 +134,7 @@ Gracias a JPA, pasar a PostgreSQL solo requiere añadir su driver y cambiar `DB_
 | metodo_ingreso | VARCHAR(20) | NOT NULL |
 | usuario_id | BIGINT | NOT NULL, FK usuarios |
 | categoria_ingreso_id | BIGINT | NOT NULL, FK categorias_ingreso |
+| ingreso_recurrente_id | BIGINT | FK ingresos_recurrentes (varios ingresos por recurrente) |
 
 ## gastos_recurrentes
 
@@ -150,6 +151,22 @@ Gracias a JPA, pasar a PostgreSQL solo requiere añadir su driver y cambiar `DB_
 | activo | BOOLEAN | NOT NULL |
 | usuario_id | BIGINT | NOT NULL, FK usuarios |
 | categoria_id | BIGINT | NOT NULL, FK categorias |
+
+## ingresos_recurrentes
+
+| Columna | Tipo | Restricción |
+|---|---|---|
+| id | BIGINT | PK |
+| importe | DECIMAL(10,2) | NOT NULL |
+| descripcion | VARCHAR(255) | NOT NULL |
+| metodo_ingreso | VARCHAR(20) | NOT NULL |
+| periodicidad | VARCHAR(20) | NOT NULL |
+| proxima_fecha | DATE | NOT NULL |
+| fecha_inicio | DATE | NOT NULL |
+| fecha_fin | DATE | |
+| activo | BOOLEAN | NOT NULL |
+| usuario_id | BIGINT | NOT NULL, FK usuarios |
+| categoria_ingreso_id | BIGINT | NOT NULL, FK categorias_ingreso |
 
 ## presupuestos
 
@@ -173,6 +190,7 @@ UNIQUE (`usuario_id`, `mes`, `anio`).
 | modelo | VARCHAR(50) | |
 | matricula | VARCHAR(20) | |
 | anio | INTEGER | |
+| kilometros_iniciales | INTEGER | (null en los vehículos anteriores al campo) |
 | activo | BOOLEAN | NOT NULL |
 | usuario_id | BIGINT | NOT NULL, FK usuarios |
 
@@ -185,7 +203,10 @@ UNIQUE (`usuario_id`, `mes`, `anio`).
 | litros | DECIMAL(10,2) | NOT NULL |
 | precio_total | DECIMAL(10,2) | NOT NULL |
 | precio_litro | DECIMAL(10,3) | NOT NULL |
-| kilometros | INTEGER | NOT NULL |
+| kilometros | INTEGER | NOT NULL (calculado por el backend) |
+| kilometros_recorridos | INTEGER | trip |
+| cuentakilometros | INTEGER | lectura real opcional |
+| lleno | BOOLEAN | (null en los antiguos = lleno) |
 | consumo_ordenador | DECIMAL | |
 | velocidad_media | DECIMAL | |
 | notas | VARCHAR(500) | |
@@ -285,7 +306,7 @@ Si alguna restricción de la base de datos saltara sin haberse comprobado antes,
 | Gasto | Borrado físico. Los de vehículos solo desde su módulo |
 | Registro de vehículo | Borra también su gasto |
 | Vehículo | Solo si no tiene registros; si los tiene, se desactiva (`activo = false`) |
-| GastoRecurrente | Borrado físico, o se pausa con `activo = false`. Los gastos ya generados se quedan |
+| GastoRecurrente / IngresoRecurrente | Borrado físico, o se pausa con `activo = false`. Los gastos o ingresos ya generados se quedan |
 | Ticket | Borra su imagen del disco y desenlaza su gasto, que se conserva |
 | Usuario | Sin endpoint de borrado por ahora |
 
@@ -293,7 +314,7 @@ Si alguna restricción de la base de datos saltara sin haberse comprobado antes,
 
 # 8. Pendiente
 
-- Tablas de las entidades pendientes: configuración, etiquetas (`gasto_etiqueta`), ingresos recurrentes, objetivos, recordatorios y chat de IA.
+- Tablas de las entidades pendientes: configuración, etiquetas (`gasto_etiqueta`), objetivos, recordatorios y chat de IA.
 - Índices explícitos por `usuario_id` y `fecha` en `gastos` e `ingresos` cuando crezca el volumen.
 - Migraciones con Flyway.
 - Migración a PostgreSQL en la V1.

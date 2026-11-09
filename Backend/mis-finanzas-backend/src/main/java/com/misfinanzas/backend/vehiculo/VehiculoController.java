@@ -3,6 +3,7 @@ package com.misfinanzas.backend.vehiculo;
 import com.misfinanzas.backend.usuario.model.Usuario;
 import com.misfinanzas.backend.vehiculo.model.dto.VehiculoRegistroDTO;
 import com.misfinanzas.backend.vehiculo.model.dto.VehiculoResponseDTO;
+import com.misfinanzas.backend.vehiculo.model.dto.VehiculoResumenDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +44,15 @@ public class VehiculoController {
         Usuario usuario = (Usuario) authentication.getPrincipal();
 
         return ResponseEntity.ok(vehiculoService.obtenerVehiculo(id, usuario));
+    }
+
+    // Km actuales, consumo medio, coste por km, gastado este año y última ITV
+    @GetMapping("/{id}/resumen")
+    public ResponseEntity<VehiculoResumenDTO> obtenerResumen(@PathVariable Long id, Authentication authentication) {
+
+        Usuario usuario = (Usuario) authentication.getPrincipal();
+
+        return ResponseEntity.ok(vehiculoService.obtenerResumen(id, usuario));
     }
 
     @PutMapping("/{id}")

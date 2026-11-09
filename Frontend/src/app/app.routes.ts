@@ -1,10 +1,6 @@
-import type { Type } from '@angular/core';
 import type { Routes } from '@angular/router';
 
 import { authGuard, publicGuard } from './guards/auth.guards';
-
-const proximamente = (): Promise<Type<unknown>> =>
-  import('./pages/proximamente/proximamente.page').then((m) => m.ProximamentePage);
 
 export const routes: Routes = [
   {
@@ -18,9 +14,46 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/registro/registro.page').then((m) => m.RegistroPage),
   },
   {
+    path: 'estadisticas',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/estadisticas/estadisticas.page').then((m) => m.EstadisticasPage),
+  },
+  // Textos legales: se ven sin sesión (desde el registro) y con ella (desde Configuración)
+  {
+    path: 'privacidad',
+    loadComponent: () => import('./pages/legal/legal.page').then((m) => m.LegalPage),
+    data: { documento: 'privacidad' },
+  },
+  {
+    path: 'terminos',
+    loadComponent: () => import('./pages/legal/legal.page').then((m) => m.LegalPage),
+    data: { documento: 'terminos' },
+  },
+  {
+    path: 'configuracion',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/configuracion/configuracion.page').then((m) => m.ConfiguracionPage),
+  },
+  {
     path: 'perfil',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/perfil/perfil.page').then((m) => m.PerfilPage),
+  },
+  // Detalle de un vehículo, encima de las pestañas (antes de ellas para que no lo tape /vehiculos)
+  {
+    path: 'vehiculos/:id',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/vehiculo-detalle/vehiculo-detalle.page').then((m) => m.VehiculoDetallePage),
+  },
+  {
+    path: 'objetivos',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/objetivos/objetivos.page').then((m) => m.ObjetivosPage),
+  },
+  {
+    path: 'objetivos/:id',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/objetivo-detalle/objetivo-detalle.page').then((m) => m.ObjetivoDetallePage),
   },
   {
     path: 'recurrentes',
@@ -46,9 +79,15 @@ export const routes: Routes = [
         path: 'finanzas',
         loadComponent: () => import('./pages/finanzas/finanzas.page').then((m) => m.FinanzasPage),
       },
-      { path: 'calendario', loadComponent: proximamente, data: { titulo: 'Calendario' } },
-      { path: 'vehiculos', loadComponent: proximamente, data: { titulo: 'Vehículos' } },
-      { path: 'ia', loadComponent: proximamente, data: { titulo: 'IA' } },
+      {
+        path: 'calendario',
+        loadComponent: () => import('./pages/calendario/calendario.page').then((m) => m.CalendarioPage),
+      },
+      {
+        path: 'vehiculos',
+        loadComponent: () => import('./pages/vehiculos/vehiculos.page').then((m) => m.VehiculosPage),
+      },
+      { path: 'ia', loadComponent: () => import('./pages/ia/ia.page').then((m) => m.IaPage) },
       { path: '', redirectTo: 'inicio', pathMatch: 'full' },
     ],
   },

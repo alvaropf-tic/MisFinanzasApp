@@ -1,0 +1,93 @@
+// Colores de acento que se eligen en Configuración (el azul de Ionic es el de por defecto).
+// Cada uno tiene su versión para tema claro (texto blanco encima) y oscuro (texto negro encima);
+// todos con contraste de 4.5:1 o más sobre el fondo y con el texto de los botones.
+
+html.acento-indigo {
+  --ion-color-primary: #4338ca;
+  --ion-color-primary-rgb: 67, 56, 202;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #3b31b2;
+  --ion-color-primary-tint: #564ccf;
+}
+
+html.ion-palette-dark.acento-indigo {
+  --ion-color-primary: #818cf8;
+  --ion-color-primary-rgb: 129, 140, 248;
+  --ion-color-primary-contrast: #000000;
+  --ion-color-primary-contrast-rgb: 0, 0, 0;
+  --ion-color-primary-shade: #727bda;
+  --ion-color-primary-tint: #8e98f9;
+}
+
+html.acento-violeta {
+  --ion-color-primary: #7e22ce;
+  --ion-color-primary-rgb: 126, 34, 206;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #6f1eb5;
+  --ion-color-primary-tint: #8b38d3;
+}
+
+html.ion-palette-dark.acento-violeta {
+  --ion-color-primary: #c084fc;
+  --ion-color-primary-rgb: 192, 132, 252;
+  --ion-color-primary-contrast: #000000;
+  --ion-color-primary-contrast-rgb: 0, 0, 0;
+  --ion-color-primary-shade: #a974de;
+  --ion-color-primary-tint: #c690fc;
+}
+
+html.acento-turquesa {
+  --ion-color-primary: #0f766e;
+  --ion-color-primary-rgb: 15, 118, 110;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #0d6861;
+  --ion-color-primary-tint: #27847c;
+}
+
+html.ion-palette-dark.acento-turquesa {
+  --ion-color-primary: #2dd4bf;
+  --ion-color-primary-rgb: 45, 212, 191;
+  --ion-color-primary-contrast: #000000;
+  --ion-color-primary-contrast-rgb: 0, 0, 0;
+  --ion-color-primary-shade: #28bba8;
+  --ion-color-primary-tint: #42d8c5;
+}
+
+html.acento-naranja {
+  --ion-color-primary: #c2410c;
+  --ion-color-primary-rgb: 194, 65, 12;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #ab390b;
+  --ion-color-primary-tint: #c85424;
+}
+
+html.ion-palette-dark.acento-naranja {
+  --ion-color-primary: #fb923c;
+  --ion-color-primary-rgb: 251, 146, 60;
+  --ion-color-primary-contrast: #000000;
+  --ion-color-primary-contrast-rgb: 0, 0, 0;
+  --ion-color-primary-shade: #dd8035;
+  --ion-color-primary-tint: #fb9d50;
+}
+
+html.acento-rosa {
+  --ion-color-primary: #be185d;
+  --ion-color-primary-rgb: 190, 24, 93;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #a71552;
+  --ion-color-primary-tint: #c42f6d;
+}
+
+html.ion-palette-dark.acento-rosa {
+  --ion-color-primary: #f472b6;
+  --ion-color-primary-rgb: 244, 114, 182;
+  --ion-color-primary-contrast: #000000;
+  --ion-color-primary-contrast-rgb: 0, 0, 0;
+  --ion-color-primary-shade: #d764a0;
+  --ion-color-primary-tint: #f580bd;
+}
