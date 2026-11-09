@@ -18,6 +18,7 @@ import { authInterceptor } from './app/core/auth.interceptor';
 import { AparienciaService } from './app/core/apariencia.service';
 import { AuthService } from './app/core/auth.service';
 import { monedaActual } from './app/core/moneda';
+import { elegirServidor, vigilarServidor } from './app/core/servidor';
 
 registerLocaleData(localeEs);
 
@@ -30,6 +31,8 @@ bootstrapApplication(AppComponent, {
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules), withComponentInputBinding()),
     provideHttpClient(withInterceptors([authInterceptor])),
+    // App Android: elige entre la red de casa y Tailscale antes de la primera petición
+    provideAppInitializer(() => elegirServidor().then(vigilarServidor)),
     // La sesión guardada se recupera antes de la primera navegación para que los guards la vean
     provideAppInitializer(() => inject(AuthService).restaurar()),
     // Tema y color elegidos en Configuración

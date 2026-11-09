@@ -97,11 +97,12 @@ caído si deja de estar *healthy*).
 
 ## 5. Copias de seguridad
 
-`backup.sh` vuelca PostgreSQL y empaqueta las fotos en `/opt/homelab/backups/misfinanzas`, y guarda 14 días.
+**Pendiente de programar.** `backup.sh` vuelca solo la base de datos (las fotos de los tickets no se copian) en
+`/opt/homelab/backups/misfinanzas`, y guarda 14 días. `deploy.sh` ya lo lanza antes de cada actualización.
 
 ```bash
 ./backup.sh                       # probar a mano
-crontab -e                        # y añadir:
+crontab -e                        # y añadir, cuando se decida programarla:
 30 3 * * * /opt/homelab/stacks/misfinanzas/backup.sh >> /opt/homelab/stacks/misfinanzas/backup.log 2>&1
 ```
 
@@ -133,3 +134,18 @@ docker stats --no-stream | grep misfinanzas
 | Error al subir un ticket (413) | Falta `client_max_body_size 10m;` en NPM |
 | «La lectura de tickets no está configurada» | `GROQ_API_KEY` vacía en `.env` (luego `docker compose up -d`) |
 | El backend se reinicia en bucle | Memoria: revisar `docker stats` y `JAVA_OPTS` en el Dockerfile |
+
+## App Android (APK)
+
+La app instalada lleva la web dentro y llama a la API por Tailscale: `http://homelab.tail168d76.ts.net:8095/api`
+(está en `Frontend/src/environments/environment.android.ts`). En el móvil tiene que estar **Tailscale activo**.
+
+Generar el APK (en el PC, desde `Frontend/`):
+
+```bash
+npm run build:android                       # compila la web para Android y la copia al proyecto
+cd android && ./gradlew assembleDebug       # con JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+```
+
+O abrir `Frontend/android` en Android Studio → **Build → Build APK(s)**. El archivo sale en
+`Frontend/android/app/build/outputs/apk/debug/app-debug.apk`. Al actualizar la app, se repite y se instala encima.

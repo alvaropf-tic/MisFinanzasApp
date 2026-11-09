@@ -18,17 +18,30 @@ import java.util.Optional;
 public interface IngresoRepository extends JpaRepository<Ingreso, Long> {
 
     // Todos los filtros son opcionales: si llegan a null no se aplican
+    default Page<Ingreso> buscarIngresos(Long usuarioId, LocalDateTime inicio, LocalDateTime fin, Long categoriaIngresoId, MetodoIngreso metodoIngreso, String patron, Pageable pageable) {
+
+        return buscarIngresosFiltrados(usuarioId, inicio == null, inicio, fin == null, fin, categoriaIngresoId == null, categoriaIngresoId,
+                metodoIngreso == null, metodoIngreso, patron == null, patron, pageable);
+    }
+
+    // Cada filtro vacío se indica con un booleano: PostgreSQL no admite "? IS NULL" con un parámetro sin tipo
     @Query("""
     SELECT i
     FROM Ingreso i
     WHERE i.usuario.id = :usuarioId
-      AND (:inicio IS NULL OR i.fecha >= :inicio)
-      AND (:fin IS NULL OR i.fecha < :fin)
-      AND (:categoriaIngresoId IS NULL OR i.categoriaIngreso.id = :categoriaIngresoId)
-      AND (:metodoIngreso IS NULL OR i.metodoIngreso = :metodoIngreso)
-      AND (:patron IS NULL OR LOWER(i.descripcion) LIKE :patron)
+      AND (:sinInicio = true OR i.fecha >= :inicio)
+      AND (:sinFin = true OR i.fecha < :fin)
+      AND (:sinCategoria = true OR i.categoriaIngreso.id = :categoriaIngresoId)
+      AND (:sinMetodo = true OR i.metodoIngreso = :metodoIngreso)
+      AND (:sinTexto = true OR LOWER(i.descripcion) LIKE :patron)
     """)
-    Page<Ingreso> buscarIngresos(@Param("usuarioId") Long usuarioId, @Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin, @Param("categoriaIngresoId") Long categoriaIngresoId, @Param("metodoIngreso") MetodoIngreso metodoIngreso, @Param("patron") String patron, Pageable pageable);
+    Page<Ingreso> buscarIngresosFiltrados(@Param("usuarioId") Long usuarioId,
+                                          @Param("sinInicio") boolean sinInicio, @Param("inicio") LocalDateTime inicio,
+                                          @Param("sinFin") boolean sinFin, @Param("fin") LocalDateTime fin,
+                                          @Param("sinCategoria") boolean sinCategoria, @Param("categoriaIngresoId") Long categoriaIngresoId,
+                                          @Param("sinMetodo") boolean sinMetodo, @Param("metodoIngreso") MetodoIngreso metodoIngreso,
+                                          @Param("sinTexto") boolean sinTexto, @Param("patron") String patron,
+                                          Pageable pageable);
 
     Optional<Ingreso> findByIdAndUsuarioId(Long id, Long usuarioId);
 

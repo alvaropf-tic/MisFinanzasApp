@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import type { Observable } from 'rxjs';
 
-import { environment } from '../../environments/environment';
+import { apiBase } from './servidor';
 
 /** Parámetros de consulta; los valores vacíos no se envían. */
 export type Parametros = Record<string, string | number | boolean | null | undefined>;
@@ -14,7 +14,6 @@ export type Parametros = Record<string, string | number | boolean | null | undef
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = environment.apiUrl;
 
   get<T>(ruta: string, parametros?: Parametros): Observable<T> {
     return this.http.get<T>(this.url(ruta), { params: this.params(parametros) });
@@ -42,7 +41,7 @@ export class ApiService {
   }
 
   private url(ruta: string): string {
-    return `${this.baseUrl}${ruta}`;
+    return `${apiBase()}${ruta}`;
   }
 
   private params(parametros?: Parametros): HttpParams {

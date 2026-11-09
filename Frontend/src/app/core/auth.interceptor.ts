@@ -2,14 +2,14 @@ import { HttpErrorResponse, type HttpInterceptorFn, type HttpRequest } from '@an
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 
-import { environment } from '../../environments/environment';
+import { apiBase } from './servidor';
 
 import { AuthService } from './auth.service';
 import { AvisoService } from './aviso.service';
 
 /** Rutas que no llevan token y cuyo 401 no significa "sesión caducada" (login incorrecto). */
 function esRutaPublica(peticion: HttpRequest<unknown>): boolean {
-  const ruta = peticion.url.substring(environment.apiUrl.length);
+  const ruta = peticion.url.substring(apiBase().length);
   return peticion.method === 'POST' && (ruta === '/auth/login' || ruta === '/usuarios');
 }
 
@@ -18,7 +18,7 @@ function esRutaPublica(peticion: HttpRequest<unknown>): boolean {
  * cierra la sesión y vuelve al login. Los 400 (p. ej. contraseña actual incorrecta) no cierran la sesión.
  */
 export const authInterceptor: HttpInterceptorFn = (peticion, siguiente) => {
-  if (!peticion.url.startsWith(environment.apiUrl) || esRutaPublica(peticion)) {
+  if (!peticion.url.startsWith(apiBase()) || esRutaPublica(peticion)) {
     return siguiente(peticion);
   }
 

@@ -25,17 +25,30 @@ import java.util.Optional;
 public interface GastoRepository extends JpaRepository<Gasto, Long> {
 
     // Todos los filtros son opcionales: si llegan a null no se aplican
+    default Page<Gasto> buscarGastos(Long usuarioId, LocalDateTime inicio, LocalDateTime fin, Long categoriaId, MetodoPago metodoPago, String patron, Pageable pageable) {
+
+        return buscarGastosFiltrados(usuarioId, inicio == null, inicio, fin == null, fin, categoriaId == null, categoriaId,
+                metodoPago == null, metodoPago, patron == null, patron, pageable);
+    }
+
+    // Cada filtro vacío se indica con un booleano: PostgreSQL no admite "? IS NULL" con un parámetro sin tipo
     @Query("""
     SELECT g
     FROM Gasto g
     WHERE g.usuario.id = :usuarioId
-      AND (:inicio IS NULL OR g.fecha >= :inicio)
-      AND (:fin IS NULL OR g.fecha < :fin)
-      AND (:categoriaId IS NULL OR g.categoria.id = :categoriaId)
-      AND (:metodoPago IS NULL OR g.metodoPago = :metodoPago)
-      AND (:patron IS NULL OR LOWER(g.descripcion) LIKE :patron)
+      AND (:sinInicio = true OR g.fecha >= :inicio)
+      AND (:sinFin = true OR g.fecha < :fin)
+      AND (:sinCategoria = true OR g.categoria.id = :categoriaId)
+      AND (:sinMetodo = true OR g.metodoPago = :metodoPago)
+      AND (:sinTexto = true OR LOWER(g.descripcion) LIKE :patron)
     """)
-    Page<Gasto> buscarGastos(@Param("usuarioId") Long usuarioId, @Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin, @Param("categoriaId") Long categoriaId, @Param("metodoPago") MetodoPago metodoPago, @Param("patron") String patron, Pageable pageable);
+    Page<Gasto> buscarGastosFiltrados(@Param("usuarioId") Long usuarioId,
+                                      @Param("sinInicio") boolean sinInicio, @Param("inicio") LocalDateTime inicio,
+                                      @Param("sinFin") boolean sinFin, @Param("fin") LocalDateTime fin,
+                                      @Param("sinCategoria") boolean sinCategoria, @Param("categoriaId") Long categoriaId,
+                                      @Param("sinMetodo") boolean sinMetodo, @Param("metodoPago") MetodoPago metodoPago,
+                                      @Param("sinTexto") boolean sinTexto, @Param("patron") String patron,
+                                      Pageable pageable);
 
     Optional<Gasto> findByIdAndUsuarioId(Long id, Long usuarioId);
 
