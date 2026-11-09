@@ -5,7 +5,8 @@
 FROM node:22-alpine AS compilacion
 WORKDIR /src
 COPY package.json package-lock.json ./
-RUN npm ci --no-audit --no-fund
+# npm install en vez de npm ci: el lock generado en Windows no recoge todas las dependencias opcionales de Linux (sharp)
+RUN npm install --no-audit --no-fund
 COPY . .
 RUN npx ng build --configuration production
 
