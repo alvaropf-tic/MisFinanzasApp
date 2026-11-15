@@ -24,7 +24,9 @@ public class CorsConfig {
 
         configuracion.setAllowedOrigins(origenesPermitidos);
         configuracion.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuracion.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        // CF-Access-Client-*: service token de Cloudflare Access que envía la app Android al entrar por Cloudflare
+        configuracion.setAllowedHeaders(
+                List.of("Authorization", "Content-Type", "CF-Access-Client-Id", "CF-Access-Client-Secret"));
         configuracion.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

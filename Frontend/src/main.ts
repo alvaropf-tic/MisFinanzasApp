@@ -17,6 +17,7 @@ import { routes } from './app/app.routes';
 import { authInterceptor } from './app/core/auth.interceptor';
 import { AparienciaService } from './app/core/apariencia.service';
 import { AuthService } from './app/core/auth.service';
+import { cloudflareInterceptor } from './app/core/cloudflare.interceptor';
 import { monedaActual } from './app/core/moneda';
 import { elegirServidor, vigilarServidor } from './app/core/servidor';
 
@@ -30,8 +31,8 @@ bootstrapApplication(AppComponent, {
     { provide: DEFAULT_CURRENCY_CODE, useFactory: monedaActual },
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules), withComponentInputBinding()),
-    provideHttpClient(withInterceptors([authInterceptor])),
-    // App Android: elige entre la red de casa y Tailscale antes de la primera petición
+    provideHttpClient(withInterceptors([cloudflareInterceptor, authInterceptor])),
+    // App Android: elige entre la red de casa, Cloudflare y Tailscale antes de la primera petición
     provideAppInitializer(() => elegirServidor().then(vigilarServidor)),
     // La sesión guardada se recupera antes de la primera navegación para que los guards la vean
     provideAppInitializer(() => inject(AuthService).restaurar()),

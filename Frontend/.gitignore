@@ -74,3 +74,6 @@ Thumbs.db
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Service token de Cloudflare Access (app Android): ver src/environments/acceso-cloudflare.example.ts
+/src/environments/acceso-cloudflare.ts
