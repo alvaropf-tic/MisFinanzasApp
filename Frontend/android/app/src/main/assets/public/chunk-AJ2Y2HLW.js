@@ -1,0 +1,1 @@
+import{d as n}from"./chunk-KYELGGHU.js";import{n as i,o}from"./chunk-NHWTPO4T.js";var f=(()=>{class t{constructor(){this.api=o(n)}obtener(e,r){return this.api.get(`/resumen/${e}/${r}`)}static{this.\u0275fac=function(r){return new(r||t)}}static{this.\u0275prov=i({token:t,factory:t.\u0275fac,providedIn:"root"})}}return t})();export{f as a};

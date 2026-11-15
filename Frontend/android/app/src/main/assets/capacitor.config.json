@@ -1,0 +1,9 @@
+{
+	"appId": "com.misfinanzas.app",
+	"appName": "Mis Finanzas",
+	"webDir": "www",
+	"server": {
+		"androidScheme": "http",
+		"cleartext": true
+	}
+}
